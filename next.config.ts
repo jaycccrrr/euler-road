@@ -1,11 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // SSR 模式支持 API 路由
   images: {
     unoptimized: true,
   },
-  // 添加 CORS 支持
   async headers() {
     return [
       {
