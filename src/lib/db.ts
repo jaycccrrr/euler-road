@@ -110,6 +110,11 @@ export async function getDailyQuestionByDate(date: string, moduleId?: string): P
   return questions[0];
 }
 
+export async function deleteDailyQuestion(id: string): Promise<void> {
+  const database = await initDB();
+  await database.delete('dailyQuestions', id);
+}
+
 export async function getDailyQuestionsByModule(moduleId: string): Promise<DailyQuestion[]> {
   const database = await initDB();
   return database.getAllFromIndex('dailyQuestions', 'by-module', moduleId);

@@ -5,6 +5,7 @@ import {
   getDailyQuestionByDate,
   getDailyQuestionById,
   createDailyQuestion,
+  deleteDailyQuestion,
   createAnswerRecord,
   getAnswerRecordByUserAndQuestion,
   getAnswerRecordsByQuestion,
@@ -86,18 +87,33 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           const questions: DailyQuestion[] = [];
           const answers: AnswerRecord[] = [];
 
+          // 获取今天的所有题目，检查是否需要清理
+          const { getAllDailyQuestions } = await import('@/lib/db');
+          const allQuestions = await getAllDailyQuestions();
+          const todayQuestions = allQuestions.filter(q => q.date === today);
+
+          // 如果有旧题目，检查是否包含错误的 LaTeX
+          for (const q of todayQuestions) {
+            if (q.content.includes('\\rac') || q.answer.includes('\\rac') || q.id.startsWith('dq-') && !q.id.startsWith('dq-v')) {
+              console.log('[DataFix] 删除旧题目:', q.id, q.content.substring(0, 50));
+              await deleteDailyQuestion(q.id);
+            }
+          }
+
           // 为每个模块生成一道题
           for (const module of KNOWLEDGE_MODULES) {
             let question = await getDailyQuestionByDate(today, module.id);
 
             // 检查旧数据是否有错误的 LaTeX (如 \rac 而不是 \frac)
             if (question && (question.content.includes('\\rac') || question.answer.includes('\\rac'))) {
-              console.log('检测到错误的 LaTeX，重新生成题目:', question.id);
+              console.log('[DataFix] 检测到错误的 LaTeX，删除旧题目:', question.id);
+              await deleteDailyQuestion(question.id);
               question = undefined; // 强制重新生成
             }
 
             if (!question) {
               question = generateRandomQuestion(today, module.id);
+              console.log('[DataFix] 生成新题目:', question.id, question.content.substring(0, 50));
               await createDailyQuestion(question);
             }
 
