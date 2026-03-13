@@ -5144,6 +5144,14 @@ export const biologyLesson: SubLesson = {
 ]
 };
 
+// 章节定义
+export interface Chapter {
+  id: string;
+  title: string;
+  icon: string;
+  lessons: SubLesson[];
+}
+
 // 所有课时映射
 export const allLessons: Record<string, SubLesson[]> = {
   'am-1': [directioncosinesLesson, crossproductLesson, tripleproductLesson, planelineLesson, quadricsurfacesLesson, coordinatesystemsLesson, vectorfieldsLesson, multivariableconceptLesson],
@@ -5153,6 +5161,46 @@ export const allLessons: Record<string, SubLesson[]> = {
   'am-5': [odebasicLesson, firstorderLesson, higherorderLesson, linearsystemLesson, laplaceLesson, seriessolutionLesson],
   'am-6': [numericalLesson, physicsLesson, engineeringLesson, mlLesson, graphicsLesson, economicsLesson, biologyLesson],
 };
+
+// 大章节结构（用于基础篇导航）
+export const basicChapters: Chapter[] = [
+  {
+    id: 'am-1',
+    title: '向量与空间解析几何',
+    icon: '📐',
+    lessons: allLessons['am-1'],
+  },
+  {
+    id: 'am-2',
+    title: '多元函数微分学',
+    icon: '📈',
+    lessons: allLessons['am-2'],
+  },
+  {
+    id: 'am-3',
+    title: '重积分',
+    icon: '🔲',
+    lessons: allLessons['am-3'],
+  },
+  {
+    id: 'am-4',
+    title: '曲线积分与曲面积分',
+    icon: '🔄',
+    lessons: allLessons['am-4'],
+  },
+  {
+    id: 'am-5',
+    title: '常微分方程',
+    icon: '⚡',
+    lessons: allLessons['am-5'],
+  },
+  {
+    id: 'am-6',
+    title: '应用与实践',
+    icon: '🚀',
+    lessons: allLessons['am-6'],
+  },
+];
 
 // 获取课时内容
 export function getLessonContent(moduleId: string, lessonId: string): SubLesson | undefined {
@@ -5164,4 +5212,577 @@ export function getLessonContent(moduleId: string, lessonId: string): SubLesson 
 // 获取模块下所有课时
 export function getModuleLessons(moduleId: string): SubLesson[] {
   return allLessons[moduleId] || [];
+}
+
+// ============ 高等数学提高篇 ============
+
+export const advancedRealNumberLesson: SubLesson = {
+  id: 'adv-real-number',
+  title: '实数理论与极限进阶',
+  has3D: false,
+  theory: `
+## 实数系的完备性
+
+### 戴德金分割
+实数系是有理数系的完备化，通过戴德金分割可以严格定义无理数。
+
+**定义**：将有理数集 ℚ 分成两个非空子集 A 和 B，满足：
+- A ∪ B = ℚ，A ∩ B = ∅
+- ∀a ∈ A, ∀b ∈ B，有 a < b
+- A 无最大元
+
+则称 (A, B) 为一个戴德金分割，定义一个实数。
+
+### 确界原理
+**定理**：非空有上界的实数集必有上确界。
+
+这是实数系完备性的核心体现，也是极限理论的基础。
+
+## 数列极限进阶
+
+### 子列收敛性
+**波尔查诺-魏尔斯特拉斯定理**：有界数列必有收敛子列。
+
+### 柯西收敛准则
+数列 {aₙ} 收敛 ⟺ ∀ε > 0, ∃N, 当 m,n > N 时 |aₙ - aₘ| < ε
+
+**意义**：不需要知道极限值，仅凭数列自身性质判断收敛性。
+
+## 函数极限的深入讨论
+
+### 海涅定理
+函数极限存在的充要条件：对任意趋于 x₀ 的数列 {xₙ}，{f(xₙ)} 收敛于同一值。
+
+### 柯西准则
+lim(x→x₀) f(x) 存在 ⟺ ∀ε > 0, ∃δ > 0, 当 0 < |x'-x₀|,|x''-x₀| < δ 时，|f(x')-f(x'')| < ε
+  `,
+  formula: `
+## 关键定理
+
+### 确界原理
+$$
+\\forall A \\subseteq \\mathbb{R}, A \\neq \\emptyset, \\text{有上界} \\Rightarrow \\exists \\sup A \\in \\mathbb{R}
+$$
+
+### 柯西收敛准则
+$$
+\\{a_n\\} \\text{收敛} \\Leftrightarrow \\forall \\varepsilon > 0, \\exists N, \\forall m,n > N: |a_m - a_n| < \\varepsilon
+$$
+
+### 单调有界原理
+$$
+\\{a_n\\} \\text{单调递增有上界} \\Rightarrow \\lim_{n\\to\\infty} a_n = \\sup\\{a_n\\}
+$$
+  `,
+  examples: [
+    {
+      id: 'adv-rn-1',
+      difficulty: 'hard',
+      question: '用柯西准则证明 aₙ = 1 + 1/2² + 1/3² + ... + 1/n² 收敛。',
+      options: [
+        '对 m > n，|aₘ - aₙ| = Σₖ₌ₙ₊₁ᵐ 1/k² < Σₖ₌ₙ₊₁ᵐ 1/(k(k-1)) = 1/n - 1/m < 1/n < ε（当 n > 1/ε）',
+        '该数列单调递增，所以有界即收敛',
+        '通过比较判别法，该级数收敛',
+        '该数列是柯西数列，所以收敛'
+      ],
+      correct: 0,
+      explanation: '利用放缩技巧：1/k² < 1/(k(k-1)) = 1/(k-1) - 1/k，进行裂项相消，得到 |aₘ - aₙ| < 1/n，当 n 足够大时可小于任意 ε。'
+    }
+  ]
+};
+
+export const uniformContinuityLesson: SubLesson = {
+  id: 'adv-uniform-continuity',
+  title: '一致连续性',
+  has3D: false,
+  theory: `
+## 一致连续的概念
+
+### 定义对比
+**逐点连续**：∀ε > 0, ∀x₀ ∈ I, ∃δ > 0, 当 |x - x₀| < δ 时 |f(x) - f(x₀)| < ε
+
+**一致连续**：∀ε > 0, ∃δ > 0, ∀x₁, x₂ ∈ I, 当 |x₁ - x₂| < δ 时 |f(x₁) - f(x₂)| < ε
+
+**关键区别**：δ 是否依赖于点的位置。
+
+## 重要定理
+
+### 康托尔定理
+闭区间上的连续函数必一致连续。
+
+### 利普希茨条件
+若存在 L > 0，使得 |f(x₁) - f(x₂)| ≤ L|x₁ - x₂|，则 f 一致连续。
+
+### 非一致连续的判定
+存在 ε₀ > 0，数列 {xₙ}, {yₙ} 满足 |xₙ - yₙ| → 0，但 |f(xₙ) - f(yₙ)| ≥ ε₀。
+
+## 典型例子
+
+- f(x) = 1/x 在 (0,1] 上不一致连续
+- f(x) = sin(1/x) 在 (0,1] 上不一致连续
+- f(x) = √x 在 [0,∞) 上一致连续
+  `,
+  formula: `
+## 核心公式
+
+### 一致连续定义
+$$
+\\forall \\varepsilon > 0, \\exists \\delta > 0, \\forall x_1, x_2 \\in I: |x_1 - x_2| < \\delta \\Rightarrow |f(x_1) - f(x_2)| < \\varepsilon
+$$
+
+### 利普希茨条件
+$$
+|f(x_1) - f(x_2)| \\leq L|x_1 - x_2|, \\quad L > 0
+$$
+
+### 康托尔定理
+$$
+f \\in C[a,b] \\Rightarrow f \\text{ 在 } [a,b] \\text{ 上一致连续}
+$$
+  `,
+  examples: [
+    {
+      id: 'adv-uc-1',
+      difficulty: 'hard',
+      question: '证明 f(x) = 1/x 在 (0,1] 上不一致连续。',
+      options: [
+        '取 xₙ = 1/n, yₙ = 1/(n+1)，则 |xₙ - yₙ| → 0，但 |f(xₙ) - f(yₙ)| = 1 → 1 ≠ 0',
+        '该函数在 x=0 处无定义，所以不一致连续',
+        '该函数在 (0,1] 上无界，所以不一致连续',
+        '该函数在 (0,1] 上不是利普希茨连续的'
+      ],
+      correct: 0,
+      explanation: '构造反例：取 xₙ = 1/n, yₙ = 1/(n+1)，两点距离趋于0，但函数值之差恒为1，不满足一致连续定义。'
+    }
+  ]
+};
+
+export const convexFunctionLesson: SubLesson = {
+  id: 'adv-convex-function',
+  title: '凸函数与 Jensen 不等式',
+  has3D: false,
+  theory: `
+## 凸函数定义
+
+### 几何定义
+函数 f 在区间 I 上称为凸函数，如果对任意 x₁, x₂ ∈ I 和 λ ∈ [0,1]：
+
+f(λx₁ + (1-λ)x₂) ≤ λf(x₁) + (1-λ)f(x₂)
+
+**几何意义**：函数图像上任意两点间的弦位于图像上方。
+
+## 判定条件
+
+### 一阶条件（可微情形）
+f 凸 ⟺ f(x₂) ≥ f(x₁) + f'(x₁)(x₂ - x₁)
+
+即函数图像位于切线上方。
+
+### 二阶条件（二阶可微情形）
+f 凸 ⟺ f''(x) ≥ 0
+
+## Jensen 不等式
+
+### 离散形式
+若 f 是凸函数，则对任意 x₁, ..., xₙ 和权重 λ₁, ..., λₙ（λᵢ ≥ 0, Σλᵢ = 1）：
+
+f(Σλᵢxᵢ) ≤ Σλᵢf(xᵢ)
+
+### 积分形式
+f(∫g(x)dμ) ≤ ∫f(g(x))dμ
+
+## 应用
+
+- 算术-几何平均不等式
+- 柯西-施瓦茨不等式
+- 信息论中的不等式
+  `,
+  formula: `
+## 核心公式
+
+### 凸函数定义
+$$
+f(\\lambda x_1 + (1-\\lambda)x_2) \\leq \\lambda f(x_1) + (1-\\lambda)f(x_2)
+$$
+
+### Jensen 不等式
+$$
+f\\left(\\sum_{i=1}^n \\lambda_i x_i\\right) \\leq \\sum_{i=1}^n \\lambda_i f(x_i)
+$$
+
+### 二阶判定
+$$
+f \\text{ 凸} \\Leftrightarrow f''(x) \\geq 0
+$$
+
+### 算术-几何平均不等式（由 Jensen 不等式导出）
+$$
+\\frac{x_1 + x_2 + ... + x_n}{n} \\geq \\sqrt[n]{x_1 x_2 ... x_n}
+$$
+  `,
+  examples: [
+    {
+      id: 'adv-cf-1',
+      difficulty: 'hard',
+      question: '用 Jensen 不等式证明算术-几何平均不等式。',
+      options: [
+        '取 f(x) = -ln(x)，利用 f 的凸性得到 -ln((Σxᵢ)/n) ≤ -(Σln(xᵢ))/n，即得结论',
+        '直接应用 Jensen 不等式于 f(x) = x²',
+        '利用柯西-施瓦茨不等式推导',
+        '使用数学归纳法证明'
+      ],
+      correct: 0,
+      explanation: `f(x) = -ln(x) 是凸函数（f''(x) = 1/x² > 0），由 Jensen 不等式：f((Σxᵢ)/n) ≤ (Σf(xᵢ))/n，即 -ln((Σxᵢ)/n) ≤ -(Σln(xᵢ))/n，整理得 (Σxᵢ)/n ≥ (Πxᵢ)^(1/n)。`
+    }
+  ]
+};
+
+export const improperIntegralAdvancedLesson: SubLesson = {
+  id: 'adv-improper-integral',
+  title: '反常积分进阶',
+  has3D: false,
+  theory: `
+## 反常积分的分类
+
+### 无穷区间上的积分
+∫ₐ^∞ f(x)dx = lim(b→∞) ∫ₐᵇ f(x)dx
+
+### 无界函数的积分
+若 f 在 a 点无界：∫ₐᵇ f(x)dx = lim(ε→0⁺) ∫ₐ₊εᵇ f(x)dx
+
+## 收敛判别法
+
+### 比较判别法
+设 0 ≤ f(x) ≤ g(x)，则：
+- ∫g 收敛 ⟹ ∫f 收敛
+- ∫f 发散 ⟹ ∫g 发散
+
+### 极限比较法
+设 f(x), g(x) > 0，若 lim(x→∞) f(x)/g(x) = L：
+- 0 < L < ∞：∫f 与 ∫g 同敛散
+- L = 0：∫g 收敛 ⟹ ∫f 收敛
+- L = ∞：∫g 发散 ⟹ ∫f 发散
+
+### p-积分判别法
+∫₁^∞ 1/xᵖ dx：p > 1 收敛，p ≤ 1 发散
+∫₀¹ 1/xᵖ dx：p < 1 收敛，p ≥ 1 发散
+
+## 条件收敛与绝对收敛
+
+### 定义
+- 绝对收敛：∫|f| 收敛 ⟹ ∫f 收敛
+- 条件收敛：∫f 收敛但 ∫|f| 发散
+
+### 狄利克雷判别法
+若 F(b) = ∫ₐᵇ f 有界，g 单调趋于0，则 ∫ₐ^∞ f·g 收敛。
+  `,
+  formula: `
+## 核心公式
+
+### p-积分
+$$
+\\int_1^\\infty \\frac{1}{x^p}dx \\begin{cases} \\text{收敛}, & p > 1 \\\\ \\text{发散}, & p \\leq 1 \\end{cases}
+$$
+
+### 极限比较法
+$$
+\\lim_{x\\to\\infty} \\frac{f(x)}{g(x)} = L \\in (0,\\infty) \\Rightarrow \\int f \\text{ 与 } \\int g \\text{ 同敛散}
+$$
+
+### 伽马函数
+$$
+\\Gamma(s) = \\int_0^\\infty x^{s-1}e^{-x}dx, \\quad s > 0
+$$
+
+### 重要反常积分
+$$
+\\int_0^\\infty \\frac{\\sin x}{x}dx = \\frac{\\pi}{2} \\quad (\\text{条件收敛})
+$$
+  `,
+  examples: [
+    {
+      id: 'adv-ii-1',
+      difficulty: 'hard',
+      question: '判断 ∫₀^∞ sin(x)/x dx 的收敛性。',
+      options: [
+        '条件收敛：通过狄利克雷判别法知收敛，但 ∫|sin(x)/x|dx 发散',
+        '绝对收敛，因为 |sin(x)/x| ≤ 1/x',
+        '发散，因为被积函数在无穷远处不趋于0',
+        '收敛于 π/2，这是已知的结论'
+      ],
+      correct: 0,
+      explanation: '该积分是经典的条件收敛例子。由狄利克雷判别法，∫sin(x)有界，1/x单调趋于0，故积分收敛。但 ∫|sin(x)/x|dx ≥ ∫sin²(x)/x dx 发散，所以不是绝对收敛。'
+    }
+  ]
+};
+
+export const functionSeriesLesson: SubLesson = {
+  id: 'adv-function-series',
+  title: '函数项级数',
+  has3D: false,
+  theory: `
+## 函数项级数的收敛性
+
+### 逐点收敛
+级数 Σfₙ(x) 在点 x₀ 收敛 ⟺ 部分和序列 Sₙ(x₀) 收敛。
+
+### 一致收敛
+级数 Σfₙ(x) 在区间 I 上一致收敛 ⟺ 部分和序列 Sₙ(x) 一致收敛。
+
+**ε-N 定义**：∀ε > 0, ∃N, 当 n > N 时 |Sₙ(x) - S(x)| < ε 对所有 x ∈ I 成立。
+
+## 一致收敛的判别法
+
+### 魏尔斯特拉斯 M-判别法
+若 |fₙ(x)| ≤ Mₙ 对所有 x ∈ I 成立，且 ΣMₙ 收敛，则 Σfₙ 一致收敛。
+
+### 狄利克雷判别法
+若部分和 Σₖ₌₁ⁿ aₖ(x) 一致有界，bₙ(x) 对每个 x 单调且一致趋于0，则 Σaₙbₙ 一致收敛。
+
+## 一致收敛的性质
+
+### 连续性
+若 fₙ 连续且 Σfₙ 一致收敛于 S，则 S 连续。
+
+### 逐项积分
+若 fₙ 连续且 Σfₙ 一致收敛，则 ∫Σfₙ = Σ∫fₙ。
+
+### 逐项求导
+若 fₙ' 连续，Σfₙ' 一致收敛，Σfₙ 在某点收敛，则 (Σfₙ)' = Σfₙ'。
+
+## 幂级数的一致收敛性
+
+幂级数在收敛域的任意闭子区间上一致收敛（内闭一致收敛）。
+  `,
+  formula: `
+## 核心公式
+
+### 一致收敛定义
+$$
+\\forall \\varepsilon > 0, \\exists N, \\forall n > N, \\forall x \\in I: |S_n(x) - S(x)| < \\varepsilon
+$$
+
+### M-判别法
+$$
+|f_n(x)| \\leq M_n, \\quad \\sum M_n \\text{ 收敛} \\Rightarrow \\sum f_n \\text{ 一致收敛}
+$$
+
+### 阿贝尔定理（幂级数）
+若幂级数在 x = R 收敛，则在 [0,R] 上一致收敛。
+
+### 泰勒级数余项
+$$
+R_n(x) = \\frac{f^{(n+1)}(\\xi)}{(n+1)!}(x-a)^{n+1}
+$$
+  `,
+  examples: [
+    {
+      id: 'adv-fs-1',
+      difficulty: 'hard',
+      question: '证明 Σₙ₌₁^∞ xⁿ/n² 在 [-1,1] 上一致收敛。',
+      options: [
+        '用 M-判别法：|xⁿ/n²| ≤ 1/n²，而 Σ1/n² = π²/6 收敛',
+        '该级数是幂级数，在收敛域内一致收敛',
+        '用狄利克雷判别法证明',
+        '用柯西收敛准则证明'
+      ],
+      correct: 0,
+      explanation: '直接应用魏尔斯特拉斯 M-判别法：在 [-1,1] 上 |xⁿ/n²| ≤ 1/n²，而 Σ1/n² 是收敛的 p-级数（p=2>1），故原级数一致收敛。'
+    }
+  ]
+};
+
+export const fourierAnalysisAdvancedLesson: SubLesson = {
+  id: 'adv-fourier-analysis',
+  title: '傅里叶分析进阶',
+  has3D: false,
+  theory: `
+## 傅里叶级数的收敛性
+
+### 狄利克雷核
+Dₙ(x) = Σₖ₌₋ₙⁿ e^(ikx) = sin((n+1/2)x)/sin(x/2)
+
+部分和可表示为卷积：Sₙ(f)(x) = (f * Dₙ)(x)
+
+### 逐点收敛定理
+若 f 分段光滑，则傅里叶级数在每点 x 收敛于 [f(x⁺) + f(x⁻)]/2。
+
+### 一致收敛
+若 f 连续且分段光滑，f(-π) = f(π)，则傅里叶级数一致收敛于 f。
+
+## 均方收敛与帕塞瓦尔恒等式
+
+### L² 收敛
+‖Sₙ - f‖₂ → 0，其中 ‖g‖₂² = (1/2π)∫|g|²
+
+### 帕塞瓦尔恒等式
+(1/2π)∫|f|² = Σ|ĉₙ|² = |a₀|²/4 + (1/2)Σ(|aₙ|² + |bₙ|²)
+
+## 傅里叶变换
+
+### 定义
+f̂(ξ) = ∫₋∞^∞ f(x)e^(-2πiξx)dx
+
+### 逆变换
+f(x) = ∫₋∞^∞ f̂(ξ)e^(2πiξx)dξ
+
+### 重要性质
+- 线性性
+- 时移：f(x-a) ̂ → e^(-2πiaξ)f̂(ξ)
+- 频移：e^(2πiax)f(x) ̂ → f̂(ξ-a)
+- 卷积定理：(f * g)̂ = f̂ · ĝ
+  `,
+  formula: `
+## 核心公式
+
+### 狄利克雷核
+$$
+D_n(x) = \\sum_{k=-n}^n e^{ikx} = \\frac{\\sin((n+1/2)x)}{\\sin(x/2)}
+$$
+
+### 帕塞瓦尔恒等式
+$$
+\\frac{1}{2\\pi}\\int_{-\\pi}^\\pi |f(x)|^2 dx = \\sum_{n=-\\infty}^\\infty |c_n|^2
+$$
+
+### 傅里叶变换
+$$
+\\hat{f}(\\xi) = \\int_{-\\infty}^\\infty f(x)e^{-2\\pi i\\xi x}dx
+$$
+
+### 逆变换
+$$
+f(x) = \\int_{-\\infty}^\\infty \\hat{f}(\\xi)e^{2\\pi i\\xi x}d\\xi
+$$
+
+### 卷积定理
+$$
+\\widehat{f * g} = \\hat{f} \\cdot \\hat{g}
+$$
+  `,
+  examples: [
+    {
+      id: 'adv-fa-1',
+      difficulty: 'hard',
+      question: '利用帕塞瓦尔恒等式求 Σₙ₌₁^∞ 1/n²。',
+      options: [
+        '取 f(x) = x（在 [-π,π] 上），计算得 Σ1/n² = π²/6',
+        '取 f(x) = |x|，计算得 Σ1/n² = π²/8',
+        '利用傅里叶变换的性质直接计算',
+        '取 f(x) = sin(x)，计算得 Σ1/n² = π²/12'
+      ],
+      correct: 0,
+      explanation: 'f(x) = x 的傅里叶系数为 bₙ = 2(-1)ⁿ⁺¹/n。由帕塞瓦尔：(1/2π)∫x²dx = π²/3 = (1/2)Σbₙ² = 2Σ1/n²，故 Σ1/n² = π²/6。'
+    }
+  ]
+};
+
+export const odeAdvancedLesson: SubLesson = {
+  id: 'adv-ode',
+  title: '常微分方程进阶',
+  has3D: false,
+  theory: `
+## 存在唯一性定理
+
+### 皮卡-林德洛夫定理
+初值问题 y' = f(x,y), y(x₀) = y₀：
+- 若 f 在矩形区域连续
+- 且 f 对 y 满足利普希茨条件
+
+则存在唯一解，定义在 |x - x₀| ≤ h 上。
+
+### 解的延拓
+解可以延拓到边界或无穷远。
+
+## 解对初值和参数的连续依赖性
+
+### 连续依赖性
+初值的微小变化导致解的微小变化。
+
+### 可微性
+在一定条件下，解对初值和参数是可微的。
+
+## 线性微分方程组
+
+### 矩阵指数
+对于常系数系统 y' = Ay，解为 y = e^(Ax)y₀
+
+其中 e^(Ax) = Σₙ₌₀^∞ (Ax)ⁿ/n!
+
+### 基本解矩阵
+若 Φ(x) 的列是线性无关解，则通解 y = Φ(x)c
+
+## 稳定性理论
+
+### 李雅普诺夫稳定性
+零解稳定 ⟺ 扰动解始终保持在零解附近
+
+### 线性化稳定性
+对于 y' = Ay + g(y)，若 g 是高阶小量，则：
+- A 的特征值实部全负 ⟹ 渐近稳定
+- A 有正实部特征值 ⟹ 不稳定
+
+## 边值问题
+
+### 斯图姆-刘维尔问题
+(py')' + (λw - q)y = 0，带边值条件
+
+特征值 λ₁ < λ₂ < ...，对应特征函数构成完备正交系。
+  `,
+  formula: `
+## 核心公式
+
+### 矩阵指数
+$$
+e^{Ax} = \\sum_{n=0}^\\infty \\frac{(Ax)^n}{n!}
+$$
+
+### 常系数系统解
+$$
+\\mathbf{y}' = A\\mathbf{y} \\Rightarrow \\mathbf{y} = e^{Ax}\\mathbf{y}_0
+$$
+
+### 常数变易公式
+$$
+\\mathbf{y}' = A(x)\\mathbf{y} + \\mathbf{f}(x) \\Rightarrow \\mathbf{y} = \\Phi(x)\\left[\\mathbf{c} + \\int \\Phi^{-1}(s)\\mathbf{f}(s)ds\\right]
+$$
+
+### 稳定性判据
+$$
+\\text{Re}(\\lambda_i) < 0 \\text{ 对所有 } i \\Rightarrow \\text{渐近稳定}
+$$
+  `,
+  examples: [
+    {
+      id: 'adv-ode-1',
+      difficulty: 'hard',
+      question: `系统 y' = Ay，其中 A = [[-1, 1], [0, -2]]，判断零解的稳定性。`,
+      options: [
+        '渐近稳定：特征值为 -1 和 -2，实部均为负',
+        '不稳定：矩阵有非零非对角元',
+        '稳定但不是渐近稳定',
+        '无法确定，需要进一步分析'
+      ],
+      correct: 0,
+      explanation: '特征方程 det(A - λI) = (-1-λ)(-2-λ) = 0，得 λ₁ = -1, λ₂ = -2。两个特征值实部均为负，故零解渐近稳定。'
+    }
+  ]
+};
+
+// 提高篇课时映射
+export const advancedLessons: Record<string, SubLesson[]> = {
+  'advanced-math': [
+    advancedRealNumberLesson,
+    uniformContinuityLesson,
+    convexFunctionLesson,
+    improperIntegralAdvancedLesson,
+    functionSeriesLesson,
+    fourierAnalysisAdvancedLesson,
+    odeAdvancedLesson,
+  ],
+};
+
+// 获取提高篇课时
+export function getAdvancedLessons(moduleId: string): SubLesson[] {
+  return advancedLessons[moduleId] || [];
 }

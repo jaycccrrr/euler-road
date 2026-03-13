@@ -4,6 +4,7 @@ import { generateId } from './utils';
 // Hugging Face Inference API configuration
 const HF_API_TOKEN = process.env.NEXT_PUBLIC_HF_API_TOKEN || '';
 const HF_MODEL = 'facebook/bart-large-mnli'; // Using a general-purpose model
+const USE_AI_GRADING = process.env.NEXT_PUBLIC_USE_AI_GRADING === 'true' || true; // 默认启用 AI 批阅
 
 // Alternative: Use a simpler similarity-based approach without API
 export async function gradeAnswer(
@@ -22,21 +23,27 @@ export async function gradeAnswer(
 
   const referenceAnswer = question.answer;
 
-  // If no API token, use simple similarity check
-  if (!HF_API_TOKEN) {
+  // 如果不使用 AI 批阅，使用简单算法
+  if (!USE_AI_GRADING) {
     return simpleGrading(userAnswer, referenceAnswer);
   }
 
   try {
-    // Try to use Hugging Face API
+    // Try to use Hugging Face API (支持无 Token 访问公开模型)
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // 如果有 Token 则使用，否则尝试无 Token 访问
+    if (HF_API_TOKEN) {
+      headers['Authorization'] = `Bearer ${HF_API_TOKEN}`;
+    }
+
     const response = await fetch(
       `https://api-inference.huggingface.co/models/${HF_MODEL}`,
       {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${HF_API_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           inputs: {
             text: userAnswer,
@@ -47,11 +54,13 @@ export async function gradeAnswer(
     );
 
     if (!response.ok) {
+      console.log('HF API 响应失败，使用简单批阅:', response.status);
       // Fall back to simple grading
       return simpleGrading(userAnswer, referenceAnswer);
     }
 
     const result = await response.json();
+    console.log('HF API 结果:', result);
 
     // Parse result and calculate score
     const entailment = result.find((r: { label: string }) => r.label === 'ENTAILMENT');

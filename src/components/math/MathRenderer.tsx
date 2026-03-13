@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
@@ -10,158 +10,191 @@ interface MathRendererProps {
 }
 
 /**
- * 数学公式和 Markdown 渲染组件
- * 使用 KaTeX 渲染数学公式，同时支持 Markdown 格式
+ * 去除模板字符串的公共缩进
+ */
+function dedent(str: string): string {
+  const lines = str.split('\n');
+  let minIndent = Infinity;
+
+  for (const line of lines) {
+    if (line.trim().length > 0) {
+      const spaces = line.match(/^(\s*)/)?.[0].length ?? 0;
+      minIndent = Math.min(minIndent, spaces);
+    }
+  }
+
+  if (minIndent === Infinity || minIndent === 0) return str;
+  return lines.map(line => line.slice(minIndent)).join('\n');
+}
+
+/**
+ * 渲染数学公式
+ */
+function renderMath(latex: string, displayMode: boolean): string {
+  try {
+    return katex.renderToString(latex.trim(), {
+      displayMode,
+      throwOnError: false,
+      strict: false,
+    });
+  } catch {
+    return displayMode ? `$$${latex}$$` : `$${latex}$`;
+  }
+}
+
+/**
+ * 处理代码块内的数学公式
+ */
+function processCodeBlock(code: string): string {
+  // 去除首尾的换行
+  let content = code.replace(/^\n/, '').replace(/\n$/, '');
+
+  // 尝试渲染代码中的数学表达式
+  // 匹配模式：字母 + 可选下标/上标 + 数学符号 + ...
+  const mathPattern = /([a-zA-Z][₀₁₂₃₄₅₆₇₈₉⁰¹²³⁴⁵⁶⁷⁸⁹ₐₑᵢₒᵤₙₘ]*(?:\s*[×÷√∫∂∇∑∏∞∈∉⊂⊃⊆⊇∪∩∧∨¬⇒⇔∀∃∂∆∇∏∑√∛∜∧∨∩∪∫∮∯∰∱∲∳∴∵∶∷∸∹∺∻∼∽∾∿≀≁≂≃≄≅≆≇≈≉≊≋≌≍≎≏≐≑≒≓≔≕≖≗≘≙≚≛≜≝≞≟≠≡≢≣≤≥≦≧≨≩≪≫≬≭≮≯≰≱≲≳≴≵≶≷≸≹≺≻≼≽≾≿⊀⊁⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋⊌⊍⊎⊏⊐⊑⊒⊓⊔⊕⊖⊗⊘⊙⊚⊛⊜⊝⊞⊟⊠⊡⊢⊣⊤⊥⊦⊧⊨⊩⊪⊫⊬⊭⊮⊯⊰⊱⊲⊳⊴⊵⊶⊷⊸⊹⊺⊻⊼⊽⊾⊿⋀⋁⋂⋃⋄⋅⋆⋇⋈⋉⋊⋋⋌⋍⋎⋏⋐⋑⋒⋓⋔⋕⋖⋗⋘⋙⋚⋛⋜⋝⋞⋟⋠⋡⋢⋣⋤⋥⋦⋧⋨⋩⋪⋫⋬⋭⋮⋯⋰⋱⋲⋳⋴⋵⋶⋷⋸⋹⋺⋻⋼⋽⋾⋿\+\-\*\/\^\_\(\)\[\]\{\}\|\\.,;=<>~!@#$%&*:?\s0-9])*)/g;
+
+  content = content.replace(mathPattern, (match) => {
+    // 如果包含数学字符，尝试渲染
+    if (/[αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ√∫∂∇∑∏∞₀₁₂₃₄₅₆₇₈₉⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(match)) {
+      try {
+        return katex.renderToString(match.trim(), { displayMode: false, throwOnError: false });
+      } catch {
+        return match;
+      }
+    }
+    return match;
+  });
+
+  return `<pre class="bg-slate-50 border border-slate-200 rounded-lg p-4 my-4 overflow-x-auto"><code class="text-sm text-slate-700 font-mono">${content}</code></pre>`;
+}
+
+/**
+ * Markdown + 数学公式渲染组件
  */
 export function MathRenderer({ children, className = '' }: MathRendererProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isReady, setIsReady] = useState(false);
+  const html = useMemo(() => {
+    if (!children) return '';
 
-  useEffect(() => {
-    if (!containerRef.current || !children) return;
+    // Step 1: 去除缩进
+    let text = dedent(children);
 
-    // 复制内容并处理
-    let html = children;
-
-    // 先保护代码块和数学公式不被 Markdown 处理影响
-    const protectedBlocks: string[] = [];
-
-    // 保护 $$...$$ 块级公式
-    html = html.replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
-      protectedBlocks.push(match);
-      return `\0BLOCK${protectedBlocks.length - 1}\0`;
+    // Step 2: 保护代码块（先处理，因为代码块里可能有$符号）
+    const codeBlocks: string[] = [];
+    text = text.replace(/```([\s\S]*?)```/g, (match, code) => {
+      codeBlocks.push(code);
+      return `<<<CODE_${codeBlocks.length - 1}>>>`;
     });
 
-    // 保护 $...$ 行内公式
-    html = html.replace(/\$([^$\n]+?)\$/g, (match) => {
-      protectedBlocks.push(match);
-      return `\0BLOCK${protectedBlocks.length - 1}\0`;
+    // Step 3: 保护行内代码
+    const inlineCodes: string[] = [];
+    text = text.replace(/`([^`]+)`/g, (match, code) => {
+      inlineCodes.push(code);
+      return `<<<INLINECODE_${inlineCodes.length - 1}>>>`;
     });
 
-    // 处理 Markdown 标题 - 更优雅的样式
-    html = html.replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold text-slate-800 mt-8 mb-4 pb-2 border-b border-slate-200">$1</h3>');
-    html = html.replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold text-slate-800 mt-10 mb-5 pb-3 border-b border-slate-200">$1</h2>');
-    html = html.replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold text-slate-900 mt-12 mb-6 pb-4 border-b-2 border-slate-300">$1</h1>');
+    // Step 4: 保护数学公式
+    const mathBlocks: string[] = [];
+    text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
+      mathBlocks.push(math);
+      return `<<<MATHBLOCK_${mathBlocks.length - 1}>>>`;
+    });
 
-    // 处理粗体 - 使用更柔和的颜色
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-slate-700 bg-slate-50 px-1 rounded">$1</strong>');
+    const inlineMaths: string[] = [];
+    text = text.replace(/\$([^$\n]+?)\$/g, (match, math) => {
+      inlineMaths.push(math);
+      return `<<<INLINEMATH_${inlineMaths.length - 1}>>>`;
+    });
 
-    // 处理斜体
-    html = html.replace(/\*(.*?)\*/g, '<em class="italic text-slate-600">$1</em>');
+    // Step 5: 处理 Markdown（现在可以安全处理，因为特殊内容已被保护）
 
-    // 处理思考引导区块 - 特殊样式
-    html = html.replace(/\[思考引导\]/g, '<div class="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-700 rounded-md text-sm font-medium border border-amber-200 mb-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>思考引导</div>');
+    // 标题（从大到小，避免重复匹配）
+    text = text.replace(/^####\s+(.+)$/gm, '<h4 class="text-lg font-bold text-slate-800 mt-6 mb-3">$1</h4>');
+    text = text.replace(/^###\s+(.+)$/gm, '<h3 class="text-xl font-bold text-slate-800 mt-8 mb-4 pb-2 border-b border-slate-200">$1</h3>');
+    text = text.replace(/^##\s+(.+)$/gm, '<h2 class="text-2xl font-bold text-slate-800 mt-10 mb-5 pb-3 border-b border-slate-200">$1</h2>');
+    text = text.replace(/^#\s+(.+)$/gm, '<h1 class="text-3xl font-bold text-slate-900 mt-12 mb-6 pb-4 border-b-2 border-slate-300">$1</h1>');
 
-    // 处理列表项 - 更好的间距和样式
-    html = html.replace(/^\s*[-*] (.*$)/gim, '<li class="ml-2 text-slate-600 leading-relaxed py-1.5">$1</li>');
+    // 引用块
+    text = text.replace(/^>\s*\*\*提示\*\*$/gm, '<div class="flex items-center gap-2 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg my-4 text-blue-800 font-medium"><svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>提示</div>');
+    text = text.replace(/^>\s*(.+)$/gm, '<blockquote class="border-l-4 border-slate-300 bg-slate-50 pl-4 py-3 pr-3 my-4 text-slate-600 italic rounded-r-lg">$1</blockquote>');
 
-    // 将连续的 li 包装在 ul 中
-    html = html.replace(/(<li[^>]*>.*<\/li>\n?)+/g, '<ul class="list-disc list-inside my-4 space-y-1 marker:text-slate-400">$&</ul>');
+    // 列表项
+    text = text.replace(/^[-*]\s+(.+)$/gm, '<li class="text-slate-600 leading-relaxed py-1">$1</li>');
 
-    // 处理重要提示/强调段落
-    html = html.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-indigo-400 bg-indigo-50 pl-4 py-3 pr-3 my-4 text-slate-700 italic rounded-r-lg">$1</blockquote>');
+    // 将连续的 li 包装成 ul
+    const paras = text.split(/\n\n+/);
+    const processedParas = paras.map(para => {
+      const lines = para.split('\n');
+      const result: string[] = [];
+      let currentList: string[] = [];
 
-    // 处理行内代码
-    html = html.replace(/`([^`]+)`/g, '<code class="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded text-sm font-mono border border-slate-200">$1</code>');
-
-    // 处理段落（将空行分隔的文本包装在 p 标签中）
-    const paragraphs = html.split(/\n\n+/);
-    html = paragraphs.map(p => {
-      if (p.trim().startsWith('<h') || p.trim().startsWith('<ul') || p.trim().startsWith('<li') || p.trim().startsWith('<blockquote')) {
-        return p;
-      }
-      return `<p class="text-slate-600 leading-[1.8] mb-4 text-[15px]">${p}</p>`;
-    }).join('\n');
-
-    // 恢复保护的块
-    html = html.replace(/\0BLOCK(\d+)\0/g, (match, index) => {
-      const block = protectedBlocks[parseInt(index)];
-
-      // 处理块级公式
-      if (block.startsWith('$$')) {
-        const latex = block.slice(2, -2).trim();
-        try {
-          return katex.renderToString(latex, {
-            displayMode: true,
-            throwOnError: false,
-            strict: false,
-          });
-        } catch (e) {
-          console.error('KaTeX block error:', e);
-          return `<div style="color:red">${block}</div>`;
+      for (const line of lines) {
+        if (line.startsWith('<li')) {
+          currentList.push(line);
+        } else {
+          if (currentList.length > 0) {
+            result.push(`<ul class="list-disc list-inside my-4 space-y-1 marker:text-slate-400">${currentList.join('')}</ul>`);
+            currentList = [];
+          }
+          result.push(line);
         }
       }
+      if (currentList.length > 0) {
+        result.push(`<ul class="list-disc list-inside my-4 space-y-1 marker:text-slate-400">${currentList.join('')}</ul>`);
+      }
+      return result.join('\n');
+    });
+    text = processedParas.join('\n\n');
 
-      // 处理行内公式
-      if (block.startsWith('$')) {
-        const latex = block.slice(1, -1).trim();
-        console.log('[MathRenderer] Rendering inline latex:', latex);
-        try {
-          return katex.renderToString(latex, {
-            displayMode: false,
-            throwOnError: false,
-            strict: false,
-          });
-        } catch (e) {
-          console.error('[MathRenderer] KaTeX inline error:', e, 'Latex:', latex);
-          return `<span style="color:red;border:1px dashed red;padding:2px;" title="KaTeX Error: ${e}">${block}</span>`;
-        }
+    // 粗体和斜体
+    text = text.replace(/\*\*思考引导\*\*/g, '<span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-sm font-semibold border border-amber-200"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>思考引导</span>');
+    text = text.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-slate-700">$1</strong>');
+    text = text.replace(/\*(.+?)\*/g, '<em class="italic text-slate-600">$1</em>');
+
+    // Step 6: 处理段落（将被保护的占位符视为独立块）
+    const finalParas = text.split(/\n\n+/).map(para => {
+      const trimmed = para.trim();
+      if (!trimmed) return '';
+
+      // 检查是否是块级元素
+      if (/^<(h[1-6]|ul|blockquote|div|pre)/.test(trimmed)) {
+        return para;
       }
 
-      return block;
+      // 检查是否只包含保护占位符
+      if (/^<<<\w+_\d+>>>$/.test(trimmed)) {
+        return para;
+      }
+
+      // 普通段落
+      return `<p class="text-slate-600 leading-[1.8] mb-4 text-[15px]">${para}</p>`;
+    }).filter(Boolean);
+
+    text = finalParas.join('\n');
+
+    // Step 7: 恢复所有保护的内容
+
+    // 恢复代码块
+    text = text.replace(/<<<CODE_(\d+)>>>/g, (_, i) => processCodeBlock(codeBlocks[parseInt(i)]));
+
+    // 恢复行内代码
+    text = text.replace(/<<<INLINECODE_(\d+)>>>/g, (_, i) => {
+      const code = inlineCodes[parseInt(i)];
+      return `<code class="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded text-sm font-mono border border-slate-200">${code}</code>`;
     });
 
-    // 处理换行（单个换行转为空格，保持段落流畅）
-    html = html.replace(/\n/g, ' ');
+    // 恢复数学公式块
+    text = text.replace(/<<<MATHBLOCK_(\d+)>>>/g, (_, i) => renderMath(mathBlocks[parseInt(i)], true));
 
-    containerRef.current.innerHTML = html;
-    setIsReady(true);
+    // 恢复行内数学公式
+    text = text.replace(/<<<INLINEMATH_(\d+)>>>/g, (_, i) => renderMath(inlineMaths[parseInt(i)], false));
+
+    return text;
   }, [children]);
 
   return (
     <div
-      ref={containerRef}
       className={`math-content text-[15px] leading-[1.8] text-slate-600 ${className}`}
-      style={{
-        opacity: isReady ? 1 : 0,
-        transition: 'opacity 0.3s ease',
-        minHeight: '1em',
-      }}
-    />
-  );
-}
-
-/**
- * 简化版数学渲染组件（用于短文本）
- */
-export function InlineMath({ children }: { children: string }) {
-  const spanRef = useRef<HTMLSpanElement>(null);
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    if (!spanRef.current || !children) return;
-
-    try {
-      spanRef.current.innerHTML = katex.renderToString(children.trim(), {
-        displayMode: false,
-        throwOnError: false,
-        strict: false,
-      });
-    } catch (e) {
-      console.error('KaTeX inline error:', e);
-      spanRef.current.textContent = `$${children}$`;
-    }
-    setIsReady(true);
-  }, [children]);
-
-  return (
-    <span
-      ref={spanRef}
-      className="inline-math"
-      style={{
-        opacity: isReady ? 1 : 0,
-        transition: 'opacity 0.2s',
-      }}
+      dangerouslySetInnerHTML={{ __html: html }}
     />
   );
 }

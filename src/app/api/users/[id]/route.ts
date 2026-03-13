@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { getAuthUserId } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
-const prisma = new PrismaClient();
-
+// 获取用户信息
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    const currentUserId = getAuthUserId(req);
 
     const user = await prisma.user.findUnique({
       where: { id },
@@ -18,53 +15,23 @@ export async function GET(
         id: true,
         nickname: true,
         avatar: true,
-        createdAt: true,
-        moduleData: true,
+        level: true,
+        experience: true,
+        title: true,
+        frame: true,
         followingCount: true,
         followerCount: true,
-        _count: {
-          select: {
-            posts: true,
-            answers: true,
-          },
-        },
+        createdAt: true,
       },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: '用户不存在' }, { status: 404 });
     }
 
-    let isFollowing = false;
-    if (currentUserId) {
-      const follow = await prisma.follow.findUnique({
-        where: {
-          followerId_followingId: {
-            followerId: currentUserId,
-            followingId: id,
-          },
-        },
-      });
-      isFollowing = !!follow;
-    }
-
-    return NextResponse.json({
-      user: {
-        ...user,
-        postCount: user._count.posts,
-        answerCount: user._count.answers,
-      },
-      isFollowing,
-      isSelf: currentUserId === id,
-    });
+    return NextResponse.json(user);
   } catch (error) {
-    console.error('Get user profile error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('获取用户失败:', error);
+    return NextResponse.json({ error: '获取用户失败' }, { status: 500 });
   }
 }

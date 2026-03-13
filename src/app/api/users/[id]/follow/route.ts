@@ -1,96 +1,124 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { getAuthUserId } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import { verifyToken } from '@/lib/auth';
 
-const prisma = new PrismaClient();
-
+// 关注/取消关注用户
 export async function POST(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: targetUserId } = await params;
-    const currentUserId = getAuthUserId(req);
+    const { id: followingId } = await params;
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
-    if (!currentUserId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!token) {
+      return NextResponse.json({ error: '未登录' }, { status: 401 });
     }
 
-    if (currentUserId === targetUserId) {
-      return NextResponse.json({ error: 'Cannot follow yourself' }, { status: 400 });
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json({ error: '无效的token' }, { status: 401 });
     }
 
-    const targetUser = await prisma.user.findUnique({
-      where: { id: targetUserId },
-    });
+    const followerId = payload.userId;
 
-    if (!targetUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    if (followerId === followingId) {
+      return NextResponse.json({ error: '不能关注自己' }, { status: 400 });
     }
 
-    await prisma.follow.create({
-      data: {
-        followerId: currentUserId,
-        followingId: targetUserId,
+    // 检查是否已关注
+    const existingFollow = await prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId,
+          followingId,
+        },
       },
     });
 
-    await prisma.user.update({
-      where: { id: currentUserId },
-      data: { followingCount: { increment: 1 } },
-    });
+    if (existingFollow) {
+      // 取消关注
+      await prisma.follow.delete({
+        where: {
+          followerId_followingId: {
+            followerId,
+            followingId,
+          },
+        },
+      });
 
-    await prisma.user.update({
-      where: { id: targetUserId },
-      data: { followerCount: { increment: 1 } },
-    });
+      // 更新计数
+      await prisma.user.update({
+        where: { id: followerId },
+        data: { followingCount: { decrement: 1 } },
+      });
 
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    if (error.code === 'P2002') {
-      return NextResponse.json({ error: 'Already following' }, { status: 409 });
+      await prisma.user.update({
+        where: { id: followingId },
+        data: { followerCount: { decrement: 1 } },
+      });
+
+      return NextResponse.json({ message: '取消关注成功', following: false });
+    } else {
+      // 添加关注
+      await prisma.follow.create({
+        data: {
+          followerId,
+          followingId,
+        },
+      });
+
+      // 更新计数
+      await prisma.user.update({
+        where: { id: followerId },
+        data: { followingCount: { increment: 1 } },
+      });
+
+      await prisma.user.update({
+        where: { id: followingId },
+        data: { followerCount: { increment: 1 } },
+      });
+
+      return NextResponse.json({ message: '关注成功', following: true });
     }
-    console.error('Follow error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error) {
+    console.error('关注操作失败:', error);
+    return NextResponse.json({ error: '关注操作失败' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
+// 检查是否已关注
+export async function GET(
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: targetUserId } = await params;
-    const currentUserId = getAuthUserId(req);
+    const { id: followingId } = await params;
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
-    if (!currentUserId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!token) {
+      return NextResponse.json({ following: false });
     }
 
-    const result = await prisma.follow.deleteMany({
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json({ following: false });
+    }
+
+    const followerId = payload.userId;
+
+    const existingFollow = await prisma.follow.findUnique({
       where: {
-        followerId: currentUserId,
-        followingId: targetUserId,
+        followerId_followingId: {
+          followerId,
+          followingId,
+        },
       },
     });
 
-    if (result.count === 0) {
-      return NextResponse.json({ error: 'Not following' }, { status: 404 });
-    }
-
-    await prisma.user.update({
-      where: { id: currentUserId },
-      data: { followingCount: { decrement: 1 } },
-    });
-
-    await prisma.user.update({
-      where: { id: targetUserId },
-      data: { followerCount: { decrement: 1 } },
-    });
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ following: !!existingFollow });
   } catch (error) {
-    console.error('Unfollow error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('检查关注状态失败:', error);
+    return NextResponse.json({ following: false });
   }
 }

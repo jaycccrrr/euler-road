@@ -1,4 +1,4 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,471,x=>{"use strict";let e=(0,x.i(75254).default)("arrow-left",[["path",{d:"m12 19-7-7 7-7",key:"1l729n"}],["path",{d:"M19 12H5",key:"x3x0zl"}]]);x.s(["ArrowLeft",()=>e],471)},31573,x=>{"use strict";var e=x.i(43476),d=x.i(22016),t=x.i(71645),a=x.i(3374),s=x.i(95907),i=x.i(15288),r=x.i(19455),l=x.i(87486),o=x.i(77572),c=x.i(76639),n=x.i(88968),y=x.i(10980),b=x.i(20278),f=x.i(63059);let p=(0,x.i(75254).default)("file-text",[["path",{d:"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",key:"1oefj6"}],["path",{d:"M14 2v5a1 1 0 0 0 1 1h5",key:"wfsgrz"}],["path",{d:"M10 9H8",key:"b1mrlr"}],["path",{d:"M16 13H8",key:"t4e002"}],["path",{d:"M16 17H8",key:"z1uh3a"}]]);var m=x.i(32095),h=x.i(471),u=x.i(83086),g=x.i(37727);function z({module:x,moduleId:z}){let[v,j]=(0,t.useState)(x),[N,k]=(0,t.useState)(null),[w,D]=(0,t.useState)(!1);(0,t.useEffect)(()=>{if(!v&&z){let x=s.KNOWLEDGE_MODULES.find(x=>x.id===z);x&&j(x)}},[v,z]);let C=x=>{k(x),D(!0)};return v?(0,e.jsxs)("div",{className:"min-h-screen",children:[(0,e.jsx)(a.default,{}),(0,e.jsxs)("main",{className:"container mx-auto px-4 py-8",children:[(0,e.jsx)(d.default,{href:"/",children:(0,e.jsxs)(r.Button,{variant:"ghost",className:"mb-4",children:[(0,e.jsx)(h.ArrowLeft,{className:"w-4 h-4 mr-2"}),"返回首页"]})}),(0,e.jsxs)("div",{className:`relative overflow-hidden rounded-3xl bg-gradient-to-br ${v.color} p-8 md:p-12 mb-8`,children:[(0,e.jsx)("div",{className:"absolute inset-0 bg-pattern-dots opacity-20"}),(0,e.jsxs)("div",{className:"relative z-10 flex flex-col md:flex-row items-center gap-6",children:[(0,e.jsx)("div",{className:"w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center text-5xl backdrop-blur-sm",children:v.icon}),(0,e.jsxs)("div",{className:"text-center md:text-left text-white",children:[(0,e.jsx)(l.Badge,{className:"bg-white/20 text-white mb-2",children:"math"===v.category?"数学":"physics"===v.category?"物理":"计算机"}),(0,e.jsx)("h1",{className:"text-3xl md:text-4xl font-bold mb-2",children:v.name}),(0,e.jsx)("p",{className:"text-white/90 max-w-xl",children:v.description})]})]})]}),(0,e.jsxs)(o.Tabs,{defaultValue:"advanced",className:"space-y-6",children:[(0,e.jsxs)(o.TabsList,{className:"grid w-full grid-cols-2",children:[(0,e.jsxs)(o.TabsTrigger,{value:"advanced",className:"flex items-center gap-2",children:[(0,e.jsx)(b.Target,{className:"w-4 h-4"}),"提高篇"]}),(0,e.jsxs)(o.TabsTrigger,{value:"basic",className:"flex items-center gap-2",children:[(0,e.jsx)(y.BookOpen,{className:"w-4 h-4"}),"基础篇"]})]}),(0,e.jsx)(o.TabsContent,{value:"advanced",children:(0,e.jsx)("div",{className:"grid grid-cols-1 md:grid-cols-2 gap-6",children:v.topics.map(x=>(0,e.jsx)(i.Card,{className:"p-6 cartoon-card hover:scale-[1.02] transition-transform cursor-pointer group",children:(0,e.jsxs)("div",{className:"flex items-start justify-between",children:[(0,e.jsxs)("div",{className:"flex-1",children:[(0,e.jsxs)("div",{className:"flex items-center gap-2 mb-2",children:[(0,e.jsx)("h3",{className:"text-lg font-bold group-hover:text-purple-600 transition-colors",children:x.title}),(0,e.jsx)(l.Badge,{variant:x.difficulty>3?"destructive":x.difficulty>2?"default":"secondary",children:"★".repeat(x.difficulty)})]}),(0,e.jsx)("p",{className:"text-sm text-gray-500 mb-4",children:"包含常见易错点和经典例题"}),(0,e.jsxs)(r.Button,{variant:"outline",size:"sm",className:"group-hover:bg-purple-50",onClick:()=>C(x),children:["开始学习",(0,e.jsx)(f.ChevronRight,{className:"w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"})]})]}),(0,e.jsx)("div",{className:"w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center",children:(0,e.jsx)(u.Sparkles,{className:"w-6 h-6 text-purple-500"})})]})},x.id))})}),(0,e.jsx)(o.TabsContent,{value:"basic",children:(0,e.jsxs)(i.Card,{className:"p-8 cartoon-card",children:[(0,e.jsxs)("div",{className:"text-center mb-8",children:[(0,e.jsx)("div",{className:"w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-4",children:(0,e.jsx)(m.GraduationCap,{className:"w-8 h-8 text-blue-500"})}),(0,e.jsx)("h2",{className:"text-2xl font-bold mb-2",children:"基础篇教材"}),(0,e.jsxs)("p",{className:"text-gray-500",children:["系统学习",v.name,"的基础知识"]})]}),(0,e.jsx)("div",{className:"grid grid-cols-1 md:grid-cols-2 gap-4",children:v.topics.map((x,d)=>(0,e.jsxs)("div",{className:"flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-purple-50 transition-colors cursor-pointer group",onClick:()=>C(x),children:[(0,e.jsx)("div",{className:"w-10 h-10 bg-white rounded-lg flex items-center justify-center font-bold text-purple-600 shadow-sm",children:d+1}),(0,e.jsxs)("div",{className:"flex-1",children:[(0,e.jsx)("h3",{className:"font-medium group-hover:text-purple-600 transition-colors",children:x.title}),(0,e.jsx)("p",{className:"text-sm text-gray-400",children:"基础概念与公式"})]}),(0,e.jsx)(p,{className:"w-5 h-5 text-gray-400 group-hover:text-purple-500"})]},x.id))}),(0,e.jsxs)("div",{className:"mt-8 p-4 bg-blue-50 rounded-xl",children:[(0,e.jsx)("h3",{className:"font-bold text-blue-700 mb-2",children:"推荐学习路径"}),(0,e.jsxs)("ol",{className:"list-decimal list-inside space-y-2 text-sm text-blue-600",children:[(0,e.jsx)("li",{children:"按顺序阅读基础教材"}),(0,e.jsx)("li",{children:"完成每个章节的练习题"}),(0,e.jsx)("li",{children:"进入提高篇挑战难题"}),(0,e.jsx)("li",{children:"参与每日一题巩固知识"})]})]})]})})]}),(0,e.jsx)(c.Dialog,{open:w,onOpenChange:D,children:(0,e.jsxs)(c.DialogContent,{className:"max-w-3xl max-h-[80vh] overflow-y-auto",children:[(0,e.jsxs)(c.DialogHeader,{children:[(0,e.jsxs)(c.DialogTitle,{className:"text-2xl font-bold flex items-center gap-2",children:[(0,e.jsx)(u.Sparkles,{className:"w-6 h-6 text-purple-500"}),N?.title]}),(0,e.jsxs)(c.DialogDescription,{className:"flex items-center gap-2",children:[(0,e.jsx)(l.Badge,{variant:N?.difficulty&&N.difficulty>3?"destructive":N?.difficulty&&N.difficulty>2?"default":"secondary",children:"★".repeat(N?.difficulty||0)}),(0,e.jsx)("span",{className:"text-gray-500",children:"难度等级"})]})]}),(0,e.jsx)("div",{className:"mt-4 prose prose-purple max-w-none",children:N?.content?(0,e.jsx)(n.MathRenderer,{className:"text-gray-700",children:N.content}):(0,e.jsxs)("div",{className:"text-center py-8 text-gray-500",children:[(0,e.jsx)(p,{className:"w-12 h-12 mx-auto mb-3 text-gray-300"}),(0,e.jsx)("p",{children:"该知识点暂无详细内容"})]})}),(0,e.jsx)("div",{className:"mt-6 flex justify-end",children:(0,e.jsxs)(r.Button,{onClick:()=>D(!1),children:[(0,e.jsx)(g.X,{className:"w-4 h-4 mr-2"}),"关闭"]})})]})})]})]}):(0,e.jsxs)("div",{className:"min-h-screen",children:[(0,e.jsx)(a.default,{}),(0,e.jsxs)("main",{className:"container mx-auto px-4 py-12 text-center",children:[(0,e.jsx)("h1",{className:"text-2xl font-bold mb-4",children:"模块未找到"}),(0,e.jsx)(d.default,{href:"/",children:(0,e.jsx)(r.Button,{children:"返回首页"})})]})]})}x.s(["default",()=>z],31573)},78881,x=>{"use strict";var e=x.i(43476),d=x.i(22016),t=x.i(71645),a=x.i(3374),s=x.i(95907);let i={"am-1":[{id:"direction-cosines",title:"方向角与方向余弦",has3D:!0,vizType:"directionCosines",theory:`
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,471,x=>{"use strict";let e=(0,x.i(75254).default)("arrow-left",[["path",{d:"m12 19-7-7 7-7",key:"1l729n"}],["path",{d:"M19 12H5",key:"x3x0zl"}]]);x.s(["ArrowLeft",()=>e],471)},31573,x=>{"use strict";var e=x.i(43476),d=x.i(22016),t=x.i(71645),a=x.i(3374),s=x.i(95907),i=x.i(15288),r=x.i(19455),l=x.i(87486),n=x.i(77572),c=x.i(76639),o=x.i(88968),y=x.i(10980),b=x.i(20278),f=x.i(63059);let p=(0,x.i(75254).default)("file-text",[["path",{d:"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",key:"1oefj6"}],["path",{d:"M14 2v5a1 1 0 0 0 1 1h5",key:"wfsgrz"}],["path",{d:"M10 9H8",key:"b1mrlr"}],["path",{d:"M16 13H8",key:"t4e002"}],["path",{d:"M16 17H8",key:"z1uh3a"}]]);var m=x.i(32095),h=x.i(471),u=x.i(83086),g=x.i(37727);function z({module:x,moduleId:z}){let[v,j]=(0,t.useState)(x),[N,k]=(0,t.useState)(null),[w,C]=(0,t.useState)(!1);(0,t.useEffect)(()=>{if(!v&&z){let x=s.KNOWLEDGE_MODULES.find(x=>x.id===z);x&&j(x)}},[v,z]);let D=x=>{k(x),C(!0)};return v?(0,e.jsxs)("div",{className:"min-h-screen",children:[(0,e.jsx)(a.default,{}),(0,e.jsxs)("main",{className:"container mx-auto px-4 py-8",children:[(0,e.jsx)(d.default,{href:"/",children:(0,e.jsxs)(r.Button,{variant:"ghost",className:"mb-4",children:[(0,e.jsx)(h.ArrowLeft,{className:"w-4 h-4 mr-2"}),"返回首页"]})}),(0,e.jsxs)("div",{className:`relative overflow-hidden rounded-3xl bg-gradient-to-br ${v.color} p-8 md:p-12 mb-8`,children:[(0,e.jsx)("div",{className:"absolute inset-0 bg-pattern-dots opacity-20"}),(0,e.jsxs)("div",{className:"relative z-10 flex flex-col md:flex-row items-center gap-6",children:[(0,e.jsx)("div",{className:"w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center text-5xl backdrop-blur-sm",children:v.icon}),(0,e.jsxs)("div",{className:"text-center md:text-left text-white",children:[(0,e.jsx)(l.Badge,{className:"bg-white/20 text-white mb-2",children:"math"===v.category?"数学":"physics"===v.category?"物理":"计算机"}),(0,e.jsx)("h1",{className:"text-3xl md:text-4xl font-bold mb-2",children:v.name}),(0,e.jsx)("p",{className:"text-white/90 max-w-xl",children:v.description})]})]})]}),(0,e.jsxs)(n.Tabs,{defaultValue:"advanced",className:"space-y-6",children:[(0,e.jsxs)(n.TabsList,{className:"grid w-full grid-cols-2",children:[(0,e.jsxs)(n.TabsTrigger,{value:"advanced",className:"flex items-center gap-2",children:[(0,e.jsx)(b.Target,{className:"w-4 h-4"}),"提高篇"]}),(0,e.jsxs)(n.TabsTrigger,{value:"basic",className:"flex items-center gap-2",children:[(0,e.jsx)(y.BookOpen,{className:"w-4 h-4"}),"基础篇"]})]}),(0,e.jsx)(n.TabsContent,{value:"advanced",children:(0,e.jsx)("div",{className:"grid grid-cols-1 md:grid-cols-2 gap-6",children:v.topics.map(x=>(0,e.jsx)(i.Card,{className:"p-6 cartoon-card hover:scale-[1.02] transition-transform cursor-pointer group",children:(0,e.jsxs)("div",{className:"flex items-start justify-between",children:[(0,e.jsxs)("div",{className:"flex-1",children:[(0,e.jsxs)("div",{className:"flex items-center gap-2 mb-2",children:[(0,e.jsx)("h3",{className:"text-lg font-bold group-hover:text-purple-600 transition-colors",children:x.title}),(0,e.jsx)(l.Badge,{variant:x.difficulty>3?"destructive":x.difficulty>2?"default":"secondary",children:"★".repeat(x.difficulty)})]}),(0,e.jsx)("p",{className:"text-sm text-gray-500 mb-4",children:"包含常见易错点和经典例题"}),(0,e.jsxs)(r.Button,{variant:"outline",size:"sm",className:"group-hover:bg-purple-50",onClick:()=>D(x),children:["开始学习",(0,e.jsx)(f.ChevronRight,{className:"w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"})]})]}),(0,e.jsx)("div",{className:"w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center",children:(0,e.jsx)(u.Sparkles,{className:"w-6 h-6 text-purple-500"})})]})},x.id))})}),(0,e.jsx)(n.TabsContent,{value:"basic",children:(0,e.jsxs)(i.Card,{className:"p-8 cartoon-card",children:[(0,e.jsxs)("div",{className:"text-center mb-8",children:[(0,e.jsx)("div",{className:"w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-4",children:(0,e.jsx)(m.GraduationCap,{className:"w-8 h-8 text-blue-500"})}),(0,e.jsx)("h2",{className:"text-2xl font-bold mb-2",children:"基础篇教材"}),(0,e.jsxs)("p",{className:"text-gray-500",children:["系统学习",v.name,"的基础知识"]})]}),(0,e.jsx)("div",{className:"grid grid-cols-1 md:grid-cols-2 gap-4",children:v.topics.map((x,d)=>(0,e.jsxs)("div",{className:"flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-purple-50 transition-colors cursor-pointer group",onClick:()=>D(x),children:[(0,e.jsx)("div",{className:"w-10 h-10 bg-white rounded-lg flex items-center justify-center font-bold text-purple-600 shadow-sm",children:d+1}),(0,e.jsxs)("div",{className:"flex-1",children:[(0,e.jsx)("h3",{className:"font-medium group-hover:text-purple-600 transition-colors",children:x.title}),(0,e.jsx)("p",{className:"text-sm text-gray-400",children:"基础概念与公式"})]}),(0,e.jsx)(p,{className:"w-5 h-5 text-gray-400 group-hover:text-purple-500"})]},x.id))}),(0,e.jsxs)("div",{className:"mt-8 p-4 bg-blue-50 rounded-xl",children:[(0,e.jsx)("h3",{className:"font-bold text-blue-700 mb-2",children:"推荐学习路径"}),(0,e.jsxs)("ol",{className:"list-decimal list-inside space-y-2 text-sm text-blue-600",children:[(0,e.jsx)("li",{children:"按顺序阅读基础教材"}),(0,e.jsx)("li",{children:"完成每个章节的练习题"}),(0,e.jsx)("li",{children:"进入提高篇挑战难题"}),(0,e.jsx)("li",{children:"参与每日一题巩固知识"})]})]})]})})]}),(0,e.jsx)(c.Dialog,{open:w,onOpenChange:C,children:(0,e.jsxs)(c.DialogContent,{className:"max-w-3xl max-h-[80vh] overflow-y-auto",children:[(0,e.jsxs)(c.DialogHeader,{children:[(0,e.jsxs)(c.DialogTitle,{className:"text-2xl font-bold flex items-center gap-2",children:[(0,e.jsx)(u.Sparkles,{className:"w-6 h-6 text-purple-500"}),N?.title]}),(0,e.jsxs)(c.DialogDescription,{className:"flex items-center gap-2",children:[(0,e.jsx)(l.Badge,{variant:N?.difficulty&&N.difficulty>3?"destructive":N?.difficulty&&N.difficulty>2?"default":"secondary",children:"★".repeat(N?.difficulty||0)}),(0,e.jsx)("span",{className:"text-gray-500",children:"难度等级"})]})]}),(0,e.jsx)("div",{className:"mt-4 prose prose-purple max-w-none",children:N?.content?(0,e.jsx)(o.MathRenderer,{className:"text-gray-700",children:N.content}):(0,e.jsxs)("div",{className:"text-center py-8 text-gray-500",children:[(0,e.jsx)(p,{className:"w-12 h-12 mx-auto mb-3 text-gray-300"}),(0,e.jsx)("p",{children:"该知识点暂无详细内容"})]})}),(0,e.jsx)("div",{className:"mt-6 flex justify-end",children:(0,e.jsxs)(r.Button,{onClick:()=>C(!1),children:[(0,e.jsx)(g.X,{className:"w-4 h-4 mr-2"}),"关闭"]})})]})})]})]}):(0,e.jsxs)("div",{className:"min-h-screen",children:[(0,e.jsx)(a.default,{}),(0,e.jsxs)("main",{className:"container mx-auto px-4 py-12 text-center",children:[(0,e.jsx)("h1",{className:"text-2xl font-bold mb-4",children:"模块未找到"}),(0,e.jsx)(d.default,{href:"/",children:(0,e.jsx)(r.Button,{children:"返回首页"})})]})]})}x.s(["default",()=>z],31573)},78881,x=>{"use strict";var e=x.i(43476),d=x.i(22016),t=x.i(71645),a=x.i(3374),s=x.i(95907);let i=[{id:"am-1",title:"向量与空间解析几何",icon:"📐",lessons:[{id:"direction-cosines",title:"方向角与方向余弦",has3D:!0,vizType:"directionCosines",theory:`
 ## 一、方向角的概念
 
 **思考引导**
@@ -1111,7 +1111,7 @@
                     - **介值定理**：连续函数可以取到最大值和最小值之间的一切值
   `,formula:`
 
-  `,examples:[{id:"mc-1",difficulty:"medium",question:"求极限 lim((x,y)→(0,0)) (x²y)/(x² + y²)",options:["0","1","不存在","∞"],correct:0,explanation:"使用极坐标：x = r·cos(θ), y = r·sin(θ)\n原式 = lim(r→0) [r³cos²(θ)sin(θ)]/r² = lim(r→0) r·cos²(θ)sin(θ) = 0"}]}],"am-2":[{id:"partial-derivative",title:"偏导数",has3D:!0,vizType:"partialDerivative",theory:`
+  `,examples:[{id:"mc-1",difficulty:"medium",question:"求极限 lim((x,y)→(0,0)) (x²y)/(x² + y²)",options:["0","1","不存在","∞"],correct:0,explanation:"使用极坐标：x = r·cos(θ), y = r·sin(θ)\n原式 = lim(r→0) [r³cos²(θ)sin(θ)]/r² = lim(r→0) r·cos²(θ)sin(θ) = 0"}]}]},{id:"am-2",title:"多元函数微分学",icon:"📈",lessons:[{id:"partial-derivative",title:"偏导数",has3D:!0,vizType:"partialDerivative",theory:`
 ## 一、从一元到多元：变化率概念的推广
 
 **思考引导**
@@ -1936,7 +1936,7 @@ zᵧ = (dz/du)\xb7uᵧ</td>
 
             ### 经济学解释
             λ 称为影子价格，表示约束条件右端项每增加1单位时，目标函数的边际变化。
-  `,examples:[{id:"lg-1",difficulty:"hard",question:"求函数 f(x,y) = xy 在约束 x² + y² = 1 下的最大值。",options:["1/2","1","√2/2","2"],correct:0,explanation:"L = xy + λ(x² + y² - 1)\nLₓ = y + 2λx = 0\nLᵧ = x + 2λy = 0\n由前两式得 y² = x²，代入约束：2x² = 1，x = ±1/√2\nf(1/√2, 1/√2) = 1/2 为最大值"}]}],"am-3":[{id:"integral-concept",title:"重积分概念",has3D:!0,vizType:"doubleIntegral",theory:`
+  `,examples:[{id:"lg-1",difficulty:"hard",question:"求函数 f(x,y) = xy 在约束 x² + y² = 1 下的最大值。",options:["1/2","1","√2/2","2"],correct:0,explanation:"L = xy + λ(x² + y² - 1)\nLₓ = y + 2λx = 0\nLᵧ = x + 2λy = 0\n由前两式得 y² = x²，代入约束：2x² = 1，x = ±1/√2\nf(1/√2, 1/√2) = 1/2 为最大值"}]}]},{id:"am-3",title:"重积分",icon:"🔲",lessons:[{id:"integral-concept",title:"重积分概念",has3D:!0,vizType:"doubleIntegral",theory:`
 ## 一、从定积分到重积分
 
 **思考引导**
@@ -2519,7 +2519,7 @@ zᵧ = (dz/du)\xb7uᵧ</td>
 \`\`\`
 
                 V = ∭ dV = ∫₀\xb2π dθ ∫₀^π sin(φ)dφ ∫₀ᴿ r\xb2 dr = 4πR\xb3/3
-  `,examples:[{id:"cs-2",difficulty:"medium",question:"求球 x² + y² + z² = R² 在 0 ≤ z ≤ h 部分的体积。",options:["πh²(R - h/3)","2πh²(R - h/3)","πhR²","4πR³/3"],correct:0,explanation:"使用柱坐标：V = ∭ dV = ∫₀²π dθ ∫₀^√(R²-h²) r dr ∫₀^h dz\n或使用球坐标直接计算得 V = πh²(R - h/3)"}]}],"am-4":[{id:"surface-integral-first",title:"第一类曲面积分",has3D:!0,vizType:"surfaceIntegralFirst",theory:`
+  `,examples:[{id:"cs-2",difficulty:"medium",question:"求球 x² + y² + z² = R² 在 0 ≤ z ≤ h 部分的体积。",options:["πh²(R - h/3)","2πh²(R - h/3)","πhR²","4πR³/3"],correct:0,explanation:"使用柱坐标：V = ∭ dV = ∫₀²π dθ ∫₀^√(R²-h²) r dr ∫₀^h dz\n或使用球坐标直接计算得 V = πh²(R - h/3)"}]}]},{id:"am-4",title:"曲线积分与曲面积分",icon:"🔄",lessons:[{id:"surface-integral-first",title:"第一类曲面积分",has3D:!0,vizType:"surfaceIntegralFirst",theory:`
 ## 定义
             设 Σ 是光滑曲面，f(x, y, z) 在 Σ 上有界，则第一类曲面积分（对面积的曲面积分）为：
 
@@ -2969,7 +2969,7 @@ zᵧ = (dz/du)\xb7uᵧ</td>
 \`\`\`
 
                 d(ω ∧ η) = dω ∧ η + (-1)^|ω| ω ∧ dη
-  `,examples:[{id:"df-1",difficulty:"hard",question:"验证 d² = 0 对于 0-形式 f(x,y) = x²y。",options:["d(df) = 0","d(df) = 2xy dx + x² dy","d(df) = 2y dx + 2x dy","d(df) = 2xy"],correct:0,explanation:"df = 2xy dx + x² dy\nd(df) = d(2xy)∧dx + d(x²)∧dy = (2y dx + 2x dy)∧dx + (2x dx)∧dy = 2y dy∧dx + 2x dx∧dy = -2y dx∧dy + 2y dx∧dy = 0"}]}],"am-5":[{id:"ode-basic",title:"微分方程基础",has3D:!0,vizType:"odeBasic",theory:`
+  `,examples:[{id:"df-1",difficulty:"hard",question:"验证 d² = 0 对于 0-形式 f(x,y) = x²y。",options:["d(df) = 0","d(df) = 2xy dx + x² dy","d(df) = 2y dx + 2x dy","d(df) = 2xy"],correct:0,explanation:"df = 2xy dx + x² dy\nd(df) = d(2xy)∧dx + d(x²)∧dy = (2y dx + 2x dy)∧dx + (2x dx)∧dy = 2y dy∧dx + 2x dx∧dy = -2y dx∧dy + 2y dx∧dy = 0"}]}]},{id:"am-5",title:"常微分方程",icon:"⚡",lessons:[{id:"ode-basic",title:"微分方程基础",has3D:!0,vizType:"odeBasic",theory:`
 ## 微分方程的定义
             含有未知函数及其导数的方程称为微分方程。
 
@@ -3346,7 +3346,7 @@ zᵧ = (dz/du)\xb7uᵧ</td>
 \`\`\`
 
                 Pₙ(x) = (1/2ⁿn!) dⁿ/dxⁿ[(x\xb2-1)ⁿ]
-  `,examples:[{id:"ss-1",difficulty:"hard",question:"用幂级数法求解 y'' - xy = 0，初始条件 y(0)=1, y'(0)=0。",options:["y = 1 + x³/6 + x⁶/180 + ...","y = 1 + x²/2 + x⁴/24 + ...","y = 1 + x³/3 + x⁶/18 + ...","y = 1 + x⁴/12 + x⁸/672 + ..."],correct:0,explanation:"设 y = Σaₙxⁿ，则 y'' = Σn(n-1)aₙxⁿ⁻²\n代入方程：Σn(n-1)aₙxⁿ⁻² - Σaₙxⁿ⁺¹ = 0\n比较系数得递推关系，由初始条件 a₀=1, a₁=0，求得 a₂=0, a₃=1/6..."}]}],"am-6":[{id:"numerical",title:"数值方法",has3D:!0,vizType:"numericalODE",theory:`
+  `,examples:[{id:"ss-1",difficulty:"hard",question:"用幂级数法求解 y'' - xy = 0，初始条件 y(0)=1, y'(0)=0。",options:["y = 1 + x³/6 + x⁶/180 + ...","y = 1 + x²/2 + x⁴/24 + ...","y = 1 + x³/3 + x⁶/18 + ...","y = 1 + x⁴/12 + x⁸/672 + ..."],correct:0,explanation:"设 y = Σaₙxⁿ，则 y'' = Σn(n-1)aₙxⁿ⁻²\n代入方程：Σn(n-1)aₙxⁿ⁻² - Σaₙxⁿ⁺¹ = 0\n比较系数得递推关系，由初始条件 a₀=1, a₁=0，求得 a₂=0, a₃=1/6..."}]}]},{id:"am-6",title:"应用与实践",icon:"🚀",lessons:[{id:"numerical",title:"数值方法",has3D:!0,vizType:"numericalODE",theory:`
 ## 欧拉方法
             最简单的数值方法：
 
@@ -3950,4 +3950,396 @@ zᵧ = (dz/du)\xb7uᵧ</td>
                 dR/dt = γI
 
                 R₀ = β/γ （基本再生数）
-  `,examples:[{id:"bio-1",difficulty:"medium",question:"指数增长模型 dN/dt = 0.1N，N(0)=100，求 N(10)。",options:["N(10) = 100·e¹ ≈ 271.8","N(10) = 100·e⁰·¹ ≈ 110.5","N(10) = 100 + 0.1×10 = 101","N(10) = 100·e¹⁰ ≈ 2.2×10⁶"],correct:0,explanation:"dN/dt = rN 的解为 N(t) = N₀e^(rt)\nN(10) = 100·e^(0.1×10) = 100·e¹ ≈ 271.8"},{id:"bio-2",difficulty:"hard",question:"逻辑斯蒂方程 dN/dt = 0.2N(1-N/1000)，N(0)=100，求平衡点。",options:["N = 0 和 N = 1000","N = 100","N = 200","N = 100 和 N = 900"],correct:0,explanation:"令 dN/dt = 0：0.2N(1-N/1000) = 0\n解得 N = 0（不稳定平衡点）或 N = K = 1000（稳定平衡点）"}]}]};var r=x.i(15288),l=x.i(19455),o=x.i(87486),c=x.i(77572),n=x.i(88968),y=x.i(10980),b=x.i(63059),f=x.i(471),p=x.i(83086),m=x.i(21557),h=x.i(75254);let u=(0,h.default)("square-function",[["rect",{width:"18",height:"18",x:"3",y:"3",rx:"2",ry:"2",key:"1m3agn"}],["path",{d:"M9 17c2 0 2.8-1 2.8-2.8V10c0-2 1-3.3 3.2-3",key:"m1af9g"}],["path",{d:"M9 11.2h5.7",key:"3zgcl2"}]]),g=(0,h.default)("menu",[["path",{d:"M4 5h16",key:"1tepv9"}],["path",{d:"M4 12h16",key:"1lakjw"}],["path",{d:"M4 19h16",key:"1djgab"}]]);var z=x.i(37727),v=x.i(69638);let j=(0,h.default)("rotate-ccw",[["path",{d:"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8",key:"1357e3"}],["path",{d:"M3 3v5h5",key:"1xhq8a"}]]);var N=x.i(86536);function k({type:x}){let d=(0,t.useRef)(null),[a,s]=(0,t.useState)(0),[i,o]=(0,t.useState)(!0);return(0,t.useEffect)(()=>{var e,t,s,i,r,l,o,c,n,y,b;if(!d.current)return;let f=d.current,p=f.getContext("2d");if(p)switch(f.width=400,f.height=300,p.fillStyle="#ffffff",p.fillRect(0,0,f.width,f.height),x){case"directionCosines":let m,h,u,g,z;e=p,t=f.width,s=f.height,i=a,m=t/2,h=s/2,e.fillStyle="#ffffff",e.fillRect(0,0,t,s),e.strokeStyle="#94a3b8",e.lineWidth=1,e.beginPath(),e.moveTo(m-100,h+50),e.lineTo(m+100,h-50),e.stroke(),e.beginPath(),e.moveTo(m-100,h-30),e.lineTo(m+100,h+70),e.stroke(),e.beginPath(),e.moveTo(m,h-80),e.lineTo(m,h+80),e.stroke(),g=80*Math.cos(u=i*Math.PI/180),z=80*Math.sin(u)*.5,e.strokeStyle="#6366f1",e.lineWidth=3,e.beginPath(),e.moveTo(m,h),e.lineTo(m+g,h-z),e.stroke(),e.fillStyle="#6366f1",e.beginPath(),e.arc(m+g,h-z,5,0,2*Math.PI),e.fill(),e.fillStyle="#475569",e.font="14px sans-serif",e.fillText("x",m+110,h-40),e.fillText("y",m+110,h+80),e.fillText("z",m+10,h-90),e.fillText("a",m+g+10,h-z);break;case"surface":!function(x,e,d,t){let a=e/2,s=d/2;x.fillStyle="#ffffff",x.fillRect(0,0,e,d),x.strokeStyle="#6366f1",x.lineWidth=1;let i=t*Math.PI/180;for(let e=-3;e<=3;e+=.5){x.beginPath();for(let d=-3;d<=3;d+=.1){let t=60*d+a,r=s-(Math.sin(d+i)*Math.cos(e)*30+60*e*.3);-3===d?x.moveTo(t,r):x.lineTo(t,r)}x.stroke()}}(p,f.width,f.height,a);break;case"curve":!function(x,e,d,t){let a=e/2,s=d/2;x.fillStyle="#ffffff",x.fillRect(0,0,e,d),x.strokeStyle="#6366f1",x.lineWidth=2;let i=t*Math.PI/180;x.beginPath();for(let e=0;e<4*Math.PI;e+=.1){let d=a+50*Math.cos(e+i)*(1+e/10),t=s+50*Math.sin(e)*.5;0===e?x.moveTo(d,t):x.lineTo(d,t)}x.stroke()}(p,f.width,f.height,a);break;case"volume":let v,j,N;r=p,l=f.width,o=f.height,c=a,v=l/2,j=o/2,r.fillStyle="#ffffff",r.fillRect(0,0,l,o),N=20*Math.cos(c*Math.PI/180),r.strokeStyle="#6366f1",r.lineWidth=2,r.beginPath(),r.rect(v-60+N,j-60,120,120),r.rect(v-60-N,j-60-20,120,120),r.moveTo(v-60+N,j-60),r.lineTo(v-60-N,j-60-20),r.moveTo(v+60+N,j-60),r.lineTo(v+60-N,j-60-20),r.moveTo(v-60+N,j+60),r.lineTo(v-60-N,j+60-20),r.moveTo(v+60+N,j+60),r.lineTo(v+60-N,j+60-20),r.stroke();break;default:let k,w;n=p,y=f.width,b=f.height,k=y/2,w=b/2,n.fillStyle="#ffffff",n.fillRect(0,0,y,b),n.fillStyle="#e2e8f0",n.fillRect(k-50,w-50,100,100),n.fillStyle="#6366f1",n.font="16px sans-serif",n.textAlign="center",n.fillText("3D 可视化",k,w)}},[x,a]),(0,t.useEffect)(()=>{let x;if(i){let e=()=>{s(x=>(x+.5)%360),x=requestAnimationFrame(e)};x=requestAnimationFrame(e)}return()=>cancelAnimationFrame(x)},[i]),(0,e.jsxs)(r.Card,{className:"p-4 bg-white shadow-sm border-slate-200",children:[(0,e.jsxs)("div",{className:"flex items-center justify-between mb-4",children:[(0,e.jsxs)("h3",{className:"font-semibold text-slate-700 flex items-center gap-2",children:[(0,e.jsx)(N.Eye,{className:"w-4 h-4"}),"3D 可视化"]}),(0,e.jsx)(l.Button,{variant:"outline",size:"sm",onClick:()=>o(!i),children:i?"暂停":"旋转"})]}),(0,e.jsx)("canvas",{ref:d,className:"w-full rounded-lg",style:{maxWidth:"400px",margin:"0 auto",display:"block",background:"#ffffff"}}),(0,e.jsxs)("div",{className:"mt-4 flex gap-2",children:[(0,e.jsx)(l.Button,{variant:"outline",size:"sm",onClick:()=>s(x=>(x-15)%360),children:(0,e.jsx)(j,{className:"w-4 h-4"})}),(0,e.jsx)(l.Button,{variant:"outline",size:"sm",onClick:()=>s(x=>(x+15)%360),children:(0,e.jsx)(j,{className:"w-4 h-4 scale-x-[-1]"})})]})]})}function w({example:x,index:d}){let[a,s]=(0,t.useState)(null),[i,l]=(0,t.useState)(!1),c=a===x.correct;return(0,e.jsxs)(r.Card,{className:"overflow-hidden mb-5 bg-white shadow-md shadow-slate-200/50 border-slate-200/60",children:[(0,e.jsx)("div",{className:"bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 px-6 py-4",children:(0,e.jsxs)("div",{className:"flex items-center gap-3",children:[(0,e.jsx)("span",{className:"w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-lg flex items-center justify-center font-bold text-sm shadow-sm",children:d+1}),(0,e.jsx)(o.Badge,{className:`${{easy:"bg-green-100 text-green-700",medium:"bg-orange-100 text-orange-700",hard:"bg-red-100 text-red-700"}[x.difficulty]} font-medium`,children:{easy:"基础题",medium:"提高题",hard:"挑战题"}[x.difficulty]})]})}),(0,e.jsxs)("div",{className:"px-6 py-5",children:[(0,e.jsx)("div",{className:"text-slate-700 mb-5 text-[15px] leading-relaxed",children:(0,e.jsx)(n.MathRenderer,{children:x.question})}),(0,e.jsx)("div",{className:"space-y-2.5 mb-5",children:x.options.map((d,t)=>(0,e.jsxs)("button",{onClick:()=>s(t),className:`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${a===t?t===x.correct?"bg-green-50 border-green-400 shadow-sm":"bg-red-50 border-red-400 shadow-sm":"bg-white border-slate-200 hover:border-indigo-300 hover:shadow-sm hover:bg-slate-50/50"}`,children:[(0,e.jsx)("span",{className:"inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-semibold text-sm mr-3",children:String.fromCharCode(65+t)}),(0,e.jsx)("span",{className:"math-option text-slate-700",children:(0,e.jsx)(n.MathRenderer,{children:d})})]},t))}),null!==a&&(0,e.jsxs)("div",{className:"mt-5 pt-5 border-t border-slate-100",children:[(0,e.jsxs)("div",{className:`p-4 rounded-xl ${c?"bg-green-50 border border-green-200":"bg-red-50 border border-red-200"}`,children:[(0,e.jsx)("div",{className:"flex items-center gap-2 mb-1",children:c?(0,e.jsxs)(e.Fragment,{children:[(0,e.jsx)(v.CheckCircle,{className:"w-5 h-5 text-green-600"}),(0,e.jsx)("span",{className:"font-bold text-green-700",children:"回答正确！"})]}):(0,e.jsxs)(e.Fragment,{children:[(0,e.jsx)(z.X,{className:"w-5 h-5 text-red-500"}),(0,e.jsx)("span",{className:"font-bold text-red-700",children:"再试一次"})]})}),!c&&(0,e.jsxs)("p",{className:"text-sm text-slate-600 ml-7",children:["正确答案是：",(0,e.jsx)("span",{className:"font-bold text-green-600",children:String.fromCharCode(65+x.correct)})]})]}),(0,e.jsxs)("button",{onClick:()=>l(!i),className:"mt-4 text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors",children:[(0,e.jsx)(y.BookOpen,{className:"w-4 h-4"}),i?"隐藏解析":"查看解析"]}),i&&(0,e.jsxs)("div",{className:"mt-3 p-5 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100",children:[(0,e.jsxs)("h4",{className:"font-bold text-indigo-900 mb-3 flex items-center gap-2",children:[(0,e.jsx)("span",{className:"w-6 h-6 rounded-lg bg-indigo-500 text-white flex items-center justify-center text-xs",children:"解"}),"详细解析"]}),(0,e.jsx)("div",{className:"text-slate-700 leading-relaxed",children:(0,e.jsx)(n.MathRenderer,{children:x.explanation})})]})]})]})]})}function D({module:x,moduleId:h}){var v;let[j,D]=(0,t.useState)(x),[C,P]=(0,t.useState)(""),[R,F]=(0,t.useState)("theory"),[T,q]=(0,t.useState)(!0);(0,t.useEffect)(()=>{if(!j&&h){let x=s.KNOWLEDGE_MODULES.find(x=>x.id===h);x&&D(x)}},[j,h]);let L="advanced-math"===(v=h||"")?[...i["am-1"]||[],...i["am-2"]||[],...i["am-3"]||[],...i["am-4"]||[],...i["am-5"]||[],...i["am-6"]||[]]:i[v]||[],S=L.find(x=>x.id===C)||L[0],V=L.findIndex(x=>x.id===C);(0,t.useEffect)(()=>{L.length>0&&!C&&P(L[0].id)},[L,C]);let A=x=>{P(x),F("theory")};return j?(0,e.jsxs)("div",{className:"min-h-screen bg-gradient-to-br from-slate-50 to-slate-100",children:[(0,e.jsx)(a.default,{}),(0,e.jsxs)("div",{className:"flex pt-16",children:[(0,e.jsxs)("aside",{className:`fixed left-0 top-16 bottom-0 bg-white border-r border-slate-200 overflow-y-auto transition-all duration-300 z-40 ${T?"w-80 translate-x-0":"w-80 -translate-x-full"}`,children:[(0,e.jsx)("div",{className:"p-4 border-b border-slate-200",children:(0,e.jsxs)("div",{className:"flex items-center gap-3 mb-4",children:[(0,e.jsx)("div",{className:`w-10 h-10 rounded-lg ${j.color} flex items-center justify-center text-xl`,children:j.icon}),(0,e.jsxs)("div",{children:[(0,e.jsx)("h2",{className:"font-bold text-slate-800",children:j.name}),(0,e.jsxs)("p",{className:"text-xs text-slate-500",children:[L.length," 个课时"]})]})]})}),(0,e.jsxs)("div",{className:"p-4 space-y-2",children:[(0,e.jsxs)("label",{className:"text-xs text-slate-500 font-medium uppercase tracking-wider mb-2 block",children:["课时列表 (",L.length," 个)"]}),(0,e.jsx)("div",{className:"space-y-1 max-h-[calc(100vh-250px)] overflow-y-auto",children:L.map((x,d)=>(0,e.jsx)("button",{onClick:()=>A(x.id),className:`w-full text-left p-3 rounded-lg text-sm transition-all ${C===x.id?"bg-indigo-50 border-l-4 border-indigo-500 text-indigo-700":"hover:bg-slate-50 text-slate-600 border-l-4 border-transparent"}`,children:(0,e.jsxs)("div",{className:"flex items-center gap-2",children:[(0,e.jsx)("span",{className:`w-5 h-5 rounded-full flex items-center justify-center text-xs ${C===x.id?"bg-indigo-500 text-white":"bg-slate-200 text-slate-500"}`,children:d+1}),(0,e.jsx)("span",{className:"font-medium truncate",children:x.title})]})},x.id))})]}),(0,e.jsx)("div",{className:"p-4 border-t border-slate-200",children:(0,e.jsx)(d.default,{href:"/",children:(0,e.jsxs)(l.Button,{variant:"outline",className:"w-full",children:[(0,e.jsx)(f.ArrowLeft,{className:"w-4 h-4 mr-2"}),"返回首页"]})})})]}),(0,e.jsxs)("main",{className:`flex-1 transition-all duration-300 ${T?"ml-80":"ml-0"}`,children:[(0,e.jsx)("button",{onClick:()=>q(!T),className:"fixed left-4 top-20 z-50 p-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow",children:T?(0,e.jsx)(z.X,{className:"w-5 h-5"}):(0,e.jsx)(g,{className:"w-5 h-5"})}),(0,e.jsxs)("div",{className:"container mx-auto px-4 py-8 max-w-6xl",children:[(0,e.jsx)("div",{className:"mb-8",children:(0,e.jsxs)("div",{className:"flex items-center gap-3 mb-4",children:[(0,e.jsx)("div",{className:`w-12 h-12 rounded-xl ${j.color} flex items-center justify-center text-2xl`,children:j.icon}),(0,e.jsxs)("div",{className:"flex-1",children:[(0,e.jsxs)("div",{className:"text-sm text-slate-500 mb-1",children:[j.name," · 课时 ",V+1,"/",L.length]}),(0,e.jsx)("h1",{className:"text-3xl font-bold text-slate-800",children:S?.title||"加载中..."}),(0,e.jsxs)("div",{className:"flex items-center gap-3 mt-2",children:[S?.has3D&&(0,e.jsx)(o.Badge,{variant:"outline",className:"bg-blue-50 text-blue-600 border-blue-200",children:"3D可视化"}),S?.examples&&S.examples.length>0&&(0,e.jsxs)(o.Badge,{variant:"outline",className:"bg-green-50 text-green-600 border-green-200",children:[(0,e.jsx)(m.Calculator,{className:"w-3 h-3 mr-1"}),S.examples.length," 道例题"]})]})]})]})}),(0,e.jsxs)(c.Tabs,{value:R,onValueChange:F,children:[(0,e.jsxs)(c.TabsList,{className:"mb-6",children:[(0,e.jsxs)(c.TabsTrigger,{value:"theory",className:"flex items-center gap-2",children:[(0,e.jsx)(y.BookOpen,{className:"w-4 h-4"}),"理论讲解"]}),S?.formula&&(0,e.jsxs)(c.TabsTrigger,{value:"formula",className:"flex items-center gap-2",children:[(0,e.jsx)(u,{className:"w-4 h-4"}),"公式推导"]}),S?.examples&&S.examples.length>0&&(0,e.jsxs)(c.TabsTrigger,{value:"examples",className:"flex items-center gap-2",children:[(0,e.jsx)(m.Calculator,{className:"w-4 h-4"}),"例题练习",(0,e.jsx)(o.Badge,{variant:"secondary",className:"ml-1 text-xs",children:S.examples.length})]}),S?.has3D&&(0,e.jsxs)(c.TabsTrigger,{value:"visualization",className:"flex items-center gap-2",children:[(0,e.jsx)(N.Eye,{className:"w-4 h-4"}),"3D可视化"]})]}),(0,e.jsx)(c.TabsContent,{value:"theory",children:(0,e.jsxs)(r.Card,{className:"overflow-hidden bg-white shadow-lg shadow-slate-200/50 border-slate-200/60",children:[(0,e.jsx)("div",{className:"bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 px-8 py-6",children:(0,e.jsxs)("div",{className:"flex items-center gap-3",children:[(0,e.jsx)("div",{className:"w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center",children:(0,e.jsx)(y.BookOpen,{className:"w-5 h-5 text-indigo-600"})}),(0,e.jsxs)("div",{children:[(0,e.jsx)("h3",{className:"text-lg font-bold text-slate-800",children:"理论讲解"}),(0,e.jsx)("p",{className:"text-sm text-slate-500",children:"理解概念的本质与应用"})]})]})}),(0,e.jsx)("div",{className:"px-8 py-8",children:(0,e.jsx)(n.MathRenderer,{className:"theory-content",children:S?.theory||"暂无理论内容"})})]})}),S?.has3D&&(0,e.jsx)(c.TabsContent,{value:"visualization",children:(0,e.jsxs)(r.Card,{className:"overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-xl border-slate-700",children:[(0,e.jsx)("div",{className:"bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-slate-700 px-8 py-6",children:(0,e.jsxs)("div",{className:"flex items-center gap-3",children:[(0,e.jsx)("div",{className:"w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center",children:(0,e.jsx)(N.Eye,{className:"w-5 h-5 text-indigo-400"})}),(0,e.jsxs)("div",{children:[(0,e.jsx)("h3",{className:"text-lg font-bold text-white",children:"3D可视化演示"}),(0,e.jsx)("p",{className:"text-sm text-slate-400",children:"交互式图形帮助理解抽象概念"})]})]})}),(0,e.jsx)("div",{className:"px-8 py-8",children:(0,e.jsx)("div",{className:"max-w-3xl mx-auto",children:(0,e.jsx)(k,{type:S?.vizType||""})})})]})}),(0,e.jsx)(c.TabsContent,{value:"formula",children:(0,e.jsxs)(r.Card,{className:"overflow-hidden bg-gradient-to-br from-indigo-50/80 to-purple-50/80 shadow-lg shadow-indigo-100/50 border-indigo-100",children:[(0,e.jsx)("div",{className:"bg-gradient-to-r from-indigo-100/50 to-purple-100/30 border-b border-indigo-100 px-8 py-6",children:(0,e.jsxs)("div",{className:"flex items-center gap-3",children:[(0,e.jsx)("div",{className:"w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center",children:(0,e.jsx)(u,{className:"w-5 h-5 text-white"})}),(0,e.jsxs)("div",{children:[(0,e.jsx)("h3",{className:"text-lg font-bold text-slate-800",children:"核心公式与推导"}),(0,e.jsx)("p",{className:"text-sm text-slate-500",children:"理解公式来源比死记硬背更重要"})]})]})}),S?.formula?(0,e.jsx)("div",{className:"px-8 py-8",children:(0,e.jsx)("div",{className:"bg-white p-8 rounded-xl shadow-sm border border-indigo-100/50",children:(0,e.jsx)(n.MathRenderer,{className:"formula-content",children:S.formula})})}):(0,e.jsx)("div",{className:"px-8 py-8",children:(0,e.jsx)("div",{className:"bg-white p-8 rounded-xl shadow-sm text-center",children:(0,e.jsx)("p",{className:"text-slate-500",children:"该课时暂无公式推导内容"})})})]})}),(0,e.jsx)(c.TabsContent,{value:"examples",children:(0,e.jsxs)("div",{className:"space-y-5",children:[(0,e.jsx)("div",{className:"bg-gradient-to-r from-slate-50 to-white rounded-2xl p-6 border border-slate-200/60 shadow-sm",children:(0,e.jsxs)("div",{className:"flex items-center justify-between",children:[(0,e.jsxs)("div",{className:"flex items-center gap-3",children:[(0,e.jsx)("div",{className:"w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center",children:(0,e.jsx)(p.Sparkles,{className:"w-6 h-6 text-orange-500"})}),(0,e.jsxs)("div",{children:[(0,e.jsx)("h3",{className:"text-xl font-bold text-slate-800",children:"精选例题"}),(0,e.jsx)("p",{className:"text-sm text-slate-500",children:"通过练习巩固所学知识"})]})]}),(0,e.jsx)("div",{className:"px-4 py-2 bg-slate-100 rounded-full",children:(0,e.jsxs)("p",{className:"text-sm font-medium text-slate-600",children:["共 ",S?.examples?.length||0," 道例题"]})})]})}),S?.examples&&S.examples.length>0?S.examples.map((x,d)=>(0,e.jsx)(w,{example:x,index:d},x.id)):(0,e.jsxs)(r.Card,{className:"p-10 text-center text-slate-500 border-slate-200/60 shadow-sm",children:[(0,e.jsx)("div",{className:"w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4",children:(0,e.jsx)(m.Calculator,{className:"w-8 h-8 text-slate-400"})}),(0,e.jsx)("p",{className:"text-lg font-medium text-slate-600",children:"该课时暂无例题"}),(0,e.jsx)("p",{className:"text-sm text-slate-400 mt-1",children:"敬请期待更多练习内容"})]})]})})]}),(0,e.jsxs)("div",{className:"flex justify-between mt-8",children:[(0,e.jsxs)(l.Button,{variant:"outline",disabled:V<=0,onClick:()=>{V>0&&A(L[V-1].id)},children:[(0,e.jsx)(b.ChevronRight,{className:"w-4 h-4 mr-2 rotate-180"}),"上一课时"]}),(0,e.jsxs)(l.Button,{className:"bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600",disabled:V>=L.length-1,onClick:()=>{V<L.length-1&&A(L[V+1].id)},children:["下一课时",(0,e.jsx)(b.ChevronRight,{className:"w-4 h-4 ml-2"})]})]})]})]})]})]}):(0,e.jsxs)("div",{className:"min-h-screen bg-gradient-to-br from-slate-50 to-slate-100",children:[(0,e.jsx)(a.default,{}),(0,e.jsxs)("main",{className:"container mx-auto px-4 py-12 text-center",children:[(0,e.jsx)("h1",{className:"text-2xl font-bold mb-4",children:"模块未找到"}),(0,e.jsx)(d.default,{href:"/",children:(0,e.jsx)(l.Button,{children:"返回首页"})})]})]})}x.s(["default",()=>D],78881)}]);
+  `,examples:[{id:"bio-1",difficulty:"medium",question:"指数增长模型 dN/dt = 0.1N，N(0)=100，求 N(10)。",options:["N(10) = 100·e¹ ≈ 271.8","N(10) = 100·e⁰·¹ ≈ 110.5","N(10) = 100 + 0.1×10 = 101","N(10) = 100·e¹⁰ ≈ 2.2×10⁶"],correct:0,explanation:"dN/dt = rN 的解为 N(t) = N₀e^(rt)\nN(10) = 100·e^(0.1×10) = 100·e¹ ≈ 271.8"},{id:"bio-2",difficulty:"hard",question:"逻辑斯蒂方程 dN/dt = 0.2N(1-N/1000)，N(0)=100，求平衡点。",options:["N = 0 和 N = 1000","N = 100","N = 200","N = 100 和 N = 900"],correct:0,explanation:"令 dN/dt = 0：0.2N(1-N/1000) = 0\n解得 N = 0（不稳定平衡点）或 N = K = 1000（稳定平衡点）"}]}]}],r={"advanced-math":[{id:"adv-real-number",title:"实数理论与极限进阶",has3D:!1,theory:`
+## 实数系的完备性
+
+### 戴德金分割
+实数系是有理数系的完备化，通过戴德金分割可以严格定义无理数。
+
+**定义**：将有理数集 ℚ 分成两个非空子集 A 和 B，满足：
+- A ∪ B = ℚ，A ∩ B = ∅
+- ∀a ∈ A, ∀b ∈ B，有 a < b
+- A 无最大元
+
+则称 (A, B) 为一个戴德金分割，定义一个实数。
+
+### 确界原理
+**定理**：非空有上界的实数集必有上确界。
+
+这是实数系完备性的核心体现，也是极限理论的基础。
+
+## 数列极限进阶
+
+### 子列收敛性
+**波尔查诺-魏尔斯特拉斯定理**：有界数列必有收敛子列。
+
+### 柯西收敛准则
+数列 {aₙ} 收敛 ⟺ ∀ε > 0, ∃N, 当 m,n > N 时 |aₙ - aₘ| < ε
+
+**意义**：不需要知道极限值，仅凭数列自身性质判断收敛性。
+
+## 函数极限的深入讨论
+
+### 海涅定理
+函数极限存在的充要条件：对任意趋于 x₀ 的数列 {xₙ}，{f(xₙ)} 收敛于同一值。
+
+### 柯西准则
+lim(x→x₀) f(x) 存在 ⟺ ∀ε > 0, ∃δ > 0, 当 0 < |x'-x₀|,|x''-x₀| < δ 时，|f(x')-f(x'')| < ε
+  `,formula:`
+## 关键定理
+
+### 确界原理
+$$
+\\forall A \\subseteq \\mathbb{R}, A \\neq \\emptyset, \\text{有上界} \\Rightarrow \\exists \\sup A \\in \\mathbb{R}
+$$
+
+### 柯西收敛准则
+$$
+\\{a_n\\} \\text{收敛} \\Leftrightarrow \\forall \\varepsilon > 0, \\exists N, \\forall m,n > N: |a_m - a_n| < \\varepsilon
+$$
+
+### 单调有界原理
+$$
+\\{a_n\\} \\text{单调递增有上界} \\Rightarrow \\lim_{n\\to\\infty} a_n = \\sup\\{a_n\\}
+$$
+  `,examples:[{id:"adv-rn-1",difficulty:"hard",question:"用柯西准则证明 aₙ = 1 + 1/2² + 1/3² + ... + 1/n² 收敛。",options:["对 m > n，|aₘ - aₙ| = Σₖ₌ₙ₊₁ᵐ 1/k² < Σₖ₌ₙ₊₁ᵐ 1/(k(k-1)) = 1/n - 1/m < 1/n < ε（当 n > 1/ε）","该数列单调递增，所以有界即收敛","通过比较判别法，该级数收敛","该数列是柯西数列，所以收敛"],correct:0,explanation:"利用放缩技巧：1/k² < 1/(k(k-1)) = 1/(k-1) - 1/k，进行裂项相消，得到 |aₘ - aₙ| < 1/n，当 n 足够大时可小于任意 ε。"}]},{id:"adv-uniform-continuity",title:"一致连续性",has3D:!1,theory:`
+## 一致连续的概念
+
+### 定义对比
+**逐点连续**：∀ε > 0, ∀x₀ ∈ I, ∃δ > 0, 当 |x - x₀| < δ 时 |f(x) - f(x₀)| < ε
+
+**一致连续**：∀ε > 0, ∃δ > 0, ∀x₁, x₂ ∈ I, 当 |x₁ - x₂| < δ 时 |f(x₁) - f(x₂)| < ε
+
+**关键区别**：δ 是否依赖于点的位置。
+
+## 重要定理
+
+### 康托尔定理
+闭区间上的连续函数必一致连续。
+
+### 利普希茨条件
+若存在 L > 0，使得 |f(x₁) - f(x₂)| ≤ L|x₁ - x₂|，则 f 一致连续。
+
+### 非一致连续的判定
+存在 ε₀ > 0，数列 {xₙ}, {yₙ} 满足 |xₙ - yₙ| → 0，但 |f(xₙ) - f(yₙ)| ≥ ε₀。
+
+## 典型例子
+
+- f(x) = 1/x 在 (0,1] 上不一致连续
+- f(x) = sin(1/x) 在 (0,1] 上不一致连续
+- f(x) = √x 在 [0,∞) 上一致连续
+  `,formula:`
+## 核心公式
+
+### 一致连续定义
+$$
+\\forall \\varepsilon > 0, \\exists \\delta > 0, \\forall x_1, x_2 \\in I: |x_1 - x_2| < \\delta \\Rightarrow |f(x_1) - f(x_2)| < \\varepsilon
+$$
+
+### 利普希茨条件
+$$
+|f(x_1) - f(x_2)| \\leq L|x_1 - x_2|, \\quad L > 0
+$$
+
+### 康托尔定理
+$$
+f \\in C[a,b] \\Rightarrow f \\text{ 在 } [a,b] \\text{ 上一致连续}
+$$
+  `,examples:[{id:"adv-uc-1",difficulty:"hard",question:"证明 f(x) = 1/x 在 (0,1] 上不一致连续。",options:["取 xₙ = 1/n, yₙ = 1/(n+1)，则 |xₙ - yₙ| → 0，但 |f(xₙ) - f(yₙ)| = 1 → 1 ≠ 0","该函数在 x=0 处无定义，所以不一致连续","该函数在 (0,1] 上无界，所以不一致连续","该函数在 (0,1] 上不是利普希茨连续的"],correct:0,explanation:"构造反例：取 xₙ = 1/n, yₙ = 1/(n+1)，两点距离趋于0，但函数值之差恒为1，不满足一致连续定义。"}]},{id:"adv-convex-function",title:"凸函数与 Jensen 不等式",has3D:!1,theory:`
+## 凸函数定义
+
+### 几何定义
+函数 f 在区间 I 上称为凸函数，如果对任意 x₁, x₂ ∈ I 和 λ ∈ [0,1]：
+
+f(λx₁ + (1-λ)x₂) ≤ λf(x₁) + (1-λ)f(x₂)
+
+**几何意义**：函数图像上任意两点间的弦位于图像上方。
+
+## 判定条件
+
+### 一阶条件（可微情形）
+f 凸 ⟺ f(x₂) ≥ f(x₁) + f'(x₁)(x₂ - x₁)
+
+即函数图像位于切线上方。
+
+### 二阶条件（二阶可微情形）
+f 凸 ⟺ f''(x) ≥ 0
+
+## Jensen 不等式
+
+### 离散形式
+若 f 是凸函数，则对任意 x₁, ..., xₙ 和权重 λ₁, ..., λₙ（λᵢ ≥ 0, Σλᵢ = 1）：
+
+f(Σλᵢxᵢ) ≤ Σλᵢf(xᵢ)
+
+### 积分形式
+f(∫g(x)dμ) ≤ ∫f(g(x))dμ
+
+## 应用
+
+- 算术-几何平均不等式
+- 柯西-施瓦茨不等式
+- 信息论中的不等式
+  `,formula:`
+## 核心公式
+
+### 凸函数定义
+$$
+f(\\lambda x_1 + (1-\\lambda)x_2) \\leq \\lambda f(x_1) + (1-\\lambda)f(x_2)
+$$
+
+### Jensen 不等式
+$$
+f\\left(\\sum_{i=1}^n \\lambda_i x_i\\right) \\leq \\sum_{i=1}^n \\lambda_i f(x_i)
+$$
+
+### 二阶判定
+$$
+f \\text{ 凸} \\Leftrightarrow f''(x) \\geq 0
+$$
+
+### 算术-几何平均不等式（由 Jensen 不等式导出）
+$$
+\\frac{x_1 + x_2 + ... + x_n}{n} \\geq \\sqrt[n]{x_1 x_2 ... x_n}
+$$
+  `,examples:[{id:"adv-cf-1",difficulty:"hard",question:"用 Jensen 不等式证明算术-几何平均不等式。",options:["取 f(x) = -ln(x)，利用 f 的凸性得到 -ln((Σxᵢ)/n) ≤ -(Σln(xᵢ))/n，即得结论","直接应用 Jensen 不等式于 f(x) = x²","利用柯西-施瓦茨不等式推导","使用数学归纳法证明"],correct:0,explanation:`f(x) = -ln(x) 是凸函数（f''(x) = 1/x\xb2 > 0），由 Jensen 不等式：f((Σxᵢ)/n) ≤ (Σf(xᵢ))/n，即 -ln((Σxᵢ)/n) ≤ -(Σln(xᵢ))/n，整理得 (Σxᵢ)/n ≥ (Πxᵢ)^(1/n)。`}]},{id:"adv-improper-integral",title:"反常积分进阶",has3D:!1,theory:`
+## 反常积分的分类
+
+### 无穷区间上的积分
+∫ₐ^∞ f(x)dx = lim(b→∞) ∫ₐᵇ f(x)dx
+
+### 无界函数的积分
+若 f 在 a 点无界：∫ₐᵇ f(x)dx = lim(ε→0⁺) ∫ₐ₊εᵇ f(x)dx
+
+## 收敛判别法
+
+### 比较判别法
+设 0 ≤ f(x) ≤ g(x)，则：
+- ∫g 收敛 ⟹ ∫f 收敛
+- ∫f 发散 ⟹ ∫g 发散
+
+### 极限比较法
+设 f(x), g(x) > 0，若 lim(x→∞) f(x)/g(x) = L：
+- 0 < L < ∞：∫f 与 ∫g 同敛散
+- L = 0：∫g 收敛 ⟹ ∫f 收敛
+- L = ∞：∫g 发散 ⟹ ∫f 发散
+
+### p-积分判别法
+∫₁^∞ 1/xᵖ dx：p > 1 收敛，p ≤ 1 发散
+∫₀\xb9 1/xᵖ dx：p < 1 收敛，p ≥ 1 发散
+
+## 条件收敛与绝对收敛
+
+### 定义
+- 绝对收敛：∫|f| 收敛 ⟹ ∫f 收敛
+- 条件收敛：∫f 收敛但 ∫|f| 发散
+
+### 狄利克雷判别法
+若 F(b) = ∫ₐᵇ f 有界，g 单调趋于0，则 ∫ₐ^∞ f\xb7g 收敛。
+  `,formula:`
+## 核心公式
+
+### p-积分
+$$
+\\int_1^\\infty \\frac{1}{x^p}dx \\begin{cases} \\text{收敛}, & p > 1 \\\\ \\text{发散}, & p \\leq 1 \\end{cases}
+$$
+
+### 极限比较法
+$$
+\\lim_{x\\to\\infty} \\frac{f(x)}{g(x)} = L \\in (0,\\infty) \\Rightarrow \\int f \\text{ 与 } \\int g \\text{ 同敛散}
+$$
+
+### 伽马函数
+$$
+\\Gamma(s) = \\int_0^\\infty x^{s-1}e^{-x}dx, \\quad s > 0
+$$
+
+### 重要反常积分
+$$
+\\int_0^\\infty \\frac{\\sin x}{x}dx = \\frac{\\pi}{2} \\quad (\\text{条件收敛})
+$$
+  `,examples:[{id:"adv-ii-1",difficulty:"hard",question:"判断 ∫₀^∞ sin(x)/x dx 的收敛性。",options:["条件收敛：通过狄利克雷判别法知收敛，但 ∫|sin(x)/x|dx 发散","绝对收敛，因为 |sin(x)/x| ≤ 1/x","发散，因为被积函数在无穷远处不趋于0","收敛于 π/2，这是已知的结论"],correct:0,explanation:"该积分是经典的条件收敛例子。由狄利克雷判别法，∫sin(x)有界，1/x单调趋于0，故积分收敛。但 ∫|sin(x)/x|dx ≥ ∫sin²(x)/x dx 发散，所以不是绝对收敛。"}]},{id:"adv-function-series",title:"函数项级数",has3D:!1,theory:`
+## 函数项级数的收敛性
+
+### 逐点收敛
+级数 Σfₙ(x) 在点 x₀ 收敛 ⟺ 部分和序列 Sₙ(x₀) 收敛。
+
+### 一致收敛
+级数 Σfₙ(x) 在区间 I 上一致收敛 ⟺ 部分和序列 Sₙ(x) 一致收敛。
+
+**ε-N 定义**：∀ε > 0, ∃N, 当 n > N 时 |Sₙ(x) - S(x)| < ε 对所有 x ∈ I 成立。
+
+## 一致收敛的判别法
+
+### 魏尔斯特拉斯 M-判别法
+若 |fₙ(x)| ≤ Mₙ 对所有 x ∈ I 成立，且 ΣMₙ 收敛，则 Σfₙ 一致收敛。
+
+### 狄利克雷判别法
+若部分和 Σₖ₌₁ⁿ aₖ(x) 一致有界，bₙ(x) 对每个 x 单调且一致趋于0，则 Σaₙbₙ 一致收敛。
+
+## 一致收敛的性质
+
+### 连续性
+若 fₙ 连续且 Σfₙ 一致收敛于 S，则 S 连续。
+
+### 逐项积分
+若 fₙ 连续且 Σfₙ 一致收敛，则 ∫Σfₙ = Σ∫fₙ。
+
+### 逐项求导
+若 fₙ' 连续，Σfₙ' 一致收敛，Σfₙ 在某点收敛，则 (Σfₙ)' = Σfₙ'。
+
+## 幂级数的一致收敛性
+
+幂级数在收敛域的任意闭子区间上一致收敛（内闭一致收敛）。
+  `,formula:`
+## 核心公式
+
+### 一致收敛定义
+$$
+\\forall \\varepsilon > 0, \\exists N, \\forall n > N, \\forall x \\in I: |S_n(x) - S(x)| < \\varepsilon
+$$
+
+### M-判别法
+$$
+|f_n(x)| \\leq M_n, \\quad \\sum M_n \\text{ 收敛} \\Rightarrow \\sum f_n \\text{ 一致收敛}
+$$
+
+### 阿贝尔定理（幂级数）
+若幂级数在 x = R 收敛，则在 [0,R] 上一致收敛。
+
+### 泰勒级数余项
+$$
+R_n(x) = \\frac{f^{(n+1)}(\\xi)}{(n+1)!}(x-a)^{n+1}
+$$
+  `,examples:[{id:"adv-fs-1",difficulty:"hard",question:"证明 Σₙ₌₁^∞ xⁿ/n² 在 [-1,1] 上一致收敛。",options:["用 M-判别法：|xⁿ/n²| ≤ 1/n²，而 Σ1/n² = π²/6 收敛","该级数是幂级数，在收敛域内一致收敛","用狄利克雷判别法证明","用柯西收敛准则证明"],correct:0,explanation:"直接应用魏尔斯特拉斯 M-判别法：在 [-1,1] 上 |xⁿ/n²| ≤ 1/n²，而 Σ1/n² 是收敛的 p-级数（p=2>1），故原级数一致收敛。"}]},{id:"adv-fourier-analysis",title:"傅里叶分析进阶",has3D:!1,theory:`
+## 傅里叶级数的收敛性
+
+### 狄利克雷核
+Dₙ(x) = Σₖ₌₋ₙⁿ e^(ikx) = sin((n+1/2)x)/sin(x/2)
+
+部分和可表示为卷积：Sₙ(f)(x) = (f * Dₙ)(x)
+
+### 逐点收敛定理
+若 f 分段光滑，则傅里叶级数在每点 x 收敛于 [f(x⁺) + f(x⁻)]/2。
+
+### 一致收敛
+若 f 连续且分段光滑，f(-π) = f(π)，则傅里叶级数一致收敛于 f。
+
+## 均方收敛与帕塞瓦尔恒等式
+
+### L\xb2 收敛
+‖Sₙ - f‖₂ → 0，其中 ‖g‖₂\xb2 = (1/2π)∫|g|\xb2
+
+### 帕塞瓦尔恒等式
+(1/2π)∫|f|\xb2 = Σ|ĉₙ|\xb2 = |a₀|\xb2/4 + (1/2)Σ(|aₙ|\xb2 + |bₙ|\xb2)
+
+## 傅里叶变换
+
+### 定义
+f̂(ξ) = ∫₋∞^∞ f(x)e^(-2πiξx)dx
+
+### 逆变换
+f(x) = ∫₋∞^∞ f̂(ξ)e^(2πiξx)dξ
+
+### 重要性质
+- 线性性
+- 时移：f(x-a) ̂ → e^(-2πiaξ)f̂(ξ)
+- 频移：e^(2πiax)f(x) ̂ → f̂(ξ-a)
+- 卷积定理：(f * g)̂ = f̂ \xb7 ĝ
+  `,formula:`
+## 核心公式
+
+### 狄利克雷核
+$$
+D_n(x) = \\sum_{k=-n}^n e^{ikx} = \\frac{\\sin((n+1/2)x)}{\\sin(x/2)}
+$$
+
+### 帕塞瓦尔恒等式
+$$
+\\frac{1}{2\\pi}\\int_{-\\pi}^\\pi |f(x)|^2 dx = \\sum_{n=-\\infty}^\\infty |c_n|^2
+$$
+
+### 傅里叶变换
+$$
+\\hat{f}(\\xi) = \\int_{-\\infty}^\\infty f(x)e^{-2\\pi i\\xi x}dx
+$$
+
+### 逆变换
+$$
+f(x) = \\int_{-\\infty}^\\infty \\hat{f}(\\xi)e^{2\\pi i\\xi x}d\\xi
+$$
+
+### 卷积定理
+$$
+\\widehat{f * g} = \\hat{f} \\cdot \\hat{g}
+$$
+  `,examples:[{id:"adv-fa-1",difficulty:"hard",question:"利用帕塞瓦尔恒等式求 Σₙ₌₁^∞ 1/n²。",options:["取 f(x) = x（在 [-π,π] 上），计算得 Σ1/n² = π²/6","取 f(x) = |x|，计算得 Σ1/n² = π²/8","利用傅里叶变换的性质直接计算","取 f(x) = sin(x)，计算得 Σ1/n² = π²/12"],correct:0,explanation:"f(x) = x 的傅里叶系数为 bₙ = 2(-1)ⁿ⁺¹/n。由帕塞瓦尔：(1/2π)∫x²dx = π²/3 = (1/2)Σbₙ² = 2Σ1/n²，故 Σ1/n² = π²/6。"}]},{id:"adv-ode",title:"常微分方程进阶",has3D:!1,theory:`
+## 存在唯一性定理
+
+### 皮卡-林德洛夫定理
+初值问题 y' = f(x,y), y(x₀) = y₀：
+- 若 f 在矩形区域连续
+- 且 f 对 y 满足利普希茨条件
+
+则存在唯一解，定义在 |x - x₀| ≤ h 上。
+
+### 解的延拓
+解可以延拓到边界或无穷远。
+
+## 解对初值和参数的连续依赖性
+
+### 连续依赖性
+初值的微小变化导致解的微小变化。
+
+### 可微性
+在一定条件下，解对初值和参数是可微的。
+
+## 线性微分方程组
+
+### 矩阵指数
+对于常系数系统 y' = Ay，解为 y = e^(Ax)y₀
+
+其中 e^(Ax) = Σₙ₌₀^∞ (Ax)ⁿ/n!
+
+### 基本解矩阵
+若 Φ(x) 的列是线性无关解，则通解 y = Φ(x)c
+
+## 稳定性理论
+
+### 李雅普诺夫稳定性
+零解稳定 ⟺ 扰动解始终保持在零解附近
+
+### 线性化稳定性
+对于 y' = Ay + g(y)，若 g 是高阶小量，则：
+- A 的特征值实部全负 ⟹ 渐近稳定
+- A 有正实部特征值 ⟹ 不稳定
+
+## 边值问题
+
+### 斯图姆-刘维尔问题
+(py')' + (λw - q)y = 0，带边值条件
+
+特征值 λ₁ < λ₂ < ...，对应特征函数构成完备正交系。
+  `,formula:`
+## 核心公式
+
+### 矩阵指数
+$$
+e^{Ax} = \\sum_{n=0}^\\infty \\frac{(Ax)^n}{n!}
+$$
+
+### 常系数系统解
+$$
+\\mathbf{y}' = A\\mathbf{y} \\Rightarrow \\mathbf{y} = e^{Ax}\\mathbf{y}_0
+$$
+
+### 常数变易公式
+$$
+\\mathbf{y}' = A(x)\\mathbf{y} + \\mathbf{f}(x) \\Rightarrow \\mathbf{y} = \\Phi(x)\\left[\\mathbf{c} + \\int \\Phi^{-1}(s)\\mathbf{f}(s)ds\\right]
+$$
+
+### 稳定性判据
+$$
+\\text{Re}(\\lambda_i) < 0 \\text{ 对所有 } i \\Rightarrow \\text{渐近稳定}
+$$
+  `,examples:[{id:"adv-ode-1",difficulty:"hard",question:`系统 y' = Ay，其中 A = [[-1, 1], [0, -2]]，判断零解的稳定性。`,options:["渐近稳定：特征值为 -1 和 -2，实部均为负","不稳定：矩阵有非零非对角元","稳定但不是渐近稳定","无法确定，需要进一步分析"],correct:0,explanation:"特征方程 det(A - λI) = (-1-λ)(-2-λ) = 0，得 λ₁ = -1, λ₂ = -2。两个特征值实部均为负，故零解渐近稳定。"}]}]};var l=x.i(15288),n=x.i(19455),c=x.i(87486),o=x.i(77572),y=x.i(88968),b=x.i(10980),f=x.i(63059),p=x.i(471),m=x.i(83086),h=x.i(21557),u=x.i(75254);let g=(0,u.default)("square-function",[["rect",{width:"18",height:"18",x:"3",y:"3",rx:"2",ry:"2",key:"1m3agn"}],["path",{d:"M9 17c2 0 2.8-1 2.8-2.8V10c0-2 1-3.3 3.2-3",key:"m1af9g"}],["path",{d:"M9 11.2h5.7",key:"3zgcl2"}]]),z=(0,u.default)("menu",[["path",{d:"M4 5h16",key:"1tepv9"}],["path",{d:"M4 12h16",key:"1lakjw"}],["path",{d:"M4 19h16",key:"1djgab"}]]);var v=x.i(37727),j=x.i(69638),N=x.i(31171),N=N,k=x.i(99219),k=k,w=x.i(20278);let C=(0,u.default)("list",[["path",{d:"M3 5h.01",key:"18ugdj"}],["path",{d:"M3 12h.01",key:"nlz23k"}],["path",{d:"M3 19h.01",key:"noohij"}],["path",{d:"M8 5h13",key:"1pao27"}],["path",{d:"M8 12h13",key:"1za7za"}],["path",{d:"M8 19h13",key:"m83p4d"}]]);function D({example:x,index:d}){let[a,s]=(0,t.useState)(null),[i,r]=(0,t.useState)(!1),n=a===x.correct;return(0,e.jsxs)(l.Card,{className:"overflow-hidden mb-5 bg-white shadow-md shadow-slate-200/50 border-slate-200/60",children:[(0,e.jsx)("div",{className:"bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 px-6 py-4",children:(0,e.jsxs)("div",{className:"flex items-center gap-3",children:[(0,e.jsx)("span",{className:"w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-lg flex items-center justify-center font-bold text-sm shadow-sm",children:d+1}),(0,e.jsx)(c.Badge,{className:`${{easy:"bg-green-100 text-green-700",medium:"bg-orange-100 text-orange-700",hard:"bg-red-100 text-red-700"}[x.difficulty]} font-medium`,children:{easy:"基础题",medium:"提高题",hard:"挑战题"}[x.difficulty]})]})}),(0,e.jsxs)("div",{className:"px-6 py-5",children:[(0,e.jsx)("div",{className:"text-slate-700 mb-5 text-[15px] leading-relaxed",children:(0,e.jsx)(y.MathRenderer,{children:x.question})}),(0,e.jsx)("div",{className:"space-y-2.5 mb-5",children:x.options.map((d,t)=>(0,e.jsxs)("button",{onClick:()=>s(t),className:`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${a===t?t===x.correct?"bg-green-50 border-green-400 shadow-sm":"bg-red-50 border-red-400 shadow-sm":"bg-white border-slate-200 hover:border-indigo-300 hover:shadow-sm hover:bg-slate-50/50"}`,children:[(0,e.jsx)("span",{className:"inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-semibold text-sm mr-3",children:String.fromCharCode(65+t)}),(0,e.jsx)("span",{className:"math-option text-slate-700",children:(0,e.jsx)(y.MathRenderer,{children:d})})]},t))}),null!==a&&(0,e.jsxs)("div",{className:"mt-5 pt-5 border-t border-slate-100",children:[(0,e.jsxs)("div",{className:`p-4 rounded-xl ${n?"bg-green-50 border border-green-200":"bg-red-50 border border-red-200"}`,children:[(0,e.jsx)("div",{className:"flex items-center gap-2 mb-1",children:n?(0,e.jsxs)(e.Fragment,{children:[(0,e.jsx)(j.CheckCircle,{className:"w-5 h-5 text-green-600"}),(0,e.jsx)("span",{className:"font-bold text-green-700",children:"回答正确！"})]}):(0,e.jsxs)(e.Fragment,{children:[(0,e.jsx)(v.X,{className:"w-5 h-5 text-red-500"}),(0,e.jsx)("span",{className:"font-bold text-red-700",children:"再试一次"})]})}),!n&&(0,e.jsxs)("p",{className:"text-sm text-slate-600 ml-7",children:["正确答案是：",(0,e.jsx)("span",{className:"font-bold text-green-600",children:String.fromCharCode(65+x.correct)})]})]}),(0,e.jsxs)("button",{onClick:()=>r(!i),className:"mt-4 text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors",children:[(0,e.jsx)(b.BookOpen,{className:"w-4 h-4"}),i?"隐藏解析":"查看解析"]}),i&&(0,e.jsxs)("div",{className:"mt-3 p-5 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100",children:[(0,e.jsxs)("h4",{className:"font-bold text-indigo-900 mb-3 flex items-center gap-2",children:[(0,e.jsx)("span",{className:"w-6 h-6 rounded-lg bg-indigo-500 text-white flex items-center justify-center text-xs",children:"解"}),"详细解析"]}),(0,e.jsx)("div",{className:"text-slate-700 leading-relaxed",children:(0,e.jsx)(y.MathRenderer,{children:x.explanation})})]})]})]})]})}function R({lesson:x,index:d,onClick:t}){return(0,e.jsx)(l.Card,{className:"p-6 cartoon-card hover:scale-[1.02] transition-transform cursor-pointer group",children:(0,e.jsxs)("div",{className:"flex items-start justify-between",children:[(0,e.jsxs)("div",{className:"flex-1",children:[(0,e.jsxs)("div",{className:"flex items-center gap-2 mb-2",children:[(0,e.jsx)("h3",{className:"text-lg font-bold group-hover:text-purple-600 transition-colors",children:x.title}),x.examples&&x.examples.length>0&&(0,e.jsxs)(c.Badge,{variant:"default",children:[x.examples.length," 道例题"]})]}),(0,e.jsx)("p",{className:"text-sm text-gray-500 mb-4",children:"深入理解与拓展应用"}),(0,e.jsxs)(n.Button,{variant:"outline",size:"sm",className:"group-hover:bg-purple-50",onClick:x=>{x.stopPropagation(),t()},children:["开始学习",(0,e.jsx)(f.ChevronRight,{className:"w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"})]})]}),(0,e.jsx)("div",{className:"w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center",children:(0,e.jsx)(m.Sparkles,{className:"w-6 h-6 text-purple-500"})})]})})}function P({chapters:x,selectedLessonId:d,onSelectLesson:a,module:s}){let[i,r]=(0,t.useState)(()=>new Set([x[0]?.id])),l=x.reduce((x,e)=>x+e.lessons.length,0);return(0,e.jsxs)("div",{className:"w-80 bg-white border-r border-slate-200 flex flex-col h-full",children:[(0,e.jsx)("div",{className:"p-4 border-b border-slate-200 bg-gradient-to-br from-indigo-50 to-white",children:(0,e.jsxs)("div",{className:"flex items-center gap-3",children:[(0,e.jsx)("div",{className:`w-12 h-12 rounded-xl ${s.color} flex items-center justify-center text-2xl shadow-sm`,children:s.icon}),(0,e.jsxs)("div",{children:[(0,e.jsx)("h2",{className:"font-bold text-slate-800",children:s.name}),(0,e.jsxs)("p",{className:"text-xs text-slate-500",children:["基础篇 · ",l," 课时"]})]})]})}),(0,e.jsx)("div",{className:"flex-1 overflow-y-auto",children:x.map(x=>{let t=i.has(x.id),s=x.lessons.some(x=>x.id===d);return(0,e.jsxs)("div",{className:`border-b border-slate-100 ${s?"bg-indigo-50/30":""}`,children:[(0,e.jsxs)("button",{onClick:()=>{var e;return e=x.id,void r(x=>{let d=new Set(x);return d.has(e)?d.delete(e):d.add(e),d})},className:`w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors ${s?"text-indigo-700":"text-slate-700"}`,children:[(0,e.jsx)("span",{className:"text-xl",children:x.icon}),(0,e.jsxs)("div",{className:"flex-1 text-left",children:[(0,e.jsx)("h3",{className:"font-medium text-sm",children:x.title}),(0,e.jsxs)("p",{className:"text-xs text-slate-400",children:[x.lessons.length," 课时"]})]}),t?(0,e.jsx)(k.default,{className:"w-4 h-4 text-slate-400"}):(0,e.jsx)(N.default,{className:"w-4 h-4 text-slate-400"})]}),t&&(0,e.jsx)("div",{className:"bg-slate-50/50",children:x.lessons.map((x,t)=>{let s=x.id===d;return(0,e.jsxs)("button",{onClick:()=>a(x),className:`w-full px-4 py-2.5 pl-12 flex items-center gap-3 text-left transition-colors ${s?"bg-indigo-100 text-indigo-700 border-r-2 border-indigo-500":"text-slate-600 hover:bg-slate-100"}`,children:[(0,e.jsx)("span",{className:`w-5 h-5 rounded flex items-center justify-center text-xs font-medium ${s?"bg-indigo-500 text-white":"bg-slate-200 text-slate-500"}`,children:t+1}),(0,e.jsx)("span",{className:"text-sm truncate",children:x.title})]},x.id)})})]},x.id)})})]})}function _({lesson:x,onToggleSidebar:d}){let[a,s]=(0,t.useState)("theory");return(0,e.jsxs)("div",{className:"flex-1 flex flex-col h-full overflow-hidden bg-slate-50",children:[(0,e.jsx)("div",{className:"bg-white border-b border-slate-200 px-6 py-4",children:(0,e.jsxs)("div",{className:"flex items-center gap-4",children:[(0,e.jsx)(n.Button,{variant:"ghost",size:"icon",onClick:d,className:"lg:hidden",children:(0,e.jsx)(z,{className:"w-5 h-5"})}),(0,e.jsxs)("div",{children:[(0,e.jsx)("h1",{className:"text-xl font-bold text-slate-800",children:x.title}),x.examples&&x.examples.length>0&&(0,e.jsxs)(c.Badge,{variant:"outline",className:"mt-1",children:[(0,e.jsx)(h.Calculator,{className:"w-3 h-3 mr-1"}),x.examples.length," 道例题"]})]})]})}),(0,e.jsxs)(o.Tabs,{value:a,onValueChange:s,className:"flex-1 flex flex-col overflow-hidden",children:[(0,e.jsx)("div",{className:"bg-white border-b border-slate-200 px-6",children:(0,e.jsxs)(o.TabsList,{className:"bg-transparent",children:[(0,e.jsxs)(o.TabsTrigger,{value:"theory",className:"flex items-center gap-2 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700",children:[(0,e.jsx)(b.BookOpen,{className:"w-4 h-4"}),"理论讲解"]}),x.formula&&(0,e.jsxs)(o.TabsTrigger,{value:"formula",className:"flex items-center gap-2 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700",children:[(0,e.jsx)(g,{className:"w-4 h-4"}),"公式推导"]}),x.examples&&x.examples.length>0&&(0,e.jsxs)(o.TabsTrigger,{value:"examples",className:"flex items-center gap-2 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700",children:[(0,e.jsx)(h.Calculator,{className:"w-4 h-4"}),"例题练习"]})]})}),(0,e.jsxs)("div",{className:"flex-1 overflow-y-auto p-6",children:[(0,e.jsx)(o.TabsContent,{value:"theory",className:"mt-0",children:(0,e.jsx)(l.Card,{className:"p-6 max-w-4xl",children:(0,e.jsx)(y.MathRenderer,{children:x.theory})})}),x.formula&&(0,e.jsx)(o.TabsContent,{value:"formula",className:"mt-0",children:(0,e.jsx)(l.Card,{className:"p-6 max-w-4xl",children:(0,e.jsx)(y.MathRenderer,{children:x.formula})})}),x.examples&&x.examples.length>0&&(0,e.jsx)(o.TabsContent,{value:"examples",className:"mt-0",children:(0,e.jsx)("div",{className:"max-w-4xl space-y-4",children:x.examples.map((x,d)=>(0,e.jsx)(D,{example:x,index:d},x.id))})})]})]})]})}function F({module:x,moduleId:f}){let[u,z]=(0,t.useState)(x),[j,N]=(0,t.useState)("advanced"),[k,F]=(0,t.useState)(null),[$,q]=(0,t.useState)(null),[L,A]=(0,t.useState)(!0);(0,t.useEffect)(()=>{if(!u&&f){let x=s.KNOWLEDGE_MODULES.find(x=>x.id===f);x&&z(x)}},[u,f]),(0,t.useEffect)(()=>{"basic"===j&&!k&&i.length>0&&F(i[0].lessons[0])},[j,k]);let T="advanced-math"===(f||"")&&r["advanced-math"]||[];return u?(0,e.jsxs)("div",{className:"min-h-screen flex flex-col",children:[(0,e.jsx)(a.default,{}),(0,e.jsxs)("main",{className:"flex-1 container mx-auto px-4 py-8",children:[(0,e.jsx)(d.default,{href:"/",children:(0,e.jsxs)(n.Button,{variant:"ghost",className:"mb-4",children:[(0,e.jsx)(p.ArrowLeft,{className:"w-4 h-4 mr-2"}),"返回首页"]})}),(0,e.jsxs)("div",{className:`relative overflow-hidden rounded-3xl bg-gradient-to-br ${u.color} p-8 md:p-12 mb-8`,children:[(0,e.jsx)("div",{className:"absolute inset-0 bg-pattern-dots opacity-20"}),(0,e.jsxs)("div",{className:"relative z-10 flex flex-col md:flex-row items-center gap-6",children:[(0,e.jsx)("div",{className:"w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center text-5xl backdrop-blur-sm",children:u.icon}),(0,e.jsxs)("div",{className:"text-center md:text-left text-white",children:[(0,e.jsx)(c.Badge,{className:"bg-white/20 text-white mb-2",children:"math"===u.category?"数学":"physics"===u.category?"物理":"计算机"}),(0,e.jsx)("h1",{className:"text-3xl md:text-4xl font-bold mb-2",children:u.name}),(0,e.jsx)("p",{className:"text-white/90 max-w-xl",children:u.description})]})]})]}),(0,e.jsxs)(o.Tabs,{value:j,onValueChange:x=>N(x),className:"space-y-6",children:[(0,e.jsxs)(o.TabsList,{className:"grid w-full grid-cols-2 max-w-md mx-auto",children:[(0,e.jsxs)(o.TabsTrigger,{value:"advanced",className:"flex items-center gap-2",children:[(0,e.jsx)(w.Target,{className:"w-4 h-4"}),"提高篇"]}),(0,e.jsxs)(o.TabsTrigger,{value:"basic",className:"flex items-center gap-2",children:[(0,e.jsx)(b.BookOpen,{className:"w-4 h-4"}),"基础篇"]})]}),(0,e.jsx)(o.TabsContent,{value:"advanced",children:(0,e.jsx)("div",{className:"grid grid-cols-1 md:grid-cols-2 gap-6",children:T.length>0?T.map((x,d)=>(0,e.jsx)(R,{lesson:x,index:d,onClick:()=>q(x)},x.id)):(0,e.jsxs)(l.Card,{className:"p-8 text-center col-span-2",children:[(0,e.jsx)(m.Sparkles,{className:"w-12 h-12 text-slate-300 mx-auto mb-3"}),(0,e.jsx)("p",{className:"text-gray-500",children:"提高篇内容正在开发中..."})]})})}),(0,e.jsx)(o.TabsContent,{value:"basic",className:"mt-0",children:(0,e.jsx)(l.Card,{className:"overflow-hidden",style:{height:"calc(100vh - 300px)",minHeight:"600px"},children:(0,e.jsxs)("div",{className:"flex h-full",children:[L&&(0,e.jsx)(P,{chapters:i,selectedLessonId:k?.id||"",onSelectLesson:F,module:u}),k?(0,e.jsx)(_,{lesson:k,onToggleSidebar:()=>A(!L)}):(0,e.jsx)("div",{className:"flex-1 flex items-center justify-center",children:(0,e.jsxs)("div",{className:"text-center",children:[(0,e.jsx)(C,{className:"w-16 h-16 text-slate-300 mx-auto mb-4"}),(0,e.jsx)("p",{className:"text-slate-500",children:"请从左侧选择一个课时开始学习"})]})})]})})})]})]}),$&&(0,e.jsxs)("div",{className:"fixed inset-0 z-50",onClick:()=>q(null),children:[(0,e.jsx)("div",{className:"absolute inset-0 bg-black/50"}),(0,e.jsxs)("div",{className:"absolute inset-4 md:inset-10 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col",onClick:x=>x.stopPropagation(),children:[(0,e.jsxs)("div",{className:"flex items-center justify-between p-6 border-b",children:[(0,e.jsxs)("div",{children:[(0,e.jsxs)("h2",{className:"text-2xl font-bold flex items-center gap-2",children:[(0,e.jsx)(m.Sparkles,{className:"w-6 h-6 text-purple-500"}),$.title]}),$.examples&&$.examples.length>0&&(0,e.jsxs)(c.Badge,{variant:"default",className:"mt-2",children:[(0,e.jsx)(h.Calculator,{className:"w-3 h-3 mr-1"}),$.examples.length," 道例题"]})]}),(0,e.jsx)(n.Button,{variant:"ghost",size:"icon",onClick:()=>q(null),children:(0,e.jsx)(v.X,{className:"w-6 h-6"})})]}),(0,e.jsx)("div",{className:"flex-1 overflow-hidden flex flex-col",children:(0,e.jsxs)(o.Tabs,{defaultValue:"theory",className:"flex-1 flex flex-col",children:[(0,e.jsxs)(o.TabsList,{className:"mx-6 mt-4",children:[(0,e.jsxs)(o.TabsTrigger,{value:"theory",className:"flex items-center gap-2",children:[(0,e.jsx)(b.BookOpen,{className:"w-4 h-4"}),"理论讲解"]}),$.formula&&(0,e.jsxs)(o.TabsTrigger,{value:"formula",className:"flex items-center gap-2",children:[(0,e.jsx)(g,{className:"w-4 h-4"}),"公式推导"]}),$.examples&&$.examples.length>0&&(0,e.jsxs)(o.TabsTrigger,{value:"examples",className:"flex items-center gap-2",children:[(0,e.jsx)(h.Calculator,{className:"w-4 h-4"}),"例题练习"]})]}),(0,e.jsxs)("div",{className:"flex-1 overflow-y-auto p-6",children:[(0,e.jsx)(o.TabsContent,{value:"theory",className:"mt-0",children:(0,e.jsx)(l.Card,{className:"p-6",children:(0,e.jsx)(y.MathRenderer,{children:$.theory})})}),$.formula&&(0,e.jsx)(o.TabsContent,{value:"formula",className:"mt-0",children:(0,e.jsx)(l.Card,{className:"p-6",children:(0,e.jsx)(y.MathRenderer,{children:$.formula})})}),$.examples&&$.examples.length>0&&(0,e.jsx)(o.TabsContent,{value:"examples",className:"mt-0",children:(0,e.jsx)("div",{className:"space-y-4",children:$.examples.map((x,d)=>(0,e.jsx)(D,{example:x,index:d},x.id))})})]})]})}),(0,e.jsx)("div",{className:"p-4 border-t flex justify-end",children:(0,e.jsxs)(n.Button,{onClick:()=>q(null),children:[(0,e.jsx)(v.X,{className:"w-4 h-4 mr-2"}),"关闭"]})})]})]})]}):(0,e.jsxs)("div",{className:"min-h-screen",children:[(0,e.jsx)(a.default,{}),(0,e.jsxs)("main",{className:"container mx-auto px-4 py-12 text-center",children:[(0,e.jsx)("h1",{className:"text-2xl font-bold mb-4",children:"模块未找到"}),(0,e.jsx)(d.default,{href:"/",children:(0,e.jsx)(n.Button,{children:"返回首页"})})]})]})}x.s(["default",()=>F],78881)}]);
