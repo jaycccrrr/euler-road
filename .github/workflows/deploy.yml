@@ -23,19 +23,13 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: |
-          cd my-app
-          npm ci
+        run: npm ci
 
       - name: Generate Prisma Client
-        run: |
-          cd my-app
-          npx prisma generate
+        run: npx prisma generate
 
       - name: Build project
-        run: |
-          cd my-app
-          npm run build
+        run: npm run build
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -44,16 +38,10 @@ jobs:
         run: npm install -g vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: |
-          cd my-app
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build for Vercel
-        run: |
-          cd my-app
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel
-        run: |
-          cd my-app
-          vercel deploy --prod --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prod --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
