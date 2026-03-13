@@ -54,18 +54,20 @@ import {
   Bookmark,
   MessageSquare,
   Heart,
+  Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Post } from '@/types';
 import { getAllPosts } from '@/lib/db';
 import { formatRelativeTime } from '@/lib/utils';
-
 export default function ProfilePage() {
   const router = useRouter();
   const { user, isAuthenticated, hasHydrated, logout, selectLegendaryTitle, setDisplayCategory } = useAuth();
   const [selectedModule, setSelectedModule] = useState<ModuleCategory | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'favorites' | 'posts'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'favorites' | 'posts' | 'following'>('overview');
+  const [followingList, setFollowingList] = useState<any[]>([]);
+  const [followersList, setFollowersList] = useState<any[]>([]);
 
   useEffect(() => {
     // 等待 hydration 完成后再检查认证状态
@@ -93,6 +95,18 @@ export default function ProfilePage() {
 
   // 获取用户发布的帖子
   const myPosts = posts.filter(post => post.userId === user?.id);
+
+  // 获取关注列表
+  const fetchFollowing = async () => {
+    if (!user) return;
+    try {
+      const res = await fetch(`/api/users/${user.id}/following`);
+      const data = await res.json();
+      setFollowingList(data.users || []);
+    } catch (error) {
+      console.error('Failed to fetch following:', error);
+    }
+  };
 
   // 等待 hydration 完成
   if (!hasHydrated) {
@@ -217,6 +231,20 @@ export default function ProfilePage() {
           >
             <MessageSquare className="w-4 h-4" />
             我的帖子 ({myPosts.length})
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('following');
+              fetchFollowing();
+            }}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+              activeTab === 'following'
+                ? 'bg-purple-500 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            关注
           </button>
         </div>
 
@@ -594,6 +622,44 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 关注列表 */}
+        {activeTab === 'following' && (
+          <div className="space-y-4">
+            <h3 className="font-semibold text-slate-700 mb-4 flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-500" />
+              我的关注 ({followingList.length})
+            </h3>
+            {followingList.length === 0 ? (
+              <Card className="p-8 text-center text-slate-500">
+                <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>还没有关注任何人</p>
+                <Link href="/community/">
+                  <Button variant="outline" className="mt-4">
+                    去社区发现有趣的作者
+                  </Button>
+                </Link>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {followingList.map((followedUser) => (
+                  <Card key={followedUser.id} className="p-4">
+                    <Link href={`/users/${followedUser.id}`} className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xl">
+                        {followedUser.avatar}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold">{followedUser.nickname}</h4>
+                        <p className="text-sm text-slate-500">{followedUser.followerCount} 粉丝</p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-400" />
+                    </Link>
                   </Card>
                 ))}
               </div>

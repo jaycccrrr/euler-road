@@ -260,7 +260,7 @@ export function generateRandomQuestion(date: string, moduleId: string): DailyQue
   const template = questions[randomIndex];
 
   return {
-    id: `dq-${date}-${moduleId}-${generateId()}`,
+    id: `dq-v2-${date}-${moduleId}-${generateId()}`,
     moduleId: moduleId,
     date,
     title: template.title || '每日一题',

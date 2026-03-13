@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[97367,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/bd395c328f5600f0.js"],"ViewportBoundary"]
+3:I[97367,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/bd395c328f5600f0.js"],"MetadataBoundary"]
+4:"$Sreact.suspense"
+5:I[27201,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/bd395c328f5600f0.js"],"IconMark"]
+0:{"buildId":"430OXSNlLI8e9v9uQ9-DV","rsc":["$","$1","h",{"children":[null,["$","$L2",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","div",null,{"hidden":true,"children":["$","$L3",null,{"children":["$","$4",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"欧拉登基之路 - 理科学习交流平台"}],["$","meta","1",{"name":"description","content":"针对高中及大学的理科教学沟通互动平台，包含数学、物理、计算机等科目的知识库和每日一题挑战"}],["$","meta","2",{"name":"keywords","content":"数学,物理,计算机,学习,教育,每日一题,论坛"}],["$","link","3",{"rel":"icon","href":"/favicon.ico?favicon.0b3bf435.ico","sizes":"256x256","type":"image/x-icon"}],["$","$L5","4",{}]]}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"loading":null,"isPartial":false}

@@ -326,11 +326,11 @@ export default function CommunityPage() {
                     return (
                       <Card key={post.id} className="p-6 cartoon-card hover:scale-[1.01] transition-transform">
                         <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-lg">
+                          <Link href={`/users/${post.userId}`} className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-lg hover:ring-2 hover:ring-purple-400 transition">
                             {post.userAvatar.startsWith('data:') || post.userAvatar.startsWith('http')
                               ? <img src={post.userAvatar} alt="" className="w-full h-full rounded-full object-cover" />
                               : post.userAvatar}
-                          </div>
+                          </Link>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2">
                               <span className="font-medium">{post.userNickname}</span>

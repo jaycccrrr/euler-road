@@ -31,21 +31,32 @@ interface AdvancedModuleContentProps {
   moduleId: string;
 }
 
-// 模块课时映射
-const MODULE_LESSONS: Record<string, string[]> = {
-  'am-1': ['direction-cosines', 'cross-product', 'triple-product', 'plane-line', 'quadric-surfaces', 'coordinate-systems', 'vector-fields', 'multivariable-concept'],
-  'am-2': ['partial-derivative', 'total-differential', 'chain-rule', 'implicit-function', 'directional-derivative', 'extrema', 'taylor', 'lagrange'],
-  'am-3': ['integral-concept', 'double-integral', 'triple-integral', 'change-variables', 'applications', 'polar-coordinates', 'cylindrical-spherical'],
-  'am-4': ['surface-integral-first', 'surface-integral-second', 'gauss-theorem', 'stokes-theorem', 'greens-theorem', 'differential-forms'],
-  'am-5': ['ode-basic', 'first-order', 'higher-order', 'linear-system', 'laplace', 'series-solution'],
-  'am-6': ['numerical', 'physics', 'engineering', 'ml', 'graphics', 'economics', 'biology']
+// 模块路由映射 - 将模块ID映射到 allLessons 的键
+const MODULE_ROUTE_MAP: Record<string, string> = {
+  'advanced-math': 'am-1', // 默认显示第一章
 };
+
+// 获取模块下的所有课时（包括所有章节）
+function getAllLessonsForModule(moduleId: string): SubLesson[] {
+  if (moduleId === 'advanced-math') {
+    // 高等数学包含 am-1 到 am-6 的所有课时
+    return [
+      ...(allLessons['am-1'] || []),
+      ...(allLessons['am-2'] || []),
+      ...(allLessons['am-3'] || []),
+      ...(allLessons['am-4'] || []),
+      ...(allLessons['am-5'] || []),
+      ...(allLessons['am-6'] || []),
+    ];
+  }
+  return allLessons[moduleId] || [];
+}
 
 // 3D可视化组件
 function Visualization3D({ type }: { type: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rotation, setRotation] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(true); // 默认自动旋转
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -57,8 +68,9 @@ function Visualization3D({ type }: { type: string }) {
     canvas.width = 400;
     canvas.height = 300;
 
-    // 清空画布
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // 填充白色背景
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // 根据类型绘制不同的3D可视化
     switch (type) {
@@ -93,7 +105,7 @@ function Visualization3D({ type }: { type: string }) {
   }, [isAnimating]);
 
   return (
-    <Card className="p-4 bg-white shadow-sm">
+    <Card className="p-4 bg-white shadow-sm border-slate-200">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-slate-700 flex items-center gap-2">
           <Eye className="w-4 h-4" />
@@ -109,8 +121,8 @@ function Visualization3D({ type }: { type: string }) {
       </div>
       <canvas
         ref={canvasRef}
-        className="w-full rounded-lg border border-slate-200"
-        style={{ maxWidth: '400px', margin: '0 auto', display: 'block' }}
+        className="w-full rounded-lg"
+        style={{ maxWidth: '400px', margin: '0 auto', display: 'block', background: '#ffffff' }}
       />
       <div className="mt-4 flex gap-2">
         <Button
@@ -142,6 +154,10 @@ function drawDirectionCosines(
   const centerX = width / 2;
   const centerY = height / 2;
   const scale = 80;
+
+  // 填充白色背景
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
 
   // 绘制坐标轴
   ctx.strokeStyle = '#94a3b8';
@@ -203,6 +219,10 @@ function drawSurface(
   const centerY = height / 2;
   const scale = 60;
 
+  // 填充白色背景
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
+
   ctx.strokeStyle = '#6366f1';
   ctx.lineWidth = 1;
 
@@ -236,6 +256,10 @@ function drawCurve(
   const centerY = height / 2;
   const scale = 50;
 
+  // 填充白色背景
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
+
   ctx.strokeStyle = '#6366f1';
   ctx.lineWidth = 2;
 
@@ -265,6 +289,10 @@ function drawVolume(
   const centerX = width / 2;
   const centerY = height / 2;
   const size = 60;
+
+  // 填充白色背景
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
 
   const angle = (rotation * Math.PI) / 180;
   const offsetX = Math.cos(angle) * 20;
@@ -299,6 +327,10 @@ function drawDefault(
 ) {
   const centerX = width / 2;
   const centerY = height / 2;
+
+  // 填充白色背景
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
 
   ctx.fillStyle = '#e2e8f0';
   ctx.fillRect(centerX - 50, centerY - 50, 100, 100);
@@ -416,7 +448,7 @@ export default function AdvancedModuleContent({
   moduleId,
 }: AdvancedModuleContentProps) {
   const [module, setModule] = useState<KnowledgeModule | undefined>(initialModule);
-  const [selectedTopicIndex, setSelectedTopicIndex] = useState(0);
+  const [selectedLessonId, setSelectedLessonId] = useState<string>('');
   const [activeTab, setActiveTab] = useState('theory');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -429,10 +461,36 @@ export default function AdvancedModuleContent({
     }
   }, [module, moduleId]);
 
-  // 获取当前章节内容
-  const currentTopic = module?.topics[selectedTopicIndex];
-  const topicContent = getTopicContent(currentTopic?.id || '');
-  const hasDetailedContent = !!topicContent;
+  // 获取当前模块的课时列表
+  const moduleLessons = getAllLessonsForModule(moduleId || '');
+  const currentLesson = moduleLessons.find(l => l.id === selectedLessonId) || moduleLessons[0];
+  const currentLessonIndex = moduleLessons.findIndex(l => l.id === selectedLessonId);
+
+  // 初始化默认选中第一个课时
+  useEffect(() => {
+    if (moduleLessons.length > 0 && !selectedLessonId) {
+      setSelectedLessonId(moduleLessons[0].id);
+    }
+  }, [moduleLessons, selectedLessonId]);
+
+  // 切换到指定课时
+  const goToLesson = (lessonId: string) => {
+    setSelectedLessonId(lessonId);
+    setActiveTab('theory');
+  };
+
+  // 上一课时/下一课时
+  const goToPrevLesson = () => {
+    if (currentLessonIndex > 0) {
+      goToLesson(moduleLessons[currentLessonIndex - 1].id);
+    }
+  };
+
+  const goToNextLesson = () => {
+    if (currentLessonIndex < moduleLessons.length - 1) {
+      goToLesson(moduleLessons[currentLessonIndex + 1].id);
+    }
+  };
 
   if (!module) {
     return (
@@ -470,30 +528,41 @@ export default function AdvancedModuleContent({
               <div>
                 <h2 className="font-bold text-slate-800">{module.name}</h2>
                 <p className="text-xs text-slate-500">
-                  {module.topics.length} 个章节
+                  {moduleLessons.length} 个课时
                 </p>
               </div>
             </div>
           </div>
 
-          {/* 章节列表 */}
+          {/* 课时列表 */}
           <div className="p-4 space-y-2">
             <label className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-2 block">
-              选择章节
+              课时列表 ({moduleLessons.length} 个)
             </label>
-            <select
-              value={selectedTopicIndex}
-              onChange={(e) => {
-                setSelectedTopicIndex(Number(e.target.value));
-              }}
-              className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
-            >
-              {module.topics.map((topic, index) => (
-                <option key={topic.id} value={index}>
-                  {index + 1}. {topic.title}
-                </option>
+            <div className="space-y-1 max-h-[calc(100vh-250px)] overflow-y-auto">
+              {moduleLessons.map((lesson, index) => (
+                <button
+                  key={lesson.id}
+                  onClick={() => goToLesson(lesson.id)}
+                  className={`w-full text-left p-3 rounded-lg text-sm transition-all ${
+                    selectedLessonId === lesson.id
+                      ? 'bg-indigo-50 border-l-4 border-indigo-500 text-indigo-700'
+                      : 'hover:bg-slate-50 text-slate-600 border-l-4 border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+                      selectedLessonId === lesson.id
+                        ? 'bg-indigo-500 text-white'
+                        : 'bg-slate-200 text-slate-500'
+                    }`}>
+                      {index + 1}
+                    </span>
+                    <span className="font-medium truncate">{lesson.title}</span>
+                  </div>
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           {/* 返回按钮 */}
@@ -532,22 +601,13 @@ export default function AdvancedModuleContent({
                 </div>
                 <div className="flex-1">
                   <div className="text-sm text-slate-500 mb-1">
-                    {currentTopic?.title}
+                    {module.name} · 课时 {currentLessonIndex + 1}/{moduleLessons.length}
                   </div>
                   <h1 className="text-3xl font-bold text-slate-800">
-                    {topicContent?.title || currentTopic?.title}
+                    {currentLesson?.title || '加载中...'}
                   </h1>
                   <div className="flex items-center gap-3 mt-2">
-                    <Badge
-                      variant={
-                        currentTopic?.difficulty && currentTopic.difficulty > 3
-                          ? 'destructive'
-                          : 'default'
-                      }
-                    >
-                      {'★'.repeat(currentTopic?.difficulty || 0)}
-                    </Badge>
-                    {topicContent?.has3D && (
+                    {currentLesson?.has3D && (
                       <Badge
                         variant="outline"
                         className="bg-blue-50 text-blue-600 border-blue-200"
@@ -555,13 +615,13 @@ export default function AdvancedModuleContent({
                         3D可视化
                       </Badge>
                     )}
-                    {hasDetailedContent && (
+                    {currentLesson?.examples && currentLesson.examples.length > 0 && (
                       <Badge
                         variant="outline"
                         className="bg-green-50 text-green-600 border-green-200"
                       >
                         <Calculator className="w-3 h-3 mr-1" />
-                        {topicContent?.examples?.length || 0} 道例题
+                        {currentLesson.examples.length} 道例题
                       </Badge>
                     )}
                   </div>
@@ -576,55 +636,57 @@ export default function AdvancedModuleContent({
                   <BookOpen className="w-4 h-4" />
                   理论讲解
                 </TabsTrigger>
-                {hasDetailedContent && (
+                {currentLesson?.formula && (
                   <TabsTrigger value="formula" className="flex items-center gap-2">
                     <FunctionSquare className="w-4 h-4" />
                     公式推导
                   </TabsTrigger>
                 )}
-                {hasDetailedContent && topicContent?.examples && (
+                {currentLesson?.examples && currentLesson.examples.length > 0 && (
                   <TabsTrigger value="examples" className="flex items-center gap-2">
                     <Calculator className="w-4 h-4" />
                     例题练习
                     <Badge variant="secondary" className="ml-1 text-xs">
-                      {topicContent.examples.length}
+                      {currentLesson.examples.length}
                     </Badge>
+                  </TabsTrigger>
+                )}
+                {currentLesson?.has3D && (
+                  <TabsTrigger value="visualization" className="flex items-center gap-2">
+                    <Eye className="w-4 h-4" />
+                    3D可视化
                   </TabsTrigger>
                 )}
               </TabsList>
 
               {/* 理论讲解 Tab */}
               <TabsContent value="theory">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div
-                    className={
-                      hasDetailedContent && topicContent?.has3D
-                        ? 'lg:col-span-2'
-                        : 'lg:col-span-3'
-                    }
-                  >
-                    <Card className="p-8 bg-white shadow-sm border-slate-200">
-                      <div className="prose prose-slate max-w-none">
-                        {hasDetailedContent ? (
-                          <MathRenderer className="text-slate-700 leading-relaxed">
-                            {topicContent?.theory || ''}
-                          </MathRenderer>
-                        ) : (
-                          <MathRenderer className="text-slate-700">
-                            {currentTopic?.content || ''}
-                          </MathRenderer>
-                        )}
-                      </div>
-                    </Card>
+                <Card className="p-8 bg-white shadow-sm border-slate-200">
+                  <div className="prose prose-slate max-w-none">
+                    <MathRenderer className="text-slate-700 leading-relaxed">
+                      {currentLesson?.theory || '暂无理论内容'}
+                    </MathRenderer>
                   </div>
-
-                  {hasDetailedContent && topicContent?.has3D && (
-                    <div className="lg:col-span-1">
-                      <Visualization3D type={topicContent?.vizType || ''} />
-                    </div>
-                  )}
-                </div>
+                </Card>
               </TabsContent>
+
+              {/* 3D可视化 Tab */}
+              {currentLesson?.has3D && (
+                <TabsContent value="visualization">
+                  <Card className="p-8 bg-slate-900 shadow-sm border-slate-800">
+                    <div className="text-center mb-6">
+                      <Eye className="w-12 h-12 text-indigo-400 mx-auto mb-3" />
+                      <h3 className="text-xl font-bold text-white">3D可视化演示</h3>
+                      <p className="text-slate-400 mt-2">
+                        交互式图形帮助理解抽象概念
+                      </p>
+                    </div>
+                    <div className="max-w-3xl mx-auto">
+                      <Visualization3D type={currentLesson?.vizType || ''} />
+                    </div>
+                  </Card>
+                </TabsContent>
+              )}
 
               {/* 公式推导 Tab */}
               <TabsContent value="formula">
@@ -637,16 +699,16 @@ export default function AdvancedModuleContent({
                     </p>
                   </div>
 
-                  {hasDetailedContent ? (
+                  {currentLesson?.formula ? (
                     <div className="bg-white p-6 rounded-xl shadow-sm">
                       <MathRenderer className="text-slate-700 leading-relaxed">
-                        {topicContent?.formula || ''}
+                        {currentLesson.formula}
                       </MathRenderer>
                     </div>
                   ) : (
                     <div className="bg-white p-6 rounded-xl shadow-sm">
                       <p className="text-slate-500 text-center">
-                        该章节暂无公式推导内容
+                        该课时暂无公式推导内容
                       </p>
                     </div>
                   )}
@@ -662,14 +724,12 @@ export default function AdvancedModuleContent({
                       精选例题
                     </h3>
                     <p className="text-sm text-slate-500">
-                      共 {topicContent?.examples?.length || 0} 道例题
+                      共 {currentLesson?.examples?.length || 0} 道例题
                     </p>
                   </div>
 
-                  {hasDetailedContent &&
-                  topicContent?.examples &&
-                  topicContent.examples.length > 0 ? (
-                    topicContent.examples.map((example, index) => (
+                  {currentLesson?.examples && currentLesson.examples.length > 0 ? (
+                    currentLesson.examples.map((example, index) => (
                       <ExampleCard
                         key={example.id}
                         example={example}
@@ -679,37 +739,29 @@ export default function AdvancedModuleContent({
                   ) : (
                     <Card className="p-8 text-center text-slate-500">
                       <Calculator className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>该章节暂无例题</p>
+                      <p>该课时暂无例题</p>
                     </Card>
                   )}
                 </div>
               </TabsContent>
             </Tabs>
 
-            {/* 章节导航 */}
+            {/* 课时导航 */}
             <div className="flex justify-between mt-8">
               <Button
                 variant="outline"
-                disabled={selectedTopicIndex <= 0}
-                onClick={() => {
-                  if (selectedTopicIndex > 0) {
-                    setSelectedTopicIndex(selectedTopicIndex - 1);
-                  }
-                }}
+                disabled={currentLessonIndex <= 0}
+                onClick={goToPrevLesson}
               >
                 <ChevronRight className="w-4 h-4 mr-2 rotate-180" />
-                上一章
+                上一课时
               </Button>
               <Button
                 className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
-                disabled={!module?.topics || selectedTopicIndex >= module.topics.length - 1}
-                onClick={() => {
-                  if (module?.topics && selectedTopicIndex < module.topics.length - 1) {
-                    setSelectedTopicIndex(selectedTopicIndex + 1);
-                  }
-                }}
+                disabled={currentLessonIndex >= moduleLessons.length - 1}
+                onClick={goToNextLesson}
               >
-                下一章
+                下一课时
                 <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
             </div>

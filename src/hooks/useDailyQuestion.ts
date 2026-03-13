@@ -90,6 +90,12 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           for (const module of KNOWLEDGE_MODULES) {
             let question = await getDailyQuestionByDate(today, module.id);
 
+            // 检查旧数据是否有错误的 LaTeX (如 \rac 而不是 \frac)
+            if (question && (question.content.includes('\\rac') || question.answer.includes('\\rac'))) {
+              console.log('检测到错误的 LaTeX，重新生成题目:', question.id);
+              question = undefined; // 强制重新生成
+            }
+
             if (!question) {
               question = generateRandomQuestion(today, module.id);
               await createDailyQuestion(question);

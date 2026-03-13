@@ -23,11 +23,17 @@ model User {
   // 收藏的帖子
   favoritePosts String[] @default([])
 
+  // 关注统计
+  followingCount Int      @default(0)
+  followerCount  Int      @default(0)
+
   // 关联
   answers       AnswerRecord[]
   posts         Post[]
   comments      Comment[]
   answerComments AnswerComment[]
+  following     Follow[] @relation("UserFollowing")
+  followers     Follow[] @relation("UserFollowers")
 }
 
 model DailyQuestion {
@@ -120,4 +126,20 @@ model Comment {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([postId])
+}
+
+// 关注关系表
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String   // 关注者
+  followingId String   // 被关注者
+  createdAt   DateTime @default(now())
+
+  // 关联
+  follower    User     @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId]) // 防止重复关注
+  @@index([followerId])
+  @@index([followingId])
 }
