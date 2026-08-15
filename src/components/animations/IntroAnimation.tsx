@@ -63,12 +63,16 @@ export function IntroAnimation() {
   const { phase, setPhase, isRecentLogin } = useAnimation();
   const rootRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
+  // 水合时 isRecentLogin 会后置翻转，用 ref 供 finish 读取最新值，
+  // 避免把 isRecentLogin 放进 useGSAP 依赖导致时间线重建重播
+  const isRecentLoginRef = useRef(isRecentLogin);
+  isRecentLoginRef.current = isRecentLogin;
 
   useGSAP(
     () => {
       if (phase !== 'intro') return;
 
-      const finish = () => setPhase(isRecentLogin ? 'complete' : 'register');
+      const finish = () => setPhase(isRecentLoginRef.current ? 'complete' : 'register');
       let drifts: gsap.core.Tween[] = [];
       const killDrift = () => {
         drifts.forEach((t) => t.kill());
@@ -230,7 +234,7 @@ export function IntroAnimation() {
 
       return () => mm.revert();
     },
-    { scope: rootRef, dependencies: [phase, isRecentLogin] }
+    { scope: rootRef, dependencies: [phase] }
   );
 
   const handleSkip = () => {

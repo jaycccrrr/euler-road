@@ -17,6 +17,7 @@ interface AnimationContextType {
   isRecentLogin: boolean;
   setPhase: (phase: AnimationPhase) => void;
   markAsRegistered: () => void;
+  markAsLoggedIn: () => void;
   resetAnimation: () => void;
   skipIntro: () => void;
 }
@@ -28,6 +29,7 @@ const defaultContext: AnimationContextType = {
   isRecentLogin: false,
   setPhase: () => {},
   markAsRegistered: () => {},
+  markAsLoggedIn: () => {},
   resetAnimation: () => {},
   skipIntro: () => {},
 };
@@ -108,6 +110,12 @@ export function AnimationProvider({ children }: { children: React.ReactNode }) {
     setPhase('register-success');
   }, [saveState]);
 
+  // 登录（已有账号）也视为已完成引导：持久化标记，下次访问不再重播开场动画
+  const markAsLoggedIn = useCallback(() => {
+    setIsNewUser(false);
+    saveState({ hasCompletedRegistration: true });
+  }, [saveState]);
+
   const resetAnimation = useCallback(() => {
     // 退出登录时重置为新用户状态
     setIsNewUser(true);
@@ -137,6 +145,7 @@ export function AnimationProvider({ children }: { children: React.ReactNode }) {
         isRecentLogin,
         setPhase: handleSetPhase,
         markAsRegistered,
+        markAsLoggedIn,
         resetAnimation,
         skipIntro,
       }}
