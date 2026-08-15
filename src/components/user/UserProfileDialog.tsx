@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LazyImage } from '@/components/LazyImage';
 import { formatRelativeTime } from '@/lib/utils';
+import { navigateTo } from '@/lib/asset';
 import {
   MapPin,
   Crown,
@@ -150,7 +151,7 @@ export function UserProfileDialog({ user, posts, isOpen, onClose }: UserProfileD
                         className="p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer group"
                         onClick={() => {
                           onClose();
-                          window.location.href = `/community/post/#id=${p.id}`;
+                          navigateTo(`/community/post/#id=${p.id}`);
                         }}
                       >
                         <div className="flex items-start justify-between gap-2">

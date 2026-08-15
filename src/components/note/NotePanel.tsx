@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Note } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { getNotesByUser, deleteNote } from '@/lib/db';
+import { assetPath, navigateTo } from '@/lib/asset';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -81,9 +82,9 @@ export function NotePanel({
     setIsOpen(false);
     const path = `/module/${n.moduleId}/`;
     const hash = `#chapter=${encodeURIComponent(n.chapterTitle)}&note=${encodeURIComponent(n.id)}`;
-    if (window.location.pathname !== path) {
+    if (window.location.pathname !== assetPath(path)) {
       // 跨页（如个人主页）：整页跳转，目标页挂载时读取 hash 定位
-      window.location.href = path + hash;
+      navigateTo(path + hash);
       return;
     }
     if (window.location.hash === hash) {

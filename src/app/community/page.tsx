@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/hooks/useAuth';
 import { getPostsPaginated, getAllPosts, createPost, updatePost, getUserById, resetDatabase, getFollowing, getFollowers, areFriends, searchUsers } from '@/lib/db';
+import { navigateTo } from '@/lib/asset';
 import { VirtualList } from '@/components/VirtualList';
 import { getPrimaryFrame, FRAME_STYLES, initModuleData, getModuleTitles } from '@/lib/gamification';
 import { Card } from '@/components/ui/card';
@@ -961,7 +962,7 @@ export default function CommunityPage() {
                   }
                   onPostClick={(post) => {
                     setIsUserDialogOpen(false);
-                    window.location.href = `/community/post/#id=${post.id}`;
+                    navigateTo(`/community/post/#id=${post.id}`);
                   }}
                 />
               </>

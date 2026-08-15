@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import { getPostById, getUserById, getAllPosts, createComment, updatePost, getFollowing, getFollowers, areFriends } from '@/lib/db';
+import { navigateTo } from '@/lib/asset';
 import { Textarea } from '@/components/ui/textarea';
 import { generateId } from '@/lib/utils';
 import { Post, User } from '@/types';
@@ -851,13 +852,13 @@ function UserDialogContent({ user: initialUser, posts, onClose }: UserDialogCont
         currentUser && !isCurrentUser && friends.some((f) => f.id === currentUser.id)
           ? () => {
               onClose();
-              window.location.href = `/messages/#user=${encodeURIComponent(user.id)}`;
+              navigateTo(`/messages/#user=${encodeURIComponent(user.id)}`);
             }
           : undefined
       }
       onPostClick={(p) => {
         onClose();
-        window.location.href = `/community/post/#id=${p.id}`;
+        navigateTo(`/community/post/#id=${p.id}`);
       }}
       canViewFollowing={canViewFollowing}
       canViewFollowers={canViewFollowers}

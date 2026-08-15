@@ -66,6 +66,7 @@ import {
 import Link from 'next/link';
 import { Post, Note, User as UserType } from '@/types';
 import { getAllPosts, deletePost, getNotesByUser, deleteNote, getFollowing, getFollowers, getUserById, getAnswerRecordsByUser, areFriends } from '@/lib/db';
+import { navigateTo } from '@/lib/asset';
 import { getDailyQuestionsByDate } from '@/lib/daily-question-bank';
 import { formatRelativeTime } from '@/lib/utils';
 import { EditProfileDialog } from '@/components/profile/EditProfileDialog';
@@ -1355,14 +1356,14 @@ export default function ProfilePage() {
                           ? () => {
                               setIsUserDialogOpen(false);
                               setSelectedUser(null);
-                              window.location.href = `/messages/#user=${encodeURIComponent(selectedUser.id)}`;
+                              navigateTo(`/messages/#user=${encodeURIComponent(selectedUser.id)}`);
                             }
                           : undefined
                       }
                       onPostClick={(post) => {
                         setIsUserDialogOpen(false);
                         setSelectedUser(null);
-                        window.location.href = `/community/post/#id=${post.id}`;
+                        navigateTo(`/community/post/#id=${post.id}`);
                       }}
                       canViewFollowing={selectedUser.privacy?.showFollowing !== false}
                       canViewFollowers={selectedUser.privacy?.showFollowers !== false}

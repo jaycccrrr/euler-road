@@ -88,7 +88,6 @@ export function IntroAnimation() {
             // 降级：直接呈现标题终态，短暂停留后淡出
             gsap.set('.intro-bg', { autoAlpha: 1 });
             gsap.set('.intro-title', { autoAlpha: 1, y: 0 });
-            gsap.set('.euler-sketch', { autoAlpha: 1, y: 0, scale: 1 });
             gsap.set('.sk-path', { strokeDashoffset: 0 });
             gsap.set('.intro-sub', { autoAlpha: 1, y: 0 });
             gsap.set('.intro-skip', { autoAlpha: 1 });
@@ -203,13 +202,6 @@ export function IntroAnimation() {
             { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out' },
             '-=0.35'
           );
-          // 素描肖像自上方淡入
-          tl.fromTo(
-            '.euler-sketch',
-            { autoAlpha: 0, y: -18, scale: 0.96 },
-            { autoAlpha: 1, y: 0, scale: 1, duration: 0.9, ease: 'power2.out' },
-            '<'
-          );
           tl.fromTo(
             '.sk-path',
             { strokeDashoffset: 1 },
@@ -319,39 +311,6 @@ export function IntroAnimation() {
         />
 
         <div className="intro-stage absolute inset-0">
-          {/* 欧拉铅笔素描（屏幕上方浮现）：灰度底 + 反相模糊 color-dodge = 经典素描效果 */}
-          <div className="absolute top-[6%] left-1/2 -translate-x-1/2 w-32 md:w-44 select-none">
-            <div
-              className="euler-sketch relative aspect-square overflow-hidden"
-              style={{
-                opacity: 0,
-              }}
-            >
-              <img
-                src="/images/euler.jpg"
-                alt="欧拉肖像"
-                draggable={false}
-                className="absolute inset-0 w-full h-full object-cover object-top"
-                style={{
-                  filter: 'grayscale(1) contrast(1.02) brightness(1.28)',
-                  mixBlendMode: 'multiply',
-                  opacity: 0.8,
-                }}
-              />
-              <img
-                src="/images/euler.jpg"
-                alt=""
-                aria-hidden
-                draggable={false}
-                className="absolute inset-0 w-full h-full object-cover object-top"
-                style={{
-                  filter: 'grayscale(1) invert(1) blur(3px)',
-                  mixBlendMode: 'color-dodge',
-                  opacity: 0.55,
-                }}
-              />
-            </div>
-          </div>
           {/* 符号星野 */}
           {glyphs.map((g, i) => (
             <span

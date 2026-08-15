@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { BookOpen, Users, Calendar, LogOut, User as UserIcon, GraduationCap } from 'lucide-react';
 import { getPrimaryFrame, initModuleData, FRAME_COLORS } from '@/lib/gamification';
+import { navigateTo } from '@/lib/asset';
 import { MessageCenter } from './MessageCenter';
 
 export default function Header() {
@@ -122,7 +123,7 @@ export default function Header() {
                 </div>
                 <div className="p-1.5">
                   <DropdownMenuItem
-                    onClick={() => window.location.href = '/profile/'}
+                    onClick={() => navigateTo('/profile/')}
                     className="cursor-pointer rounded-lg px-2.5 py-2"
                   >
                     <span className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-2.5">
