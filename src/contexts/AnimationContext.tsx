@@ -60,7 +60,7 @@ export function AnimationProvider({ children }: { children: React.ReactNode }) {
     }
 
     // 近期自动登录检测：如果用户一周内登录过且未主动登出，
-    // 开场动画撕裂后直接进入首页，跳过登录页
+    // 直接跳过开场动画进入首页
     if (!hasCompletedRegistration) {
       try {
         const authStorage = localStorage.getItem('auth-storage');
@@ -80,7 +80,8 @@ export function AnimationProvider({ children }: { children: React.ReactNode }) {
                 ...currentState,
                 hasCompletedRegistration: true,
               }));
-              // 不设置 phase='complete'，让开场动画继续播放
+              // 近期登录用户跳过开场动画
+              setPhase('complete');
             }
           }
         }
