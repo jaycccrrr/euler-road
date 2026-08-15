@@ -247,46 +247,9 @@ export function IntroAnimation() {
 
   return (
     <div ref={rootRef} className="fixed inset-0 z-[100] overflow-hidden">
-      {/* 底层：动画揭示后露出的内容 */}
+      {/* 底层：动画揭示后露出的内容（新用户=注册卡；近期登录=首页由 AnimatedHome 渲染在更下层） */}
       <div className="absolute inset-0 z-[5]">
-        {isRecentLogin ? (
-          <div
-            className="min-h-screen flex items-center justify-center"
-            style={{
-              background: '#f0f7ff',
-              backgroundImage: `
-                linear-gradient(#e2e8f0 1px, transparent 1px),
-                linear-gradient(90deg, #e2e8f0 1px, transparent 1px)
-              `,
-              backgroundSize: '48px 48px',
-            }}
-          >
-            <div className="text-center">
-              <h1
-                style={{
-                  fontFamily: '"Playfair Display", Georgia, "Noto Serif SC", serif',
-                  fontWeight: 700,
-                  fontSize: 'clamp(3rem, 8vw, 6rem)',
-                  color: '#1e293b',
-                  letterSpacing: '0.02em',
-                }}
-              >
-                Euler Road
-              </h1>
-              <p
-                className="text-lg mt-4"
-                style={{
-                  fontFamily: 'var(--font-noto-serif-sc), "Noto Serif SC", serif',
-                  color: '#94a3b8',
-                }}
-              >
-                欢迎回来
-              </p>
-            </div>
-          </div>
-        ) : (
-          <AuthPanel />
-        )}
+        {!isRecentLogin && <AuthPanel />}
       </div>
 
       {/* 动画层（结尾虹膜裁剪揭示底层） */}

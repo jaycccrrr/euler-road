@@ -3,7 +3,6 @@
 import Header from '@/components/layout/Header';
 import { ChallengeBackground } from '@/components/challenge/ChallengeBackground';
 import { DailyChallenge } from '@/components/challenge/DailyChallenge';
-import { PiPowerOrb } from '@/components/pipower/PiPowerOrb';
 
 export default function DailyPage() {
   return (
@@ -15,7 +14,6 @@ export default function DailyPage() {
           <DailyChallenge />
         </main>
       </div>
-      <PiPowerOrb />
     </div>
   );
 }

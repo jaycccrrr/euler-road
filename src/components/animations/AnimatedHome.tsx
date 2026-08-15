@@ -62,7 +62,7 @@ const MODULES = [
 ];
 
 export function AnimatedHome() {
-  const { phase } = useAnimation();
+  const { phase, isRecentLogin } = useAnimation();
   const heroRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const reduce = useReducedMotion();
@@ -93,7 +93,8 @@ export function AnimatedHome() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  if (phase !== 'home' && phase !== 'complete') return null;
+  // 近期登录用户：intro 阶段就渲染在动画层下方，虹膜揭示时直接露出首页（无"欢迎回来"中转页）
+  if (phase !== 'home' && phase !== 'complete' && !(phase === 'intro' && isRecentLogin)) return null;
 
   return (
     // §14 减动效：reducedMotion="user" 时 framer 自动禁用位移动画，仅保留透明度渐变
