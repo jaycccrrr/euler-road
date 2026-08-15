@@ -17,6 +17,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDailyQuestion } from '@/hooks/useDailyQuestion';
 import { createPost } from '@/lib/db';
 import { generateId } from '@/lib/utils';
+import { assetPath } from '@/lib/asset';
+import { pickQuote } from '@/lib/quotes';
 
 const MODULE_NAMES: Record<string, string> = {
   'highschool-math': '高中数学',
@@ -36,6 +38,9 @@ export interface ShareCardData {
   nickname: string;
   avatar: string;
   streak: number;
+  /** 我的解答内容（可选，配合 showAnswer 控制是否出现在卡片上） */
+  answerContent?: string;
+  answerImages?: string[];
 }
 
 interface ShareCardDialogProps {
@@ -47,11 +52,13 @@ interface ShareCardDialogProps {
 }
 
 /** 题目分享卡片本体（纯展示，可被对话、社区复用） */
-export function QuestionShareCard({ data }: { data: ShareCardData }) {
+export function QuestionShareCard({ data, showAnswer = true }: { data: ShareCardData; showAnswer?: boolean }) {
   const questionUrl =
     typeof window !== 'undefined'
-      ? `${window.location.origin}/daily/#date=${data.date}&module=${data.moduleId}`
-      : `/daily/#date=${data.date}&module=${data.moduleId}`;
+      ? `${window.location.origin}${assetPath(`/daily/#date=${data.date}&module=${data.moduleId}`)}`
+      : assetPath(`/daily/#date=${data.date}&module=${data.moduleId}`);
+  const quote = pickQuote(data.date);
+  const hasSolution = showAnswer && (!!data.answerContent?.trim() || (data.answerImages?.length ?? 0) > 0);
 
   return (
     <div
@@ -64,8 +71,19 @@ export function QuestionShareCard({ data }: { data: ShareCardData }) {
         border: '1px solid #e2e8f0',
       }}
     >
+      {/* 今日名言 */}
+      <div className="px-6 pt-5 pb-2 text-center">
+        <p
+          className="text-[13px] leading-relaxed text-slate-600 italic"
+          style={{ fontFamily: 'Georgia, "Noto Serif SC", serif' }}
+        >
+          「{quote.text}」
+        </p>
+        <p className="text-[11px] text-slate-400 mt-1 tracking-wide">—— {quote.author}</p>
+      </div>
+
       {/* 头部品牌区 */}
-      <div className="flex items-center justify-between px-6 pt-5 pb-3">
+      <div className="flex items-center justify-between px-6 pt-2 pb-3">
         <div
           style={{
             fontFamily: 'Georgia, "Playfair Display", serif',
@@ -101,6 +119,34 @@ export function QuestionShareCard({ data }: { data: ShareCardData }) {
           <MathRenderer>{data.questionContent}</MathRenderer>
         </div>
       </div>
+
+      {/* 我的解答（可选） */}
+      {hasSolution && (
+        <div className="px-6 pb-3">
+          <div className="rounded-xl border border-slate-200 bg-white/70 px-4 py-3">
+            <div className="text-[11px] tracking-wide text-slate-400 mb-1.5">我的解答</div>
+            {data.answerContent?.trim() && (
+              <div className="text-xs text-slate-700 leading-relaxed max-h-[96px] overflow-hidden">
+                <MathRenderer>{data.answerContent}</MathRenderer>
+              </div>
+            )}
+            {data.answerImages && data.answerImages.length > 0 && (
+              <div className="flex gap-2 mt-2">
+                {data.answerImages.slice(0, 3).map((img, i) => (
+                  // 分享卡片导出走 html-to-image，不能用 next/image
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={i}
+                    src={img}
+                    alt=""
+                    className="h-16 w-16 rounded-lg border border-slate-200 object-cover"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 成绩区 */}
       <div className="px-6 pb-3">
@@ -158,14 +204,17 @@ export function ShareCardDialog({ open, onOpenChange, data, recordId }: ShareCar
   const [posting, setPosting] = useState(false);
   const [posted, setPosted] = useState(false);
   const [togglingPublic, setTogglingPublic] = useState(false);
+  const [includeSolution, setIncludeSolution] = useState(true);
+  const [shareFallback, setShareFallback] = useState(false);
 
   const { user } = useAuth();
   const { questionMyRecords, userAnswerHistory, setAnswerPublic } = useDailyQuestion();
 
   const shareUrl =
     typeof window !== 'undefined'
-      ? `${window.location.origin}/daily/#date=${data.date}&module=${data.moduleId}`
-      : `/daily/#date=${data.date}&module=${data.moduleId}`;
+      ? `${window.location.origin}${assetPath(`/daily/#date=${data.date}&module=${data.moduleId}`)}`
+      : assetPath(`/daily/#date=${data.date}&module=${data.moduleId}`);
+  const hasAnswerData = !!data.answerContent?.trim() || (data.answerImages?.length ?? 0) > 0;
   const shareTitle = `每日一题 · ${MODULE_NAMES[data.moduleId] || data.moduleId}`;
   const shareText = `我在欧拉之路解答了「${data.questionTitle.replace(/\$+/g, '')}」，得分 ${data.score}，来挑战吧！`;
 
@@ -206,10 +255,15 @@ export function ShareCardDialog({ open, onOpenChange, data, recordId }: ShareCar
     setTimeout(() => setLinkCopied(false), 2000);
   };
 
-  /** 系统分享：优先携带卡片图片，其次纯链接；不支持则降级为复制链接 */
+  /** 系统分享：优先携带卡片图片，其次纯链接；不支持则降级为复制链接（并给出反馈） */
   const handleSystemShare = async () => {
-    if (typeof navigator === 'undefined' || !navigator.share) {
+    const fallbackCopy = async () => {
       await copyLink();
+      setShareFallback(true);
+      setTimeout(() => setShareFallback(false), 2000);
+    };
+    if (typeof navigator === 'undefined' || !navigator.share) {
+      await fallbackCopy();
       return;
     }
     setSharing(true);
@@ -230,7 +284,7 @@ export function ShareCardDialog({ open, onOpenChange, data, recordId }: ShareCar
       // 用户取消分享不视为错误
       if ((err as Error)?.name !== 'AbortError') {
         console.error('System share failed:', err);
-        await copyLink();
+        await fallbackCopy();
       }
     } finally {
       setSharing(false);
@@ -250,7 +304,7 @@ export function ShareCardDialog({ open, onOpenChange, data, recordId }: ShareCar
         moduleId: data.moduleId,
         postType: 'thought',
         title: `我解答了每日一题「${data.questionTitle.replace(/\$+/g, '').slice(0, 30)}」`,
-        content: `${data.date} 的${MODULE_NAMES[data.moduleId] || ''}每日一题，我得了 ${data.score} 分${data.isCorrect ? '，解答正确' : ''}。\n\n一起来挑战 → [查看题目](/daily/#date=${data.date}&module=${data.moduleId})`,
+        content: `${data.date} 的${MODULE_NAMES[data.moduleId] || ''}每日一题，我得了 ${data.score} 分${data.isCorrect ? '，解答正确' : ''}。\n\n一起来挑战 → [查看题目](${assetPath(`/daily/#date=${data.date}&module=${data.moduleId}`)})`,
         topics: ['每日一题'],
         images: [],
         commentPermission: 'all',
@@ -283,8 +337,31 @@ export function ShareCardDialog({ open, onOpenChange, data, recordId }: ShareCar
           <DialogTitle>分享我的答题卡片</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-2">
+          {/* 卡片内容开关：带解答 / 仅题目 */}
+          {hasAnswerData && (
+            <div className="w-full grid grid-cols-2 gap-1 p-1 rounded-lg bg-slate-100">
+              {([
+                { value: true, label: '包含解答过程' },
+                { value: false, label: '仅题目' },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() => setIncludeSolution(opt.value)}
+                  className={`py-1.5 text-xs rounded-md motion-safe:transition-all motion-safe:duration-200 ${
+                    includeSolution === opt.value
+                      ? 'bg-white text-slate-800 font-medium shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div ref={cardRef}>
-            <QuestionShareCard data={data} />
+            <QuestionShareCard data={data} showAnswer={includeSolution} />
           </div>
 
           {/* 站外分享 */}
@@ -308,10 +385,12 @@ export function ShareCardDialog({ open, onOpenChange, data, recordId }: ShareCar
             <Button onClick={handleSystemShare} disabled={sharing} variant="outline" className="w-full">
               {sharing ? (
                 <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+              ) : shareFallback ? (
+                <Check className="w-4 h-4 mr-1.5 text-emerald-500" />
               ) : (
                 <Share2 className="w-4 h-4 mr-1.5" />
               )}
-              更多分享
+              {shareFallback ? '已复制链接' : '更多分享'}
             </Button>
           </div>
 
