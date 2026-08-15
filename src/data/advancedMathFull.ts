@@ -37,13 +37,13 @@ export const directioncosinesLesson: SubLesson = {
                     - 方向角和方向余弦就是解决这个问题的工具
 
             ### 1.1 定义
-            设向量 **a** = (a₁, a₂, a₃)，它与 x 轴、y 轴、z 轴正方向的夹角分别记为 α、β、γ，称为向量的**方向角**。
+            设向量 \\mathbf{a} = (a₁, a₂, a₃)，它与 x 轴、y 轴、z 轴正方向的夹角分别记为 α、β、γ，称为向量的**方向角**。
 
 \`\`\`
 
-                α = ∠(**a**, **i**)， β = ∠(**a**, **j**)， γ = ∠(**a**, **k**)
+                α = ∠(\\mathbf{a}, \\mathbf{i})， β = ∠(\\mathbf{a}, \\mathbf{j})， γ = ∠(\\mathbf{a}, \\mathbf{k})
 
-            其中 **i**、**j**、**k** 分别是 x、y、z 轴的单位向量。
+            其中 \\mathbf{i}、\\mathbf{j}、\\mathbf{k} 分别是 x、y、z 轴的单位向量。
 
             <!-- 方向角3D图示 -->
 
@@ -56,24 +56,24 @@ export const directioncosinesLesson: SubLesson = {
 
 \`\`\`
 
-                cos α = a₁/|**a**| = a₁/√(a₁² + a₂² + a₃²)
+                cos α = a₁/|\\mathbf{a}| = a₁/√(a₁² + a₂² + a₃²)
 
-                cos β = a₂/|**a**| = a₂/√(a₁² + a₂² + a₃²)
+                cos β = a₂/|\\mathbf{a}| = a₂/√(a₁² + a₂² + a₃²)
 
-                cos γ = a₃/|**a**| = a₃/√(a₁² + a₂² + a₃²)
+                cos γ = a₃/|\\mathbf{a}| = a₃/√(a₁² + a₂² + a₃²)
 
             ### 2.2 公式推导
 
             #### 推导一：方向余弦与分量关系
-            设向量 **a** = (a₁, a₂, a₃)，其模为 |**a**| = √(a₁² + a₂² + a₃²)。
+            设向量 \\mathbf{a} = (a₁, a₂, a₃)，其模为 |\\mathbf{a}| = √(a₁² + a₂² + a₃²)。
 
-            根据点乘定义：**a** · **i** = |**a**||**i**|cos α = |**a**|cos α
+            根据点乘定义：\\mathbf{a} \\cdot \\mathbf{i} = |\\mathbf{a}||\\mathbf{i}|cos α = |\\mathbf{a}|cos α
 
-            又因为 **a** · **i** = a₁，所以：
+            又因为 \\mathbf{a} \\cdot \\mathbf{i} = a₁，所以：
 
 \`\`\`
 
-                cos α = a₁/|**a**| = a₁/√(a₁² + a₂² + a₃²)
+                cos α = a₁/|\\mathbf{a}| = a₁/√(a₁² + a₂² + a₃²)
 
             同理可得 cos β 和 cos γ 的表达式。
 
@@ -88,7 +88,7 @@ export const directioncosinesLesson: SubLesson = {
 > 
                 **证明**：
 
-                cos²α + cos²β + cos²γ = (a₁² + a₂² + a₃²) / |**a**|² = |**a**|² / |**a**|² = 1
+                cos²α + cos²β + cos²γ = (a₁² + a₂² + a₃²) / |\\mathbf{a}|² = |\\mathbf{a}|² / |\\mathbf{a}|² = 1
 
             <!-- 方向余弦恒等式图示 -->
 
@@ -97,18 +97,18 @@ export const directioncosinesLesson: SubLesson = {
             ## 三、方向余弦的应用
 
             ### 3.1 单位向量表示
-            向量 **a** 的单位向量可以用方向余弦表示：
+            向量 \\mathbf{a} 的单位向量可以用方向余弦表示：
 
 \`\`\`
 
-                **a**⁰ = **a**/|**a**| = (cos α, cos β, cos γ)
+                \\mathbf{a}⁰ = \\mathbf{a}/|\\mathbf{a}| = (cos α, cos β, cos γ)
 
             ### 3.2 两向量夹角
-            设向量 **a** 和 **b** 的方向余弦分别为 (cos α₁, cos β₁, cos γ₁) 和 (cos α₂, cos β₂, cos γ₂)，则：
+            设向量 \\mathbf{a} 和 \\mathbf{b} 的方向余弦分别为 (cos α₁, cos β₁, cos γ₁) 和 (cos α₂, cos β₂, cos γ₂)，则：
 
 \`\`\`
 
-                cos θ = cos α₁ cos α₂ + cos β₁ cos β₂ + cos γ₁ cos γ₂
+                cos \theta = cos α₁ cos α₂ + cos β₁ cos β₂ + cos γ₁ cos γ₂
 
             ## 四、方向数
             与方向余弦成比例的任意三个数称为**方向数**。若 l : m : n = cos α : cos β : cos γ，则 (l, m, n) 是一组方向数。
@@ -125,33 +125,33 @@ export const directioncosinesLesson: SubLesson = {
 ## 方向余弦公式推导
 
             ### 一、从点乘定义推导方向余弦
-            设向量 **a** = (a₁, a₂, a₃)，其模为 |**a**| = √(a₁² + a₂² + a₃²)。
+            设向量 \\mathbf{a} = (a₁, a₂, a₃)，其模为 |\\mathbf{a}| = √(a₁² + a₂² + a₃²)。
 
-            根据向量点乘的定义，**a** 与 x 轴单位向量 **i** = (1, 0, 0) 的点乘为：
+            根据向量点乘的定义，\\mathbf{a} 与 x 轴单位向量 \\mathbf{i} = (1, 0, 0) 的点乘为：
 
 \`\`\`
 
-                **a** · **i** = |**a**||**i**|cos α = |**a**|cos α
+                \\mathbf{a} \\cdot \\mathbf{i} = |\\mathbf{a}||\\mathbf{i}|cos α = |\\mathbf{a}|cos α
 
             另一方面，通过分量计算点乘：
 
 \`\`\`
 
-                **a** · **i** = a₁×1 + a₂×0 + a₃×0 = a₁
+                \\mathbf{a} \\cdot \\mathbf{i} = a₁\\times1 + a₂\\times0 + a₃\\times0 = a₁
 
             因此得到方向余弦的第一个公式：
 
 \`\`\`
 
-                cos α = a₁/|**a**| = a₁/√(a₁² + a₂² + a₃²)
+                cos α = a₁/|\\mathbf{a}| = a₁/√(a₁² + a₂² + a₃²)
 
-            同理，通过与 **j** 和 **k** 的点乘可得：
+            同理，通过与 \\mathbf{j} 和 \\mathbf{k} 的点乘可得：
 
 \`\`\`
 
-                cos β = a₂/|**a**| = a₂/√(a₁² + a₂² + a₃²)
+                cos β = a₂/|\\mathbf{a}| = a₂/√(a₁² + a₂² + a₃²)
 
-                cos γ = a₃/|**a**| = a₃/√(a₁² + a₂² + a₃²)
+                cos γ = a₃/|\\mathbf{a}| = a₃/√(a₁² + a₂² + a₃²)
 
             ### 二、方向余弦基本恒等式的证明
 
@@ -167,35 +167,35 @@ export const directioncosinesLesson: SubLesson = {
 
                 cos²α + cos²β + cos²γ
 
-                = (a₁²/|**a**|²) + (a₂²/|**a**|²) + (a₃²/|**a**|²)
+                = (a₁²/|\\mathbf{a}|²) + (a₂²/|\\mathbf{a}|²) + (a₃²/|\\mathbf{a}|²)
 
-                = (a₁² + a₂² + a₃²) / |**a**|²
+                = (a₁² + a₂² + a₃²) / |\\mathbf{a}|²
 
-                = |**a**|² / |**a**|²
+                = |\\mathbf{a}|² / |\\mathbf{a}|²
 
                 = 1
 
 > **提示**
 > 
-                **几何意义**：单位向量的终点总是落在单位球面上。方向余弦 (cos α, cos β, cos γ) 正是单位向量 **a**⁰ 的坐标。
+                **几何意义**：单位向量的终点总是落在单位球面上。方向余弦 (cos α, cos β, cos γ) 正是单位向量 \\mathbf{a}⁰ 的坐标。
 
             ### 三、单位向量的方向余弦表示
 
-            向量 **a** 的单位向量 **a**⁰ 可以表示为：
+            向量 \\mathbf{a} 的单位向量 \\mathbf{a}⁰ 可以表示为：
 
 \`\`\`
 
-                **a**⁰ = **a**/|**a**| = (a₁/|**a**|, a₂/|**a**|, a₃/|**a**|) = (cos α, cos β, cos γ)
+                \\mathbf{a}⁰ = \\mathbf{a}/|\\mathbf{a}| = (a₁/|\\mathbf{a}|, a₂/|\\mathbf{a}|, a₃/|\\mathbf{a}|) = (cos α, cos β, cos γ)
 
             ### 四、两向量夹角公式
 
-            设向量 **a** 和 **b** 的方向余弦分别为 (cos α₁, cos β₁, cos γ₁) 和 (cos α₂, cos β₂, cos γ₂)。
+            设向量 \\mathbf{a} 和 \\mathbf{b} 的方向余弦分别为 (cos α₁, cos β₁, cos γ₁) 和 (cos α₂, cos β₂, cos γ₂)。
 
             由于单位向量的点乘等于它们夹角的余弦：
 
 \`\`\`
 
-                cos θ = **a**⁰ · **b**⁰
+                cos \theta = \\mathbf{a}⁰ \\cdot \\mathbf{b}⁰
 
                 = cos α₁ cos α₂ + cos β₁ cos β₂ + cos γ₁ cos γ₂
 
@@ -226,7 +226,7 @@ export const directioncosinesLesson: SubLesson = {
   {
     "id": "dc-1",
     "difficulty": "easy",
-    "question": "已知向量 **a** = (1, 2, 2)，求其方向余弦。",
+    "question": "已知向量 \\mathbf{a} = (1, 2, 2)，求其方向余弦。",
     "options": [
       "(1/3, 2/3, 2/3)",
       "(1/√5, 2/√5, 2/√5)",
@@ -234,7 +234,7 @@ export const directioncosinesLesson: SubLesson = {
       "(1, 2, 2)/5"
     ],
     "correct": 0,
-    "explanation": "|**a**| = √(1² + 2² + 2²) = √9 = 3\ncos α = 1/3, cos β = 2/3, cos γ = 2/3"
+    "explanation": "|\\mathbf{a}| = √(1² + 2² + 2²) = √9 = 3\ncos α = 1/3, cos β = 2/3, cos γ = 2/3"
   },
   {
     "id": "dc-2",
@@ -252,7 +252,7 @@ export const directioncosinesLesson: SubLesson = {
   {
     "id": "dc-3",
     "difficulty": "hard",
-    "question": "已知向量 **a** 的方向余弦为 (1/2, √2/2, 1/2)，求其与 z 轴的夹角。",
+    "question": "已知向量 \\mathbf{a} 的方向余弦为 (1/2, √2/2, 1/2)，求其与 z 轴的夹角。",
     "options": [
       "30°",
       "45°",
@@ -275,7 +275,7 @@ export const crossproductLesson: SubLesson = {
 
 **思考引导**
 
-                **思考引导**：点乘 **a** · **b** 可以告诉我们两个向量的"相似程度"（投影关系），但还有很多问题无法回答：
+                **思考引导**：点乘 \\mathbf{a} \\cdot \\mathbf{b} 可以告诉我们两个向量的"相似程度"（投影关系），但还有很多问题无法回答：
 
                     - 如何求同时垂直于两个向量的方向？（求平面法向量）
                     - 如何计算两个向量张成的平行四边形面积？
@@ -286,33 +286,33 @@ export const crossproductLesson: SubLesson = {
             ## 二、从几何需求到代数定义
 
             ### 2.1 确定方向：右手定则
-            假设我们已经确定了叉乘结果的方向垂直于 **a** 和 **b** 所在平面，但还有一个问题：垂直方向有两个（"向上"和"向下"），选哪一个？
+            假设我们已经确定了叉乘结果的方向垂直于 \\mathbf{a} 和 \\mathbf{b} 所在平面，但还有一个问题：垂直方向有两个（"向上"和"向下"），选哪一个？
 
 > **提示**
 > 
-                **右手定则**：右手四指从 **a** 转向 **b**，拇指指向即为 **a** × **b** 的方向。
+                **右手定则**：右手四指从 \\mathbf{a} 转向 \\mathbf{b}，拇指指向即为 \\mathbf{a} \\times \\mathbf{b} 的方向。
 
-                这样规定使得 **a** × **b** = -(**b** × **a**)，即叉乘是**反交换**的。
+                这样规定使得 \\mathbf{a} \\times \\mathbf{b} = -(\\mathbf{b} \\times \\mathbf{a})，即叉乘是**反交换**的。
 
             <!-- 右手定则图示 - 使用标准教材图片 -->
 
 [图片: 右手定则示意图]
 
-                **右手定则**：四指从 **a** 转向 **b**，拇指指向 **a × b**
+                **右手定则**：四指从 \\mathbf{a} 转向 \\mathbf{b}，拇指指向 **a \\times b**
 
-                |a × b| = |a||b|sinθ，方向垂直于 a 和 b 所在平面
+                |a \\times b| = |\\mathbf{a}||\\mathbf{b}|sin\theta，方向垂直于 a 和 b 所在平面
 
             ### 2.2 确定大小：面积的几何意义
             叉乘的大小应该如何确定？几何上一个自然的想法是：**等于以 a, b 为邻边的平行四边形面积**。
 
 \`\`\`
 
-                |**a** × **b**| = |**a**||**b**|sin(θ)
+                |\\mathbf{a} \\times \\mathbf{b}| = |\\mathbf{a}||\\mathbf{b}|sin(\theta)
 
-            其中 θ 是两向量夹角。这样规定的好处：
+            其中 \theta 是两向量夹角。这样规定的好处：
 
-                - 当 **a** ⊥ **b** 时，面积最大，|sin(90°)| = 1
-                - 当 **a** ∥ **b** 时，面积为零，sin(0°) = 0，此时 **a** × **b** = **0**
+                - 当 \\mathbf{a} ⊥ \\mathbf{b} 时，面积最大，|sin(90°)| = 1
+                - 当 \\mathbf{a} ∥ \\mathbf{b} 时，面积为零，sin(0°) = 0，此时 \\mathbf{a} \\times \\mathbf{b} = **0**
                 - 这与平行四边形面积公式一致
 
             ## 三、分量公式的推导
@@ -322,26 +322,26 @@ export const crossproductLesson: SubLesson = {
 
 \`\`\`
 
-                i × i = j × j = k × k = **0**（自身叉乘为零）
+                i \\times i = j \\times j = k \\times k = **0**（自身叉乘为零）
 
-                i × j = k,  j × k = i,  k × i = j（循环对称）
+                i \\times j = k,  j \\times k = i,  k \\times i = j（循环对称）
 
-                j × i = -k, k × j = -i, i × k = -j（反交换性）
+                j \\times i = -k, k \\times j = -i, i \\times k = -j（反交换性）
 
             ### 3.2 分配律的应用
-            **定理**：叉乘满足分配律 **a** × (**b** + **c**) = **a** × **b** + **a** × **c**
+            **定理**：叉乘满足分配律 \\mathbf{a} \\times (\\mathbf{b} + \\mathbf{c}) = \\mathbf{a} \\times \\mathbf{b} + \\mathbf{a} \\times \\mathbf{c}
 
-            将 **a** = a₁i + a₂j + a₃k 和 **b** = b₁i + b₂j + b₃k 展开：
-
-\`\`\`
-
-                **a** × **b** = (a₁i + a₂j + a₃k) × (b₁i + b₂j + b₃k)
-
-            展开后，利用 i, j, k 的叉乘关系，同类项（如 i × i）为零，交叉项保留：
+            将 \\mathbf{a} = a₁i + a₂j + a₃k 和 \\mathbf{b} = b₁i + b₂j + b₃k 展开：
 
 \`\`\`
 
-                **a** × **b** = a₁b₂(i × j) + a₁b₃(i × k) + a₂b₁(j × i) + a₂b₃(j × k) + a₃b₁(k × i) + a₃b₂(k × j)
+                \\mathbf{a} \\times \\mathbf{b} = (a₁i + a₂j + a₃k) \\times (b₁i + b₂j + b₃k)
+
+            展开后，利用 i, j, k 的叉乘关系，同类项（如 i \\times i）为零，交叉项保留：
+
+\`\`\`
+
+                \\mathbf{a} \\times \\mathbf{b} = a₁b₂(i \\times j) + a₁b₃(i \\times k) + a₂b₁(j \\times i) + a₂b₃(j \\times k) + a₃b₁(k \\times i) + a₃b₂(k \\times j)
 
                 = a₁b₂k - a₁b₃j - a₂b₁k + a₂b₃i + a₃b₁j - a₃b₂i
 
@@ -352,7 +352,7 @@ export const crossproductLesson: SubLesson = {
 
 \`\`\`
 
-                **a** × **b** = |i  j  k|
+                \\mathbf{a} \\times \\mathbf{b} = |i  j  k|
 
                              |a₁ a₂ a₃|
 
@@ -362,38 +362,38 @@ export const crossproductLesson: SubLesson = {
 
             ## 四、几何意义与应用
 
-                **3D可视化演示**：右侧动画展示了向量 **a**（红色）、**b**（蓝色）以及它们的叉乘 **a** × **b**（绿色）。
+                **3D可视化演示**：右侧动画展示了向量 \\mathbf{a}（红色）、\\mathbf{b}（蓝色）以及它们的叉乘 \\mathbf{a} \\times \\mathbf{b}（绿色）。
 
-                观察：当 **b** 绕 **a** 旋转时，叉乘的大小如何变化？方向是否始终垂直于 **a** 和 **b** 所在平面？
+                观察：当 \\mathbf{b} 绕 \\mathbf{a} 旋转时，叉乘的大小如何变化？方向是否始终垂直于 \\mathbf{a} 和 \\mathbf{b} 所在平面？
 
             ### 4.1 平行四边形与三角形面积
-            **定理**：|**a** × **b**| = 以 a, b 为邻边的平行四边形面积
+            **定理**：|\\mathbf{a} \\times \\mathbf{b}| = 以 a, b 为邻边的平行四边形面积
 
-            **推论**：三角形面积 = ½|**a** × **b**|
+            **推论**：三角形面积 = ½|\\mathbf{a} \\times \\mathbf{b}|
 
             ### 4.2 判断共线性
-            **定理**：**a** × **b** = **0** ⟺ **a** ∥ **b**（两向量共线/平行）
+            **定理**：\\mathbf{a} \\times \\mathbf{b} = **0** ⟺ \\mathbf{a} ∥ \\mathbf{b}（两向量共线/平行）
 
-            **证明**：叉乘为零当且仅当 |**a**||**b**|sin(θ) = 0，即 sin(θ) = 0，θ = 0 或 π。
+            **证明**：叉乘为零当且仅当 |\\mathbf{a}||\\mathbf{b}|sin(\theta) = 0，即 sin(\theta) = 0，\theta = 0 或 π。
 
             ### 4.3 求平面法向量
-            给定平面内两个不共线向量 **a** 和 **b**，**a** × **b** 就是该平面的一个法向量。
+            给定平面内两个不共线向量 \\mathbf{a} 和 \\mathbf{b}，\\mathbf{a} \\times \\mathbf{b} 就是该平面的一个法向量。
 
             ## 五、代数性质总结
 
 **思考引导**
 
-                    - **反交换律**：**a** × **b** = -(**b** × **a**)
-                    - **分配律**：**a** × (**b** + **c**) = **a** × **b** + **a** × **c**
-                    - **数乘结合律**：(λ**a**) × **b** = λ(**a** × **b**) = **a** × (λ**b**)
-                    - **自叉乘为零**：**a** × **a** = **0**
-                    - **Jacobi恒等式**：**a** × (**b** × **c**) + **b** × (**c** × **a**) + **c** × (**a** × **b**) = **0**
+                    - **反交换律**：\\mathbf{a} \\times \\mathbf{b} = -(\\mathbf{b} \\times \\mathbf{a})
+                    - **分配律**：\\mathbf{a} \\times (\\mathbf{b} + \\mathbf{c}) = \\mathbf{a} \\times \\mathbf{b} + \\mathbf{a} \\times \\mathbf{c}
+                    - **数乘结合律**：(λ\\mathbf{a}) \\times \\mathbf{b} = λ(\\mathbf{a} \\times \\mathbf{b}) = \\mathbf{a} \\times (λ\\mathbf{b})
+                    - **自叉乘为零**：\\mathbf{a} \\times \\mathbf{a} = **0**
+                    - **Jacobi恒等式**：\\mathbf{a} \\times (\\mathbf{b} \\times \\mathbf{c}) + \\mathbf{b} \\times (\\mathbf{c} \\times \\mathbf{a}) + \\mathbf{c} \\times (\\mathbf{a} \\times \\mathbf{b}) = **0**
 
 > ⚠️ **注意**
 > 
-                **重要提醒**：叉乘不满足结合律！即 (**a** × **b**) × **c** ≠ **a** × (**b** × **c**)
+                **重要提醒**：叉乘不满足结合律！即 (\\mathbf{a} \\times \\mathbf{b}) \\times \\mathbf{c} ≠ \\mathbf{a} \\times (\\mathbf{b} \\times \\mathbf{c})
 
-                例如：(i × j) × j = k × j = -i，而 i × (j × j) = i × 0 = 0
+                例如：(i \\times j) \\times j = k \\times j = -i，而 i \\times (j \\times j) = i \\times 0 = 0
   `,
   formula: `
 ## 叉乘公式的推导
@@ -402,27 +402,27 @@ export const crossproductLesson: SubLesson = {
 
 \`\`\`
 
-                |**a** × **b**| = |**a**||**b**|sin(θ)
+                |\\mathbf{a} \\times \\mathbf{b}| = |\\mathbf{a}||\\mathbf{b}|sin(\theta)
 
             ### 利用点乘与叉乘的关系
             重要恒等式（拉格朗日公式）：
 
 \`\`\`
 
-                |**a** × **b**|² + (**a** · **b**)² = |**a**|²|**b**|²
+                |\\mathbf{a} \\times \\mathbf{b}|² + (\\mathbf{a} \\cdot \\mathbf{b})² = |\\mathbf{a}|²|\\mathbf{b}|²
 
             ### 分量推导
             设 i, j, k 为标准正交基向量：
 
 \`\`\`
 
-                i × j = k,  j × k = i,  k × i = j
+                i \\times j = k,  j \\times k = i,  k \\times i = j
 
-                j × i = -k, k × j = -i, i × k = -j
+                j \\times i = -k, k \\times j = -i, i \\times k = -j
 
 **思考引导**
 
-                展开 **a** × **b** = (a₁i + a₂j + a₃k) × (b₁i + b₂j + b₃k)
+                展开 \\mathbf{a} \\times \\mathbf{b} = (a₁i + a₂j + a₃k) \\times (b₁i + b₂j + b₃k)
 
                 利用分配律和基向量的叉乘关系，即可得到分量公式
   `,
@@ -430,7 +430,7 @@ export const crossproductLesson: SubLesson = {
   {
     "id": "cp-1",
     "difficulty": "easy",
-    "question": "已知向量 **a** = (1, 2, 3)，**b** = (4, 5, 6)，求 **a** × **b**。",
+    "question": "已知向量 \\mathbf{a} = (1, 2, 3)，\\mathbf{b} = (4, 5, 6)，求 \\mathbf{a} \\times \\mathbf{b}。",
     "options": [
       "(-3, 6, -3)",
       "(3, -6, 3)",
@@ -438,7 +438,7 @@ export const crossproductLesson: SubLesson = {
       "(3, 6, 3)"
     ],
     "correct": 0,
-    "explanation": "使用叉乘公式：\na × b = (2×6 - 3×5, 3×4 - 1×6, 1×5 - 2×4)\n= (12-15, 12-6, 5-8)\n= (-3, 6, -3)"
+    "explanation": "使用叉乘公式：\na \\times b = (2\\times6 - 3\\times5, 3\\times4 - 1\\times6, 1\\times5 - 2\\times4)\n= (12-15, 12-6, 5-8)\n= (-3, 6, -3)"
   },
   {
     "id": "cp-2",
@@ -451,12 +451,12 @@ export const crossproductLesson: SubLesson = {
       "1/2"
     ],
     "correct": 0,
-    "explanation": "向量 AB = (-1, 1, 0)，向量 AC = (-1, 0, 1)\nAB × AC = (1, 1, 1)\n|AB × AC| = √3\n三角形面积 = |AB × AC|/2 = √3/2"
+    "explanation": "向量 AB = (-1, 1, 0)，向量 AC = (-1, 0, 1)\nAB \\times AC = (1, 1, 1)\n|AB \\times AC| = √3\n三角形面积 = |AB \\times AC|/2 = √3/2"
   },
   {
     "id": "cp-3",
     "difficulty": "hard",
-    "question": "若 **a** + **b** + **c** = **0**，证明：**a** × **b** = **b** × **c** = **c** × **a**。",
+    "question": "若 \\mathbf{a} + \\mathbf{b} + \\mathbf{c} = **0**，证明：\\mathbf{a} \\times \\mathbf{b} = \\mathbf{b} \\times \\mathbf{c} = \\mathbf{c} \\times \\mathbf{a}。",
     "options": [],
     "correct": 0,
     "explanation": "利用叉乘的分配律和反交换律，以及自叉乘为零的性质。"
@@ -476,8 +476,8 @@ export const tripleproductLesson: SubLesson = {
 
                 **思考引导**：我们已经知道：
 
-                    - 点乘 **a** · **b** 与投影、夹角有关
-                    - 叉乘 **a** × **b** 与面积、垂直方向有关
+                    - 点乘 $\mathbf{a} \cdot \mathbf{b}$ 与投影、夹角有关
+                    - 叉乘 $\mathbf{a} \times \mathbf{b}$ 与面积、垂直方向有关
                 
                 **新问题**：如何计算以三个向量为棱的平行六面体的体积？
 
@@ -486,36 +486,36 @@ export const tripleproductLesson: SubLesson = {
             ## 二、体积公式的推导
 
             ### 2.1 分解思路
-            平行六面体体积 = 底面积 × 高
+            平行六面体体积 = 底面积 $\times$ 高
 
 \`\`\`
 
-                V = (底面积) × (高)
+                V = (底面积) $\times$ (高)
 
-            选择以 **a** 和 **b** 为底面邻边：
+            选择以 $\mathbf{a}$ 和 $\mathbf{b}$ 为底面邻边：
 
-                - **底面积** = |**a** × **b**|（叉乘的大小）
-                - **高** = **c** 在垂直于底面方向上的投影长度
+                - **底面积** = $|\\mathbf{a} \\times \\mathbf{b}|$（叉乘的大小）
+                - **高** = $\\mathbf{c}$ 在垂直于底面方向上的投影长度
 
             ### 2.2 高的计算
-            底面的法向量方向就是 **a** × **b** 的方向。**c** 在这个方向上的投影为：
+            底面的法向量方向就是 $\\mathbf{a} \\times \\mathbf{b}$ 的方向。$\\mathbf{c}$ 在这个方向上的投影为：
 
 \`\`\`
 
-                高 = |**c**|·|cos(θ)| = |(**a** × **b**) · **c**| / |**a** × **b**|
+                高 = |\\mathbf{c}|\\cdot|cos(\theta)| = |(\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c}| / |\\mathbf{a} \\times \\mathbf{b}|
 
-            其中 θ 是 **c** 与 **a** × **b** 的夹角。
+            其中 \theta 是 \\mathbf{c} 与 \\mathbf{a} \\times \\mathbf{b} 的夹角。
 
             ### 2.3 体积公式
             综合以上：
 
 \`\`\`
 
-                V = |**a** × **b**| × |(**a** × **b**) · **c**| / |**a** × **b**| = |(**a** × **b**) · **c**|
+                V = |\\mathbf{a} \\times \\mathbf{b}| \\times |(\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c}| / |\\mathbf{a} \\times \\mathbf{b}| = |(\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c}|
 
 > **提示**
 > 
-                **定义**：三个向量的**混合积**定义为 (**a** × **b**) · **c**
+                **定义**：三个向量的**混合积**定义为 (\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c}
 
                 **几何意义**：其绝对值等于以三个向量为棱的平行六面体的体积
 
@@ -526,15 +526,15 @@ export const tripleproductLesson: SubLesson = {
             ## 三、代数表示：行列式
 
             ### 3.1 从分量展开
-            设 **a** = (a₁, a₂, a₃), **b** = (b₁, b₂, b₃), **c** = (c₁, c₂, c₃)
+            设 \\mathbf{a} = (a₁, a₂, a₃), \\mathbf{b} = (b₁, b₂, b₃), \\mathbf{c} = (c₁, c₂, c₃)
 
-            先计算 **a** × **b** = (a₂b₃ - a₃b₂, a₃b₁ - a₁b₃, a₁b₂ - a₂b₁)
+            先计算 \\mathbf{a} \\times \\mathbf{b} = (a₂b₃ - a₃b₂, a₃b₁ - a₁b₃, a₁b₂ - a₂b₁)
 
-            再与 **c** 点乘：
+            再与 \\mathbf{c} 点乘：
 
 \`\`\`
 
-                (**a** × **b**) · **c** = c₁(a₂b₃ - a₃b₂) + c₂(a₃b₁ - a₁b₃) + c₃(a₁b₂ - a₂b₁)
+                (\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c} = c₁(a₂b₃ - a₃b₂) + c₂(a₃b₁ - a₁b₃) + c₃(a₁b₂ - a₂b₁)
 
             ### 3.2 整理为行列式
             展开式可以重新排列为：
@@ -547,7 +547,7 @@ export const tripleproductLesson: SubLesson = {
 
 \`\`\`
 
-                (**a** × **b**) · **c** = det(**a**, **b**, **c**) = |a₁ a₂ a₃|
+                (\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c} = det(\\mathbf{a}, \\mathbf{b}, \\mathbf{c}) = |a₁ a₂ a₃|
 
                                                                    |b₁ b₂ b₃|
 
@@ -560,37 +560,37 @@ export const tripleproductLesson: SubLesson = {
 
 **思考引导**
 
-                    - **(<strong>a** × **b**) · **c** > 0</strong>：**c** 与 **a** × **b** 同向，构成右手系
-                    - **(<strong>a** × **b**) · **c** < 0</strong>：**c** 与 **a** × **b** 反向，构成左手系
-                    - **(<strong>a** × **b**) · **c** = 0</strong>：三向量共面，体积为零
+                    - **(<strong>a** \\times \\mathbf{b}) \\cdot \\mathbf{c} > 0</strong>：\\mathbf{c} 与 \\mathbf{a} \\times \\mathbf{b} 同向，构成右手系
+                    - **(<strong>a** \\times \\mathbf{b}) \\cdot \\mathbf{c} < 0</strong>：\\mathbf{c} 与 \\mathbf{a} \\times \\mathbf{b} 反向，构成左手系
+                    - **(<strong>a** \\times \\mathbf{b}) \\cdot \\mathbf{c} = 0</strong>：三向量共面，体积为零
 
             ### 4.2 轮换对称性
             循环置换三个向量，混合积不变：
 
 \`\`\`
 
-                (**a** × **b**) · **c** = (**b** × **c**) · **a** = (**c** × **a**) · **b**
+                (\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c} = (\\mathbf{b} \\times \\mathbf{c}) \\cdot \\mathbf{a} = (\\mathbf{c} \\times \\mathbf{a}) \\cdot \\mathbf{b}
 
             **证明**：这三个量都等于同一个行列式，只是行交换了偶数次，符号不变。
 
             ## 五、应用与判定
 
             ### 5.1 共面性判定
-            **定理**：(**a** × **b**) · **c** = 0 ⟺ 三向量共面
+            **定理**：(\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c} = 0 ⟺ 三向量共面
 
             **证明**：混合积为零 ⟺ 体积为零 ⟺ 三个向量共面
 
             ### 5.2 体积计算
             
-                - **平行六面体**：V = |(**a** × **b**) · **c**|
-                - **四面体**：V = ⅙|(**a** × **b**) · **c**|（四面体是平行六面体的1/6）
+                - **平行六面体**：V = |(\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c}|
+                - **四面体**：V = ⅙|(\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c}|（四面体是平行六面体的1/6）
 
             ### 5.3 点到平面的距离
-            已知平面过点 P₀，法向量 **n** = **a** × **b**，点 P 到平面的距离：
+            已知平面过点 P₀，法向量 \\mathbf{n} = \\mathbf{a} \\times \\mathbf{b}，点 P 到平面的距离：
 
 \`\`\`
 
-                d = |(**P** - **P₀**) · **n**| / |**n**|
+                d = |(**P** - **P₀**) \\cdot \\mathbf{n}| / |\\mathbf{n}|
 
 > ⚠️ **注意**
 > 
@@ -598,24 +598,22 @@ export const tripleproductLesson: SubLesson = {
 
 \`\`\`
 
-                    (**a** × **b**) · **c** = -(**b** × **a**) · **c** = (**b** × **c**) · **a**
+                    (\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c} = -(\\mathbf{b} \\times \\mathbf{a}) \\cdot \\mathbf{c} = (\\mathbf{b} \\times \\mathbf{c}) \\cdot \\mathbf{a}
   `,
   formula: `
 ## 混合积公式的推导
             ### 展开计算
             设 a = (a₁, a₂, a₃), b = (b₁, b₂, b₃), c = (c₁, c₂, c₃)
 
-            先计算 a × b：
+            先计算 a \\times b：
 
-\`\`\`
-
-                a × b = (a₂b₃ - a₃b₂, a₃b₁ - a₁b₃, a₁b₂ - a₂b₁)
+\`\`\`    $\\mathbf{a} \\times \\mathbf{b}$ = (a₂b₃ - a₃b₂, a₃b₁ - a₁b₃, a₁b₂ - a₂b₁)
 
             ### 再与 c 点乘
             
 \`\`\`
 
-                (a × b) · c = c₁(a₂b₃ - a₃b₂) + c₂(a₃b₁ - a₁b₃) + c₃(a₁b₂ - a₂b₁)
+                (a \\times b) \\cdot c = c₁(a₂b₃ - a₃b₂) + c₂(a₃b₁ - a₁b₃) + c₃(a₁b₂ - a₂b₁)
 
                 = c₁a₂b₃ - c₁a₃b₂ + c₂a₃b₁ - c₂a₁b₃ + c₃a₁b₂ - c₃a₂b₁
 
@@ -631,20 +629,20 @@ export const tripleproductLesson: SubLesson = {
                 |c₁ c₂ c₃|
 
             ## 几何推导
-            平行六面体体积 = 底面积 × 高
+            平行六面体体积 = 底面积 \\times 高
 
-                - 底面积 = |a × b|
-                - 高 = |c||cos(θ)|，其中 θ 是 c 与 a×b 的夹角
+                - 底面积 = |a \\times b|
+                - 高 = |\\mathbf{c}||cos(\theta)|，其中 \theta 是 c 与 a\timesb 的夹角
 
 \`\`\`
 
-                V = |a × b| × |c| × |cos(θ)| = |(a × b) · c|
+                V = |a \\times b| \\times |\\mathbf{c}| \\times |cos(\theta)| = |(a \\times b) \\cdot c|
   `,
   examples: [
   {
     "id": "tp-1",
     "difficulty": "easy",
-    "question": "已知 **a** = (1,0,0), **b** = (0,1,0), **c** = (0,0,1)，求混合积 (**a** × **b**) · **c**。",
+    "question": "已知 \\mathbf{a} = (1,0,0), \\mathbf{b} = (0,1,0), \\mathbf{c} = (0,0,1)，求混合积 (\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c}。",
     "options": [
       "0",
       "1",
@@ -652,7 +650,7 @@ export const tripleproductLesson: SubLesson = {
       "2"
     ],
     "correct": 1,
-    "explanation": "a × b = (0,0,1)，(a × b) · c = (0,0,1) · (0,0,1) = 1\n这正好是单位立方体的体积。"
+    "explanation": "a \\times b = (0,0,1)，(a \\times b) \\cdot c = (0,0,1) \\cdot (0,0,1) = 1\n这正好是单位立方体的体积。"
   },
   {
     "id": "tp-2",
@@ -665,7 +663,7 @@ export const tripleproductLesson: SubLesson = {
       "1/3"
     ],
     "correct": 2,
-    "explanation": "向量 AB = (1,0,0), AC = (0,2,0), AD = (0,0,3)\n混合积 (AB × AC) · AD = 6\n四面体体积 = |混合积|/6 = 6/6 = 1"
+    "explanation": "向量 AB = (1,0,0), AC = (0,2,0), AD = (0,0,3)\n混合积 (AB \\times AC) \\cdot AD = 6\n四面体体积 = |混合积|/6 = 6/6 = 1"
   }
 ]
 };
@@ -679,7 +677,7 @@ export const planelineLesson: SubLesson = {
 ## 平面方程
 
             ### 1. 点法式方程
-            已知平面上一点 P₀(x₀, y₀, z₀) 和平面的法向量 **n** = (A, B, C)：
+            已知平面上一点 P₀(x₀, y₀, z₀) 和平面的法向量 \\mathbf{n} = (A, B, C)：
 
 \`\`\`
 
@@ -738,15 +736,15 @@ export const planelineLesson: SubLesson = {
 
                 #### 两平面关系
                 
-                    - 平行：法向量平行，n₁ × n₂ = 0
-                    - 垂直：法向量垂直，n₁ · n₂ = 0
-                    - 夹角：cos(θ) = |n₁ · n₂|/(|n₁||n₂|)
+                    - 平行：法向量平行，n₁ \\times n₂ = 0
+                    - 垂直：法向量垂直，n₁ \\cdot n₂ = 0
+                    - 夹角：cos(\theta) = |n₁ \\cdot n₂|/(|n₁||n₂|)
 
                 #### 两直线关系
                 
                     - 平行：方向向量平行
                     - 垂直：方向向量垂直
-                    - 共面：(P₂-P₁) · (s₁ × s₂) = 0
+                    - 共面：(P₂-P₁) \\cdot (s₁ \\times s₂) = 0
 
                 #### 直线与平面关系
                 
@@ -777,7 +775,7 @@ export const planelineLesson: SubLesson = {
 
 \`\`\`
 
-                    d = |**P₀P** × **s**| / |**s**|
+                    d = |**P₀P** \\times **s**| / |**s**|
 
                 *几何意义：平行四边形的高 = 面积 / 底边长*
 
@@ -864,7 +862,7 @@ export const quadricsurfacesLesson: SubLesson = {
 
 \`\`\`
 
-                \frac{x^2}{a^2} + \frac{y^2}{b^2} + \frac{z^2}{c^2} = 1
+                \\frac{x^2}{a^2} + \\frac{y^2}{b^2} + \\frac{z^2}{c^2} = 1
 
             ### 1.2 几何特征分析
 
@@ -874,13 +872,13 @@ export const quadricsurfacesLesson: SubLesson = {
 
 \`\`\`
 
-                \frac{x^2}{a^2} + \frac{y^2}{b^2} = 1 - \frac{h^2}{c^2} = \frac{c^2 - h^2}{c^2}
+                \\frac{x^2}{a^2} + \\frac{y^2}{b^2} = 1 - \\frac{h^2}{c^2} = \\frac{c^2 - h^2}{c^2}
 
             两边除以右边，得标准椭圆方程：
 
 \`\`\`
 
-                \frac{x^2}{a^2(1 - h^2/c^2)} + \frac{y^2}{b^2(1 - h^2/c^2)} = 1
+                \\frac{x^2}{a^2(1 - h^2/c^2)} + \\frac{y^2}{b^2(1 - h^2/c^2)} = 1
 
             这说明水平截面是椭圆，且随 |h| 增大，椭圆逐渐缩小，当 |h| = c 时缩为一点。
 
@@ -900,13 +898,13 @@ export const quadricsurfacesLesson: SubLesson = {
 
 \`\`\`
 
-                \sqrt{x^2 + z^2} = \sqrt{y} \Rightarrow y = x^2 + z^2
+                \\sqrt{x^2 + z^2} = \\sqrt{y} \Rightarrow y = x^2 + z^2
 
             更一般地，若两个方向的"开口速度"不同，得到**椭圆抛物面**：
 
 \`\`\`
 
-                z = \frac{x^2}{a^2} + \frac{y^2}{b^2}
+                z = \\frac{x^2}{a^2} + \\frac{y^2}{b^2}
 
             ### 2.2 几何性质
 
@@ -914,7 +912,7 @@ export const quadricsurfacesLesson: SubLesson = {
 
 \`\`\`
 
-                \frac{x^2}{a^2h} + \frac{y^2}{b^2h} = 1
+                \\frac{x^2}{a^2h} + \\frac{y^2}{b^2h} = 1
 
             **定理 2**：椭圆抛物面与平面 x = 0 或 y = 0 的交线是抛物线。
 
@@ -930,11 +928,11 @@ export const quadricsurfacesLesson: SubLesson = {
 
 \`\`\`
 
-                z = \frac{x^2}{a^2} - \frac{y^2}{b^2}
+                z = \\frac{x^2}{a^2} - \\frac{y^2}{b^2}
 
             这个简单的符号变化导致了截然不同的几何性质：
 
-                <li>**与 z = h 的交线**：\frac{x^2}{a^2} - \frac{y^2}{b^2} = h
+                <li>**与 z = h 的交线**：\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = h
                     
                         - h > 0 时：双曲线，实轴平行于 x 轴
                         - h < 0 时：双曲线，实轴平行于 y 轴
@@ -962,7 +960,7 @@ export const quadricsurfacesLesson: SubLesson = {
 
 \`\`\`
 
-                \frac{x^2}{a^2} + \frac{y^2}{b^2} - \frac{z^2}{c^2} = 1
+                \\frac{x^2}{a^2} + \\frac{y^2}{b^2} - \\frac{z^2}{c^2} = 1
 
             **几何特征分析**：
 
@@ -970,7 +968,7 @@ export const quadricsurfacesLesson: SubLesson = {
 
 \`\`\`
 
-                \frac{x^2}{a^2} + \frac{y^2}{b^2} = 1 + \frac{h^2}{c^2}
+                \\frac{x^2}{a^2} + \\frac{y^2}{b^2} = 1 + \\frac{h^2}{c^2}
 
             注意：随着 |h| 增大，椭圆不断扩大！这与椭球面形成鲜明对比。
 
@@ -978,7 +976,7 @@ export const quadricsurfacesLesson: SubLesson = {
 
 \`\`\`
 
-                \frac{x^2}{a^2} - \frac{z^2}{c^2} = 1
+                \\frac{x^2}{a^2} - \\frac{z^2}{c^2} = 1
 
                 *↑ 观察单叶双曲面，注意腰部椭圆（红色）和双曲线截面（绿色）*
 
@@ -990,13 +988,13 @@ export const quadricsurfacesLesson: SubLesson = {
 
 \`\`\`
 
-                \frac{z^2}{c^2} - \frac{x^2}{a^2} - \frac{y^2}{b^2} = 1
+                \\frac{z^2}{c^2} - \\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1
 
             或等价地写为：
 
 \`\`\`
 
-                \frac{x^2}{a^2} + \frac{y^2}{b^2} - \frac{z^2}{c^2} = -1
+                \\frac{x^2}{a^2} + \\frac{y^2}{b^2} - \\frac{z^2}{c^2} = -1
 
             **关键差异**：
 
@@ -1020,7 +1018,7 @@ export const quadricsurfacesLesson: SubLesson = {
 
 \`\`\`
 
-                \frac{x^2}{a^2} + \frac{y^2}{b^2} = \frac{z^2}{c^2}
+                \\frac{x^2}{a^2} + \\frac{y^2}{b^2} = \\frac{z^2}{c^2}
 
             **定理**：锥面与平面 z = h（h ≠ 0）的交线是椭圆，与平面 x = 0 或 y = 0 的交线是两条相交直线。
 
@@ -1051,13 +1049,13 @@ export const quadricsurfacesLesson: SubLesson = {
                 </tr>
                 <tr>
                     <td style="padding: 10px; border: 1px solid #ccc;">椭圆柱面</td>
-                    <td style="padding: 10px; border: 1px solid #ccc;">\frac{x^2}{a^2} + \frac{y^2}{b^2} = 1</td>
+                    <td style="padding: 10px; border: 1px solid #ccc;">\\frac{x^2}{a^2} + \\frac{y^2}{b^2} = 1</td>
                     <td style="padding: 10px; border: 1px solid #ccc;">xy平面椭圆</td>
                     <td style="padding: 10px; border: 1px solid #ccc;">封闭</td>
                 </tr>
                 <tr>
                     <td style="padding: 10px; border: 1px solid #ccc;">双曲柱面</td>
-                    <td style="padding: 10px; border: 1px solid #ccc;">\frac{x^2}{a^2} - \frac{y^2}{b^2} = 1</td>
+                    <td style="padding: 10px; border: 1px solid #ccc;">\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1</td>
                     <td style="padding: 10px; border: 1px solid #ccc;">xy平面双曲线</td>
                     <td style="padding: 10px; border: 1px solid #ccc;">两叶开口</td>
                 </tr>
@@ -1163,19 +1161,19 @@ export const coordinatesystemsLesson: SubLesson = {
   vizType: 'coordinateTransform',
   theory: `
 ## 柱坐标系
-            用 (r, θ, z) 表示空间中一点：
+            用 (r, \theta, z) 表示空间中一点：
 
                 - r：点到 z 轴的距离
-                - θ：点在 xy 平面上投影的极角
+                - \theta：点在 xy 平面上投影的极角
                 - z：点的竖坐标（与直角坐标相同）
 
             ### 与直角坐标的转换
             
 \`\`\`
 
-                x = r·cos(θ)
+                x = r\cdotcos(\theta)
 
-                y = r·sin(θ)
+                y = r\cdotsin(\theta)
 
                 z = z
 
@@ -1183,7 +1181,7 @@ export const coordinatesystemsLesson: SubLesson = {
 
                 r = √(x² + y²)
 
-                θ = arctan(y/x)
+                \theta = arctan(y/x)
 
                 z = z
 
@@ -1191,30 +1189,30 @@ export const coordinatesystemsLesson: SubLesson = {
             
 \`\`\`
 
-                dV = r·dr·dθ·dz
+                dV = r\cdotdr\cdotd\theta\cdotdz
 
             ## 球坐标系
-            用 (r, θ, φ) 表示空间中一点：
+            用 (r, \theta, φ) 表示空间中一点：
 
                 - r：点到原点的距离
-                - θ：极角（与 z 轴正向的夹角）
+                - \theta：极角（与 z 轴正向的夹角）
                 - φ：方位角（在 xy 平面上的投影与 x 轴的夹角）
 
             ### 与直角坐标的转换
             
 \`\`\`
 
-                x = r·sin(θ)·cos(φ)
+                x = r\cdotsin(\theta)\cdotcos(φ)
 
-                y = r·sin(θ)·sin(φ)
+                y = r\cdotsin(\theta)\cdotsin(φ)
 
-                z = r·cos(θ)
+                z = r\cdotcos(\theta)
 
             ### 体积元
             
 \`\`\`
 
-                dV = r²·sin(θ)·dr·dθ·dφ
+                dV = r²\cdotsin(\theta)\cdotdr\cdotd\theta\cdotdφ
 
             ## 坐标系选择指南
             
@@ -1231,15 +1229,15 @@ export const coordinatesystemsLesson: SubLesson = {
             
 \`\`\`
 
-                dV = r dr dθ dz
+                dV = r dr d\theta dz
 
-            推导：考虑由 r 到 r+dr，θ 到 θ+dθ，z 到 z+dz 的小体积
+            推导：考虑由 r 到 r+dr，\theta 到 \theta+d\theta，z 到 z+dz 的小体积
 
             ### 球坐标体积元
             
 \`\`\`
 
-                dV = r² sin(φ) dr dφ dθ
+                dV = r² sin(φ) dr dφ d\theta
   `,
   examples: [
   {
@@ -1253,7 +1251,7 @@ export const coordinatesystemsLesson: SubLesson = {
       "(2, π/4, 1)"
     ],
     "correct": 0,
-    "explanation": "r = √(x²+y²) = √(1+1) = √2\nθ = arctan(y/x) = arctan(1) = π/4\nz = 1\n所以柱坐标为 (√2, π/4, 1)"
+    "explanation": "r = √(x²+y²) = √(1+1) = √2\n\theta = arctan(y/x) = arctan(1) = π/4\nz = 1\n所以柱坐标为 (√2, π/4, 1)"
   }
 ]
 };
@@ -1269,7 +1267,7 @@ export const vectorfieldsLesson: SubLesson = {
 
 \`\`\`
 
-                **F**(x, y, z) = P(x,y,z)**i** + Q(x,y,z)**j** + R(x,y,z)**k**
+                **F**(x, y, z) = P(x,y,z)\\mathbf{i} + Q(x,y,z)\\mathbf{j} + R(x,y,z)\\mathbf{k}
 
             ## 重要的向量场
 
@@ -1285,13 +1283,13 @@ export const vectorfieldsLesson: SubLesson = {
 
 \`\`\`
 
-                ∇ × **F** = (∂R/∂y - ∂Q/∂z, ∂P/∂z - ∂R/∂x, ∂Q/∂x - ∂P/∂y)
+                ∇ \\times **F** = (∂R/∂y - ∂Q/∂z, ∂P/∂z - ∂R/∂x, ∂Q/∂x - ∂P/∂y)
 
             **散度**（Divergence）：
 
 \`\`\`
 
-                ∇ · **F** = ∂P/∂x + ∂Q/∂y + ∂R/∂z
+                ∇ \\cdot **F** = ∂P/∂x + ∂Q/∂y + ∂R/∂z
 
             ## 重要恒等式
             
@@ -1299,9 +1297,9 @@ export const vectorfieldsLesson: SubLesson = {
 
 \`\`\`
 
-                    ∇ × (∇f) = 0（梯度的旋度为零）
+                    ∇ \\times (∇f) = 0（梯度的旋度为零）
 
-                    ∇ · (∇ × **F**) = 0（旋度的散度为零）
+                    ∇ \\cdot (∇ \\times **F**) = 0（旋度的散度为零）
 
             ## 物理意义
             
@@ -1318,7 +1316,7 @@ export const vectorfieldsLesson: SubLesson = {
             
 \`\`\`
 
-                ∇ × **F** = | i     j     k    |
+                ∇ \\times **F** = | i     j     k    |
 
                            | ∂/∂x  ∂/∂y  ∂/∂z |
 
@@ -1328,7 +1326,7 @@ export const vectorfieldsLesson: SubLesson = {
             
 \`\`\`
 
-                ∭_V (∇ · **F**)dV = ∯_S **F** · d**S**
+                ∭_V (∇ \\cdot **F**)dV = ∯_S **F** \\cdot d**S**
   `,
   examples: [
   {
@@ -1406,7 +1404,7 @@ export const multivariableconceptLesson: SubLesson = {
       "∞"
     ],
     "correct": 0,
-    "explanation": "使用极坐标：x = r·cos(θ), y = r·sin(θ)\n原式 = lim(r→0) [r³cos²(θ)sin(θ)]/r² = lim(r→0) r·cos²(θ)sin(θ) = 0"
+    "explanation": "使用极坐标：x = r\cdotcos(\theta), y = r\cdotsin(\theta)\n原式 = lim(r→0) [r³cos²(\theta)sin(\theta)]/r² = lim(r→0) r\cdotcos²(\theta)sin(\theta) = 0"
   }
 ]
 };
@@ -1491,17 +1489,17 @@ export const partialderivativeLesson: SubLesson = {
 
 \`\`\`
 
-                ∂z/∂x = 2xy + y·cos(xy)（y 视为常数）
+                ∂z/∂x = 2xy + y\cdotcos(xy)（y 视为常数）
 
-                ∂z/∂y = x² + x·cos(xy)（x 视为常数）
+                ∂z/∂y = x² + x\cdotcos(xy)（x 视为常数）
 
             **例 2**：z = xʸ（幂指函数）
 
 \`\`\`
 
-                ∂z/∂x = y·xʸ⁻¹（y 视为常数，幂函数求导）
+                ∂z/∂x = y\cdotxʸ⁻¹（y 视为常数，幂函数求导）
 
-                ∂z/∂y = xʸ·ln(x)（x 视为常数，指数函数求导）
+                ∂z/∂y = xʸ\cdotln(x)（x 视为常数，指数函数求导）
 
             ## 五、高阶偏导数与混合偏导数
 
@@ -1588,7 +1586,7 @@ export const totaldifferentialLesson: SubLesson = {
 
                     dy = f'(x)dx，且 Δy = f'(x)Δx + o(Δx)
 
-                这表示：函数的微小变化 ≈ 导数 × 自变量的微小变化。
+                这表示：函数的微小变化 ≈ 导数 \\times 自变量的微小变化。
 
                 **问题**：对于多元函数 z = f(x, y)，当 x 和 y 同时有微小变化时，z 的变化如何近似？
 
@@ -1605,7 +1603,7 @@ export const totaldifferentialLesson: SubLesson = {
 
 \`\`\`
 
-                Δz = A·Δx + B·Δy + o(√(Δx² + Δy²))
+                Δz = A\\cdotΔx + B\\cdotΔy + o(√(Δx² + Δy²))
 
             其中前两项是**线性主部**，最后一项是高阶无穷小。
 
@@ -1619,7 +1617,7 @@ export const totaldifferentialLesson: SubLesson = {
 
 \`\`\`
 
-                f(x+Δx, y) - f(x, y) = A·Δx + o(|Δx|)
+                f(x+Δx, y) - f(x, y) = A\\cdotΔx + o(|Δx|)
 
             两边除以 Δx 并令 Δx → 0：
 
@@ -1701,13 +1699,13 @@ export const totaldifferentialLesson: SubLesson = {
 
 \`\`\`
 
-                dV = (∂V/∂r)dr + (∂V/∂h)dh = 2πrh·dr + πr²·dh
+                dV = (∂V/∂r)dr + (∂V/∂h)dh = 2πrh\cdotdr + πr²\cdotdh
 
             若 r = 10cm，h = 20cm，测量误差 |dr| ≤ 0.1cm，|dh| ≤ 0.1cm：
 
 \`\`\`
 
-                |dV| ≤ 2π·10·20·0.1 + π·100·0.1 = 40π + 10π = 50π ≈ 157 cm³
+                |dV| ≤ 2π\\cdot10\\cdot20\\cdot0.1 + π\\cdot100\\cdot0.1 = 40π + 10π = 50π ≈ 157 cm³
 
             用于近似计算和误差估计。
   `,
@@ -1745,7 +1743,7 @@ export const chainruleLesson: SubLesson = {
 
 \`\`\`
 
-                    y = f(u)，u = g(x) ⟹ dy/dx = (dy/du)·(du/dx) = f'(u)·g'(x)
+                    y = f(u)，u = g(x) ⟹ dy/dx = (dy/du)\\cdot(du/dx) = f'(u)\cdotg'(x)
 
                 这是"变化率的传递"。**问题**：对于多元复合函数，这个法则如何推广？
 
@@ -1792,21 +1790,21 @@ export const chainruleLesson: SubLesson = {
                 <tr>
                     <td style="padding: 10px; border: 1px solid #ccc;">z = f(u,v)
 u = u(t), v = v(t)</td>
-                    <td style="padding: 10px; border: 1px solid #ccc;">dz/dt = zᵤ·u' + zᵥ·v'</td>
+                    <td style="padding: 10px; border: 1px solid #ccc;">dz/dt = zᵤ\cdotu' + zᵥ\cdotv'</td>
                     <td style="padding: 10px; border: 1px solid #ccc;">全导数（一元）</td>
                 </tr>
                 <tr>
                     <td style="padding: 10px; border: 1px solid #ccc;">z = f(u,v)
 u = u(x,y), v = v(x,y)</td>
-                    <td style="padding: 10px; border: 1px solid #ccc;">zₓ = zᵤ·uₓ + zᵥ·vₓ
-zᵧ = zᵤ·uᵧ + zᵥ·vᵧ</td>
+                    <td style="padding: 10px; border: 1px solid #ccc;">zₓ = zᵤ\cdotuₓ + zᵥ\cdotvₓ
+zᵧ = zᵤ\cdotuᵧ + zᵥ\cdotvᵧ</td>
                     <td style="padding: 10px; border: 1px solid #ccc;">偏导数（二元）</td>
                 </tr>
                 <tr>
                     <td style="padding: 10px; border: 1px solid #ccc;">z = f(u)
 u = u(x,y)</td>
-                    <td style="padding: 10px; border: 1px solid #ccc;">zₓ = (dz/du)·uₓ
-zᵧ = (dz/du)·uᵧ</td>
+                    <td style="padding: 10px; border: 1px solid #ccc;">zₓ = (dz/du)\cdotuₓ
+zᵧ = (dz/du)\cdotuᵧ</td>
                     <td style="padding: 10px; border: 1px solid #ccc;">单中间变量</td>
                 </tr>
             </table>
@@ -1844,8 +1842,8 @@ zᵧ = (dz/du)·uᵧ</td>
 
 \`\`\`
 
-                ∂²z/∂x² = ∂/∂x(zᵤ·uₓ + zᵥ·vₓ)
-                        = (zᵤᵤ·uₓ + zᵤᵥ·vₓ)uₓ + zᵤ·uₓₓ + (zᵥᵤ·uₓ + zᵥᵥ·vₓ)vₓ + zᵥ·vₓₓ
+                ∂²z/∂x² = ∂/∂x(zᵤ\cdotuₓ + zᵥ\cdotvₓ)
+                        = (zᵤᵤ\cdotuₓ + zᵤᵥ\cdotvₓ)uₓ + zᵤ\cdotuₓₓ + (zᵥᵤ\cdotuₓ + zᵥᵥ\cdotvₓ)vₓ + zᵥ\cdotvₓₓ
 
 > ⚠️ **注意**
 > 
@@ -1882,7 +1880,7 @@ zᵧ = (dz/du)·uᵧ</td>
       "4y"
     ],
     "correct": 0,
-    "explanation": "∂z/∂x = (∂z/∂u)(∂u/∂x) + (∂z/∂v)(∂v/∂x)\n= 2u·1 + 2v·1 = 2(x+y) + 2(x-y) = 4x"
+    "explanation": "∂z/∂x = (∂z/∂u)(∂u/∂x) + (∂z/∂v)(∂v/∂x)\n= 2u\\cdot1 + 2v\\cdot1 = 2(x+y) + 2(x-y) = 4x"
   }
 ]
 };
@@ -2052,14 +2050,14 @@ export const directionalderivativeLesson: SubLesson = {
 
 \`\`\`
 
-                ∂f/∂l = fₓ·cos α + fᵧ·cos β = ∇f · **e**
+                ∂f/∂l = fₓ\cdotcos α + fᵧ\cdotcos β = ∇f \\cdot **e**
 
             ### 3.2 推导
             由全微分公式：
 
 \`\`\`
 
-                Δf ≈ fₓΔx + fᵧΔy = fₓ·ρcos α + fᵧ·ρcos β
+                Δf ≈ fₓΔx + fᵧΔy = fₓ\\cdotρcos α + fᵧ\\cdotρcos β
 
             因此：
 
@@ -2086,9 +2084,9 @@ export const directionalderivativeLesson: SubLesson = {
 
 \`\`\`
 
-                ∂f/∂l = ∇f · **e** = |∇f|·cos(θ)
+                ∂f/∂l = ∇f \\cdot **e** = |∇f|\cdotcos(\theta)
 
-            其中 θ 是梯度方向与方向 **l** 的夹角。
+            其中 \theta 是梯度方向与方向 **l** 的夹角。
 
             ## 五、梯度的几何意义
 
@@ -2099,13 +2097,13 @@ export const directionalderivativeLesson: SubLesson = {
                     - 观察：梯度始终垂直于等值线
 
             ### 5.1 最大变化率
-            由 ∂f/∂l = |∇f|cos(θ) 可知：
+            由 ∂f/∂l = |∇f|cos(\theta) 可知：
 
 **思考引导**
 
-                    - 当 θ = 0（沿梯度方向）：∂f/∂l = |∇f|（最大）
-                    - 当 θ = π（沿负梯度方向）：∂f/∂l = -|∇f|（最小）
-                    - 当 θ = π/2（垂直于梯度）：∂f/∂l = 0（等值线方向）
+                    - 当 \theta = 0（沿梯度方向）：∂f/∂l = |∇f|（最大）
+                    - 当 \theta = π（沿负梯度方向）：∂f/∂l = -|∇f|（最小）
+                    - 当 \theta = π/2（垂直于梯度）：∂f/∂l = 0（等值线方向）
 
             ### 5.2 梯度的三个关键性质
 
@@ -2123,7 +2121,7 @@ export const directionalderivativeLesson: SubLesson = {
 
 \`\`\`
 
-                ∂f/∂l = ∇f · **e** = fₓcos α + fᵧcos β + fᵤcos γ
+                ∂f/∂l = ∇f \\cdot **e** = fₓcos α + fᵧcos β + fᵤcos γ
 
             梯度 ∇f 是等值面 f(x,y,z) = C 的法向量。
 
@@ -2153,7 +2151,7 @@ export const directionalderivativeLesson: SubLesson = {
       "4"
     ],
     "correct": 0,
-    "explanation": "fₓ = 2x = 2, fᵧ = 2y = 2\n方向单位向量 e = (1/√2, 1/√2)\n∂f/∂l = 2·(1/√2) + 2·(1/√2) = 4/√2 = 2√2"
+    "explanation": "fₓ = 2x = 2, fᵧ = 2y = 2\n方向单位向量 e = (1/√2, 1/√2)\n∂f/∂l = 2\\cdot(1/√2) + 2\\cdot(1/√2) = 4/√2 = 2√2"
   }
 ]
 };
@@ -2205,7 +2203,7 @@ export const extremaLesson: SubLesson = {
 
 \`\`\`
 
-                L(x, y, λ) = f(x, y) + λ·φ(x, y)
+                L(x, y, λ) = f(x, y) + λ\\cdotφ(x, y)
 
             解方程组：
 
@@ -2278,9 +2276,9 @@ export const taylorLesson: SubLesson = {
 
                 = f(x₀, y₀)
 
-                + fₓ·h + fᵧ·k
+                + fₓ\cdoth + fᵧ\cdotk
 
-                + 1/2[fₓₓ·h² + 2fₓᵧ·hk + fᵧᵧ·k²]
+                + 1/2[fₓₓ\cdoth² + 2fₓᵧ\cdothk + fᵧᵧ\cdotk²]
 
             ## 矩阵表示
             令 **h** = (h, k)，H 为 Hessian 矩阵：
@@ -2293,7 +2291,7 @@ export const taylorLesson: SubLesson = {
 
 \`\`\`
 
-                f(x₀+h, y₀+k) ≈ f(x₀, y₀) + ∇f·**h** + 1/2 **h**ᵀH**h**
+                f(x₀+h, y₀+k) ≈ f(x₀, y₀) + ∇f\\cdot**h** + 1/2 **h**ᵀH**h**
 
             ## 极值的二次型判别
             
@@ -2354,7 +2352,7 @@ export const lagrangeLesson: SubLesson = {
             
 \`\`\`
 
-                L(x, y, λ) = f(x, y) + λ·φ(x, y)
+                L(x, y, λ) = f(x, y) + λ\\cdotφ(x, y)
 
             ### 极值必要条件
             
@@ -2371,7 +2369,7 @@ export const lagrangeLesson: SubLesson = {
 
 \`\`\`
 
-                L(x, y, z, λ, μ) = f(x, y, z) + λ·φ(x, y, z) + μ·ψ(x, y, z)
+                L(x, y, z, λ, μ) = f(x, y, z) + λ\\cdotφ(x, y, z) + μ\\cdotψ(x, y, z)
 
             ## 几何解释
             
@@ -2528,7 +2526,7 @@ export const integralconceptLesson: SubLesson = {
 
 \`\`\`
 
-                    ∬ᴅ f(x,y)dσ = f(ξ,η)·|D|
+                    ∬ᴅ f(x,y)dσ = f(ξ,η)\\cdot|D|
 
                 其中 |D| 是区域 D 的面积。
 
@@ -2567,7 +2565,7 @@ export const integralconceptLesson: SubLesson = {
 
 \`\`\`
 
-                ∬ᴅ f(x,y)dσ = f(ξ,η)·|D|
+                ∬ᴅ f(x,y)dσ = f(ξ,η)\\cdot|D|
   `,
   examples: [
   {
@@ -2669,33 +2667,33 @@ export const doubleintegralLesson: SubLesson = {
             
 \`\`\`
 
-                x = r·cos(θ), y = r·sin(θ)
+                x = r\cdotcos(\theta), y = r\cdotsin(\theta)
 
-            **关键**：极坐标下的面积元素不是 drdθ，而是：
+            **关键**：极坐标下的面积元素不是 drd\theta，而是：
 
 **思考引导**
 
 \`\`\`
 
-                    dσ = r·dr·dθ
+                    dσ = r\cdotdr\cdotd\theta
 
-                **几何解释**：极坐标网格中，小区域近似为矩形，边长为 dr 和 r·dθ。
+                **几何解释**：极坐标网格中，小区域近似为矩形，边长为 dr 和 r\cdotd\theta。
 
             ### 3.3 极坐标下的计算公式
 
 \`\`\`
 
-                ∬ᴅ f(x, y)dσ = ∬ᴅ' f(r·cos(θ), r·sin(θ))·r·dr·dθ
+                ∬ᴅ f(x, y)dσ = ∬ᴅ' f(r\cdotcos(\theta), r\cdotsin(\theta))\cdotr\cdotdr\cdotd\theta
 
             ### 3.4 常用极坐标区域
 
 > **提示**
 > 
                 
-                    - **圆 x² + y² ≤ R²**：0 ≤ r ≤ R, 0 ≤ θ ≤ 2π
-                    - **圆 x² + y² ≤ 2Rx**（圆心在 (R,0)）：0 ≤ r ≤ 2R·cos(θ), -π/2 ≤ θ ≤ π/2
-                    - **圆环 a² ≤ x² + y² ≤ b²**：a ≤ r ≤ b, 0 ≤ θ ≤ 2π
-                    - **扇形**：0 ≤ r ≤ R, α ≤ θ ≤ β
+                    - **圆 x² + y² ≤ R²**：0 ≤ r ≤ R, 0 ≤ \theta ≤ 2π
+                    - **圆 x² + y² ≤ 2Rx**（圆心在 (R,0)）：0 ≤ r ≤ 2R\cdotcos(\theta), -π/2 ≤ \theta ≤ π/2
+                    - **圆环 a² ≤ x² + y² ≤ b²**：a ≤ r ≤ b, 0 ≤ \theta ≤ 2π
+                    - **扇形**：0 ≤ r ≤ R, α ≤ \theta ≤ β
 
             ## 四、变量替换的一般公式
 
@@ -2758,21 +2756,21 @@ export const tripleintegralLesson: SubLesson = {
             
 \`\`\`
 
-                x = r·cos(θ), y = r·sin(θ), z = z
+                x = r\cdotcos(\theta), y = r\cdotsin(\theta), z = z
 
-                dV = r·dr·dθ·dz
+                dV = r\cdotdr\cdotd\theta\cdotdz
 
             ## 球坐标
             
 \`\`\`
 
-                x = r·sin(φ)·cos(θ)
+                x = r\cdotsin(φ)\cdotcos(\theta)
 
-                y = r·sin(φ)·sin(θ)
+                y = r\cdotsin(φ)\cdotsin(\theta)
 
-                z = r·cos(φ)
+                z = r\cdotcos(φ)
 
-                dV = r²·sin(φ)·dr·dφ·dθ
+                dV = r²\cdotsin(φ)\cdotdr\cdotdφ\cdotd\theta
 
             ## 坐标系选择
             
@@ -2788,7 +2786,7 @@ export const tripleintegralLesson: SubLesson = {
                 若 Ω 关于 xy 平面对称：
 
                     - f(x, y, -z) = -f(x, y, z) ⟹ 积分为 0
-                    - f(x, y, -z) = f(x, y, z) ⟹ 积分 = 2 × 上半区域积分
+                    - f(x, y, -z) = f(x, y, z) ⟹ 积分 = 2 \\times 上半区域积分
   `,
   formula: `
 ## 三重积分计算方法
@@ -2816,7 +2814,7 @@ export const tripleintegralLesson: SubLesson = {
       "π/2"
     ],
     "correct": 0,
-    "explanation": "使用球坐标：V = ∭ dV = ∫₀²π dθ ∫₀^π dφ ∫₀¹ r² sin(φ) dr\n= 2π × [-cos(φ)]₀^π × [r³/3]₀¹\n= 2π × 2 × 1/3 = 4π/3"
+    "explanation": "使用球坐标：V = ∭ dV = ∫₀²π d\theta ∫₀^π dφ ∫₀¹ r² sin(φ) dr\n= 2π \\times [-cos(φ)]₀^π \\times [r³/3]₀¹\n= 2π \\times 2 \\times 1/3 = 4π/3"
   }
 ]
 };
@@ -2846,17 +2844,17 @@ export const changevariablesLesson: SubLesson = {
             
 \`\`\`
 
-                J = |cos(θ)  -r·sin(θ)|
+                J = |cos(\theta)  -r\cdotsin(\theta)|
 
-                    |sin(θ)   r·cos(θ)| = r
+                    |sin(\theta)   r\cdotcos(\theta)| = r
 
             ## 广义极坐标
             
 \`\`\`
 
-                x = a·r·cos(θ), y = b·r·sin(θ)
+                x = a\cdotr\cdotcos(\theta), y = b\cdotr\cdotsin(\theta)
 
-                J = ab·r
+                J = ab\cdotr
 
             用于椭圆区域 x²/a² + y²/b² ≤ 1
 
@@ -2883,13 +2881,13 @@ export const changevariablesLesson: SubLesson = {
 
                 若 x = x(u,v), y = y(u,v)，且 u = u(s,t), v = v(s,t)
 
-                则 ∂(x,y)/∂(s,t) = ∂(x,y)/∂(u,v) × ∂(u,v)/∂(s,t)
+                则 ∂(x,y)/∂(s,t) = ∂(x,y)/∂(u,v) \\times ∂(u,v)/∂(s,t)
 
             ### 逆变换
             
 \`\`\`
 
-                ∂(x,y)/∂(u,v) × ∂(u,v)/∂(x,y) = 1
+                ∂(x,y)/∂(u,v) \\times ∂(u,v)/∂(x,y) = 1
   `,
   examples: [
   {
@@ -2903,7 +2901,7 @@ export const changevariablesLesson: SubLesson = {
       "4ab"
     ],
     "correct": 0,
-    "explanation": "令 x = ar·cos(θ), y = br·sin(θ)\nJ = abr\nS = ∬ᴅ dxdy = ∫₀²π dθ ∫₀¹ abr dr = 2π × ab × 1/2 = πab"
+    "explanation": "令 x = ar\cdotcos(\theta), y = br\cdotsin(\theta)\nJ = abr\nS = ∬ᴅ dxdy = ∫₀²π d\theta ∫₀¹ abr dr = 2π \\times ab \\times 1/2 = πab"
   }
 ]
 };
@@ -2949,19 +2947,19 @@ export const applicationsLesson: SubLesson = {
             
 \`\`\`
 
-                x̄ = (1/M)∬ᴅ x·ρ(x,y)dσ
+                x̄ = (1/M)∬ᴅ x\\cdotρ(x,y)dσ
 
-                ȳ = (1/M)∬ᴅ y·ρ(x,y)dσ
+                ȳ = (1/M)∬ᴅ y\\cdotρ(x,y)dσ
 
             ### 转动惯量
             
 \`\`\`
 
-                Iₓ = ∬ᴅ y²·ρ(x,y)dσ （对 x 轴）
+                Iₓ = ∬ᴅ y²\\cdotρ(x,y)dσ （对 x 轴）
 
-                Iᵧ = ∬ᴅ x²·ρ(x,y)dσ （对 y 轴）
+                Iᵧ = ∬ᴅ x²\\cdotρ(x,y)dσ （对 y 轴）
 
-                I₀ = ∬ᴅ (x²+y²)·ρ(x,y)dσ （对原点）
+                I₀ = ∬ᴅ (x²+y²)\\cdotρ(x,y)dσ （对原点）
 
             ### 引力
             物体对质点的引力可用三重积分计算各分量。
@@ -2972,11 +2970,11 @@ export const applicationsLesson: SubLesson = {
             
 \`\`\`
 
-                x̄ = (1/M)∭ᴠ x·ρ dV
+                x̄ = (1/M)∭ᴠ x\\cdotρ dV
 
-                ȳ = (1/M)∭ᴠ y·ρ dV
+                ȳ = (1/M)∭ᴠ y\\cdotρ dV
 
-                z̄ = (1/M)∭ᴠ z·ρ dV
+                z̄ = (1/M)∭ᴠ z\\cdotρ dV
 
             ### 转动惯量张量
             
@@ -2996,7 +2994,7 @@ export const applicationsLesson: SubLesson = {
       "(R/2, 0)"
     ],
     "correct": 0,
-    "explanation": "由对称性，x̄ = 0\nȳ = (1/S)∬ᴅ y dσ = (1/(πR²/2))∫₀^π dθ ∫₀ᴿ r·sin(θ)·r dr\n= (2/(πR²)) × 2 × R³/3 = 4R/(3π)"
+    "explanation": "由对称性，x̄ = 0\nȳ = (1/S)∬ᴅ y dσ = (1/(πR²/2))∫₀^π d\theta ∫₀ᴿ r\cdotsin(\theta)\cdotr dr\n= (2/(πR²)) \\times 2 \\times R³/3 = 4R/(3π)"
   }
 ]
 };
@@ -3011,28 +3009,28 @@ export const polarcoordinatesLesson: SubLesson = {
             
 \`\`\`
 
-                x = r·cos(θ), y = r·sin(θ)
+                x = r\cdotcos(\theta), y = r\cdotsin(\theta)
 
-                dσ = r·dr·dθ
+                dσ = r\cdotdr\cdotd\theta
 
             ## 极坐标下的积分区域
 
             ### 圆形区域
             
-                - 圆心在原点：0 ≤ r ≤ R, 0 ≤ θ ≤ 2π
-                - 圆心在 (a, 0)：0 ≤ r ≤ 2a·cos(θ), -π/2 ≤ θ ≤ π/2
+                - 圆心在原点：0 ≤ r ≤ R, 0 ≤ \theta ≤ 2π
+                - 圆心在 (a, 0)：0 ≤ r ≤ 2a\cdotcos(\theta), -π/2 ≤ \theta ≤ π/2
 
             ### 环形区域
             
 \`\`\`
 
-                a ≤ r ≤ b, 0 ≤ θ ≤ 2π
+                a ≤ r ≤ b, 0 ≤ \theta ≤ 2π
 
             ### 扇形区域
             
 \`\`\`
 
-                0 ≤ r ≤ R, α ≤ θ ≤ β
+                0 ≤ r ≤ R, α ≤ \theta ≤ β
 
             ## 适合极坐标的被积函数
             
@@ -3047,8 +3045,8 @@ export const polarcoordinatesLesson: SubLesson = {
             
 **思考引导**
 
-                    - 正确确定 θ 的范围（观察区域覆盖的角度）
-                    - r 的上下限可能是 θ 的函数
+                    - 正确确定 \theta 的范围（观察区域覆盖的角度）
+                    - r 的上下限可能是 \theta 的函数
                     - 注意乘以 r（雅可比行列式）
                     - 利用对称性简化计算
   `,
@@ -3058,15 +3056,15 @@ export const polarcoordinatesLesson: SubLesson = {
             
 \`\`\`
 
-                J = |∂x/∂r  ∂x/∂θ|   |cos(θ)  -r·sin(θ)|
+                J = |∂x/∂r  ∂x/∂\theta|   |cos(\theta)  -r\cdotsin(\theta)|
 
-                    |∂y/∂r  ∂y/∂θ| = |sin(θ)   r·cos(θ)| = r
+                    |∂y/∂r  ∂y/∂\theta| = |sin(\theta)   r\cdotcos(\theta)| = r
 
             ### 面积元素
             
 \`\`\`
 
-                dσ = |J| dr dθ = r dr dθ
+                dσ = |J| dr d\theta = r dr d\theta
   `,
   examples: [
   {
@@ -3080,7 +3078,7 @@ export const polarcoordinatesLesson: SubLesson = {
       "π/e"
     ],
     "correct": 0,
-    "explanation": "使用极坐标：x² + y² = r², dσ = rdrdθ\n∬ᴅ e^(x²+y²) dxdy = ∫₀²π dθ ∫₀¹ e^(r²) r dr\n= 2π × [1/2 e^(r²)]₀¹ = π(e - 1)"
+    "explanation": "使用极坐标：x² + y² = r², dσ = rdrd\theta\n∬ᴅ e^(x²+y²) dxdy = ∫₀²π d\theta ∫₀¹ e^(r²) r dr\n= 2π \\times [1/2 e^(r²)]₀¹ = π(e - 1)"
   }
 ]
 };
@@ -3095,9 +3093,9 @@ export const cylindricalsphericalLesson: SubLesson = {
             
 \`\`\`
 
-                x = r·cos(θ), y = r·sin(θ), z = z
+                x = r\cdotcos(\theta), y = r\cdotsin(\theta), z = z
 
-                dV = r·dr·dθ·dz
+                dV = r\cdotdr\cdotd\theta\cdotdz
 
             ### 适用场景
             
@@ -3109,19 +3107,19 @@ export const cylindricalsphericalLesson: SubLesson = {
             
 \`\`\`
 
-                x = r·sin(φ)·cos(θ)
+                x = r\cdotsin(φ)\cdotcos(\theta)
 
-                y = r·sin(φ)·sin(θ)
+                y = r\cdotsin(φ)\cdotsin(\theta)
 
-                z = r·cos(φ)
+                z = r\cdotcos(φ)
 
-                dV = r²·sin(φ)·dr·dφ·dθ
+                dV = r²\cdotsin(φ)\cdotdr\cdotdφ\cdotd\theta
 
             ### 变量说明
             
                 - r：点到原点的距离 (0 ≤ r < ∞)
                 - φ：与 z 轴正向的夹角 (0 ≤ φ ≤ π)
-                - θ：在 xy 平面上与 x 轴的夹角 (0 ≤ θ ≤ 2π)
+                - \theta：在 xy 平面上与 x 轴的夹角 (0 ≤ \theta ≤ 2π)
 
             ### 适用场景
             
@@ -3134,17 +3132,17 @@ export const cylindricalsphericalLesson: SubLesson = {
 > **提示**
 > 
                 #### 球 x² + y² + z² ≤ R²
-                0 ≤ r ≤ R, 0 ≤ φ ≤ π, 0 ≤ θ ≤ 2π
+                0 ≤ r ≤ R, 0 ≤ φ ≤ π, 0 ≤ \theta ≤ 2π
 
                 #### 上半球
-                0 ≤ r ≤ R, 0 ≤ φ ≤ π/2, 0 ≤ θ ≤ 2π
+                0 ≤ r ≤ R, 0 ≤ φ ≤ π/2, 0 ≤ \theta ≤ 2π
 
                 #### 球壳 a² ≤ x² + y² + z² ≤ b²
-                a ≤ r ≤ b, 0 ≤ φ ≤ π, 0 ≤ θ ≤ 2π
+                a ≤ r ≤ b, 0 ≤ φ ≤ π, 0 ≤ \theta ≤ 2π
 
 > ⚠️ **注意**
 > 
-                **注意**：不要忘记体积元中的 r（柱坐标）或 r²·sin(φ)（球坐标）！
+                **注意**：不要忘记体积元中的 r（柱坐标）或 r²\cdotsin(φ)（球坐标）！
   `,
   formula: `
 ## 球坐标体积元推导
@@ -3160,7 +3158,7 @@ export const cylindricalsphericalLesson: SubLesson = {
             
 \`\`\`
 
-                V = ∭ dV = ∫₀²π dθ ∫₀^π sin(φ)dφ ∫₀ᴿ r² dr = 4πR³/3
+                V = ∭ dV = ∫₀²π d\theta ∫₀^π sin(φ)dφ ∫₀ᴿ r² dr = 4πR³/3
   `,
   examples: [
   {
@@ -3174,7 +3172,7 @@ export const cylindricalsphericalLesson: SubLesson = {
       "4πR³/3"
     ],
     "correct": 0,
-    "explanation": "使用柱坐标：V = ∭ dV = ∫₀²π dθ ∫₀^√(R²-h²) r dr ∫₀^h dz\n或使用球坐标直接计算得 V = πh²(R - h/3)"
+    "explanation": "使用柱坐标：V = ∭ dV = ∫₀²π d\theta ∫₀^√(R²-h²) r dr ∫₀^h dz\n或使用球坐标直接计算得 V = πh²(R - h/3)"
   }
 ]
 };
@@ -3205,7 +3203,7 @@ export const surfaceintegralfirstLesson: SubLesson = {
 
 \`\`\`
 
-                dS = |**r**_u × **r**_v| dudv
+                dS = |**r**_u \\times **r**_v| dudv
 
             ## 几何意义
             
@@ -3221,7 +3219,7 @@ export const surfaceintegralfirstLesson: SubLesson = {
                 若 Σ 关于 xy 平面对称：
 
                     - f(x,y,-z) = -f(x,y,z) ⟹ 积分为 0
-                    - f(x,y,-z) = f(x,y,z) ⟹ 积分 = 2 × 上半曲面积分
+                    - f(x,y,-z) = f(x,y,z) ⟹ 积分 = 2 \\times 上半曲面积分
   `,
   formula: `
 ## 曲面积分的面积元素
@@ -3237,11 +3235,11 @@ export const surfaceintegralfirstLesson: SubLesson = {
             
 \`\`\`
 
-                dS = |**r**_u × **r**_v| du dv
+                dS = |**r**_u \\times **r**_v| du dv
 
                 = √(EG - F²) du dv
 
-            其中 E = **r**_u·**r**_u, F = **r**_u·**r**_v, G = **r**_v·**r**_v
+            其中 E = **r**_u\\cdot**r**_u, F = **r**_u\\cdot**r**_v, G = **r**_v\\cdot**r**_v
   `,
   examples: [
   {
@@ -3255,7 +3253,7 @@ export const surfaceintegralfirstLesson: SubLesson = {
       "πR²/2"
     ],
     "correct": 0,
-    "explanation": "zₓ = -x/z, zᵧ = -y/z\n√(1+zₓ²+zᵧ²) = R/√(R²-x²-y²) = R/z\nS = ∬ᴅ R/z dxdy = R × 2πR = 2πR²"
+    "explanation": "zₓ = -x/z, zᵧ = -y/z\n√(1+zₓ²+zᵧ²) = R/√(R²-x²-y²) = R/z\nS = ∬ᴅ R/z dxdy = R \\times 2πR = 2πR²"
   }
 ]
 };
@@ -3271,7 +3269,7 @@ export const surfaceintegralsecondLesson: SubLesson = {
 
 \`\`\`
 
-                ∬_Σ **F** · d**S** = ∬_Σ P dydz + Q dzdx + R dxdy
+                ∬_Σ **F** \\cdot d**S** = ∬_Σ P dydz + Q dzdx + R dxdy
 
             ## 有向曲面
             曲面的侧由法向量的方向确定：
@@ -3351,13 +3349,13 @@ export const gausstheoremLesson: SubLesson = {
 
 \`\`\`
 
-                ∯_Σ **F** · d**S** = ∭_Ω (∇ · **F**)dV
+                ∯_Σ **F** \\cdot d**S** = ∭_Ω (∇ \\cdot **F**)dV
 
             ## 二、散度（Divergence）的物理意义
             
 \`\`\`
 
-                div **F** = ∇ · **F** = ∂P/∂x + ∂Q/∂y + ∂R/∂z
+                div **F** = ∇ \\cdot **F** = ∂P/∂x + ∂Q/∂y + ∂R/∂z
 
 **思考引导**
 
@@ -3379,7 +3377,7 @@ export const gausstheoremLesson: SubLesson = {
 
 \`\`\`
 
-                ∯<sub>Σ</sub> **F** · d**S** = ∭<sub>Ω</sub> (∇ · **F**) dV
+                ∯<sub>Σ</sub> **F** \\cdot d**S** = ∭<sub>Ω</sub> (∇ \\cdot **F**) dV
 
             这与格林公式是一脉相承的——都是"内部微分 = 边界积分"的体现。
 
@@ -3405,15 +3403,15 @@ export const gausstheoremLesson: SubLesson = {
 
 \`\`\`
 
-                ∯<sub>Σ</sub> **E** · d**S** = Q/ε₀
+                ∯<sub>Σ</sub> **E** \\cdot d**S** = Q/ε₀
 
             其中 Q 是闭曲面内的总电荷。由高斯公式：
 
 \`\`\`
 
-                ∭<sub>Ω</sub> (∇ · **E**) dV = Q/ε₀ = ∭<sub>Ω</sub> (ρ/ε₀) dV
+                ∭<sub>Ω</sub> (∇ \\cdot **E**) dV = Q/ε₀ = ∭<sub>Ω</sub> (ρ/ε₀) dV
 
-            得到微分形式：∇ · **E** = ρ/ε₀（电荷密度与散度的关系）。
+            得到微分形式：∇ \\cdot **E** = ρ/ε₀（电荷密度与散度的关系）。
   `,
   formula: `
 ## 高斯公式推导思路
@@ -3440,7 +3438,7 @@ export const gausstheoremLesson: SubLesson = {
       "0"
     ],
     "correct": 0,
-    "explanation": "div F = ∂x/∂x + ∂y/∂y + ∂z/∂z = 3\n∯_Σ F·dS = ∭_Ω 3 dV = 3 × 4πR³/3 = 4πR³"
+    "explanation": "div F = ∂x/∂x + ∂y/∂y + ∂z/∂z = 3\n∯_Σ F\cdotdS = ∭_Ω 3 dV = 3 \\times 4πR³/3 = 4πR³"
   }
 ]
 };
@@ -3466,13 +3464,13 @@ export const stokestheoremLesson: SubLesson = {
             
 \`\`\`
 
-                ∮_Γ **F** · d**r** = ∬_Σ (∇ × **F**) · d**S**
+                ∮_Γ **F** \\cdot d**r** = ∬_Σ (∇ \\times **F**) \\cdot d**S**
 
             ## 旋度（Curl）
             
 \`\`\`
 
-                rot **F** = ∇ × **F** = |**i**    **j**    **k**|
+                rot **F** = ∇ \\times **F** = |\\mathbf{i}    \\mathbf{j}    \\mathbf{k}|
 
                                          |∂/∂x ∂/∂y ∂/∂z|
 
@@ -3500,7 +3498,7 @@ export const stokestheoremLesson: SubLesson = {
             
 \`\`\`
 
-                (∇ × F)·n = lim(S→0) (1/|S|) ∮_∂S F·dr
+                (∇ \\times F)\cdotn = lim(S→0) (1/|S|) ∮_∂S F\cdotdr
 
             表示单位面积上的环量密度。
   `,
@@ -3516,7 +3514,7 @@ export const stokestheoremLesson: SubLesson = {
       "2πa²"
     ],
     "correct": 0,
-    "explanation": "∇ × F = (-1, -1, -1)\n取 Σ 为平面 x+y+z=0 上的圆，法向量 n = (1,1,1)/√3\n∮_Γ F·dr = ∬_Σ (∇×F)·n dS = -√3 × πa²"
+    "explanation": "∇ \\times F = (-1, -1, -1)\n取 Σ 为平面 x+y+z=0 上的圆，法向量 n = (1,1,1)/√3\n∮_Γ F\cdotdr = ∬_Σ (∇\timesF)\cdotn dS = -√3 \\times πa²"
   }
 ]
 };
@@ -3578,13 +3576,13 @@ export const greenstheoremLesson: SubLesson = {
 
                 S = ∬_D dxdy = (1/2)∮_L xdy - ydx = ∮_L xdy = -∮_L ydx
 
-            **例**：椭圆的参数方程 x = a·cos(t), y = b·sin(t)，面积：
+            **例**：椭圆的参数方程 x = a\cdotcos(t), y = b\cdotsin(t)，面积：
 
 \`\`\`
 
-                S = (1/2)∫₀²π [a·cos(t)·b·cos(t) - b·sin(t)·(-a·sin(t))]dt
+                S = (1/2)∫₀²π [a\cdotcos(t)\cdotb\cdotcos(t) - b\cdotsin(t)\\cdot(-a\cdotsin(t))]dt
 
-                = (ab/2)∫₀²π (cos²t + sin²t)dt = (ab/2) × 2π = πab
+                = (ab/2)∫₀²π (cos²t + sin²t)dt = (ab/2) \\times 2π = πab
 
             ### 3.2 曲线积分与路径无关
 
@@ -3664,7 +3662,7 @@ export const greenstheoremLesson: SubLesson = {
       "2ab"
     ],
     "correct": 0,
-    "explanation": "P = -y, Q = x\n∂Q/∂x - ∂P/∂y = 1 - (-1) = 2\n∮_L xdy - ydx = ∬_D 2 dxdy = 2 × 椭圆面积 = 2πab"
+    "explanation": "P = -y, Q = x\n∂Q/∂x - ∂P/∂y = 1 - (-1) = 2\n∮_L xdy - ydx = ∬_D 2 dxdy = 2 \\times 椭圆面积 = 2πab"
   }
 ]
 };
@@ -3884,7 +3882,7 @@ export const firstorderLesson: SubLesson = {
             
 \`\`\`
 
-                y = e^(-∫Pdx) [∫Q·e^(∫Pdx)dx + C]
+                y = e^(-∫Pdx) [∫Q\cdote^(∫Pdx)dx + C]
 
             ## 伯努利方程
             
@@ -3937,7 +3935,7 @@ export const higherorderLesson: SubLesson = {
             解法：令 p = y'，则 y'' = dp/dx，化为一阶方程。
 
             ### 类型三：y'' = f(y, y')
-            解法：令 p = y'，则 y'' = p·dp/dy，化为一阶方程。
+            解法：令 p = y'，则 y'' = p\cdotdp/dy，化为一阶方程。
 
             ## 常系数线性齐次方程
             
@@ -4047,9 +4045,9 @@ export const linearsystemLesson: SubLesson = {
 
 **思考引导**
 
-                    - λ₁, λ₂ 为不等实根：**x** = C₁**v**₁e^(λ₁t) + C₂**v**₂e^(λ₂t)
-                    - λ₁ = λ₂ = λ：**x** = (C₁**v** + C₂(**v**t + **w**))e^(λt)
-                    - λ = α ± iβ：**x** = e^(αt)[C₁Re(**v**e^(iβt)) + C₂Im(**v**e^(iβt))]
+                    - λ₁, λ₂ 为不等实根：**x** = C₁\\mathbf{v}₁e^(λ₁t) + C₂\\mathbf{v}₂e^(λ₂t)
+                    - λ₁ = λ₂ = λ：**x** = (C₁\\mathbf{v} + C₂(\\mathbf{v}t + **w**))e^(λt)
+                    - λ = α ± iβ：**x** = e^(αt)[C₁Re(\\mathbf{v}e^(iβt)) + C₂Im(\\mathbf{v}e^(iβt))]
 
             ## 平衡点分类
             
@@ -4074,7 +4072,7 @@ export const linearsystemLesson: SubLesson = {
             
 \`\`\`
 
-                **x**(t) = c₁**v**₁e^(λ₁t) + c₂**v**₂e^(λ₂t)
+                **x**(t) = c₁\\mathbf{v}₁e^(λ₁t) + c₂\\mathbf{v}₂e^(λ₂t)
   `,
   examples: [
   {
@@ -4305,7 +4303,7 @@ export const numericalLesson: SubLesson = {
 
 \`\`\`
 
-                yₙ₊₁ = yₙ + h·f(xₙ, yₙ)
+                yₙ₊₁ = yₙ + h\cdotf(xₙ, yₙ)
 
             局部截断误差：O(h²)
 
@@ -4314,9 +4312,9 @@ export const numericalLesson: SubLesson = {
 
 \`\`\`
 
-                预测：y* = yₙ + h·f(xₙ, yₙ)
+                预测：y* = yₙ + h\cdotf(xₙ, yₙ)
 
-                校正：yₙ₊₁ = yₙ + h/2·[f(xₙ, yₙ) + f(xₙ₊₁, y*)]
+                校正：yₙ₊₁ = yₙ + h/2\\cdot[f(xₙ, yₙ) + f(xₙ₊₁, y*)]
 
             局部截断误差：O(h³)
 
@@ -4324,7 +4322,7 @@ export const numericalLesson: SubLesson = {
             
 \`\`\`
 
-                yₙ₊₁ = yₙ + h/6·(k₁ + 2k₂ + 2k₃ + k₄)
+                yₙ₊₁ = yₙ + h/6\\cdot(k₁ + 2k₂ + 2k₃ + k₄)
 
             其中：
 
@@ -4358,7 +4356,7 @@ export const numericalLesson: SubLesson = {
             
 \`\`\`
 
-                yₙ₊₁ = yₙ + h·f(xₙ, yₙ)
+                yₙ₊₁ = yₙ + h\cdotf(xₙ, yₙ)
 
                 局部误差：O(h²)
 
@@ -4372,7 +4370,7 @@ export const numericalLesson: SubLesson = {
 
                 k₂ = f(xₙ₊₁, yₙ + hk₁)
 
-                yₙ₊₁ = yₙ + h/2·(k₁ + k₂)
+                yₙ₊₁ = yₙ + h/2\\cdot(k₁ + k₂)
 
                 局部误差：O(h³)
 
@@ -4380,7 +4378,7 @@ export const numericalLesson: SubLesson = {
             
 \`\`\`
 
-                yₙ₊₁ = yₙ + h/6·(k₁ + 2k₂ + 2k₃ + k₄)
+                yₙ₊₁ = yₙ + h/6\\cdot(k₁ + 2k₂ + 2k₃ + k₄)
 
                 局部误差：O(h⁵)
   `,
@@ -4396,7 +4394,7 @@ export const numericalLesson: SubLesson = {
       "1.01"
     ],
     "correct": 0,
-    "explanation": "欧拉公式：yₙ₊₁ = yₙ + h·f(xₙ, yₙ)\ny₁ = y₀ + 0.1·y₀ = 1 + 0.1 = 1.1\ny₂ = y₁ + 0.1·y₁ = 1.1 + 0.11 = 1.21"
+    "explanation": "欧拉公式：yₙ₊₁ = yₙ + h\cdotf(xₙ, yₙ)\ny₁ = y₀ + 0.1\cdoty₀ = 1 + 0.1 = 1.1\ny₂ = y₁ + 0.1\cdoty₁ = 1.1 + 0.11 = 1.21"
   }
 ]
 };
@@ -4415,19 +4413,19 @@ export const physicsLesson: SubLesson = {
 
                 **r**(t) = (x(t), y(t), z(t))
 
-                **v** = d**r**/dt, **a** = d**v**/dt = d²**r**/dt²
+                \\mathbf{v} = d**r**/dt, \\mathbf{a} = d\\mathbf{v}/dt = d²**r**/dt²
 
             ### 牛顿第二定律
             
 \`\`\`
 
-                **F** = m**a** = m d²**r**/dt²
+                **F** = m\\mathbf{a} = m d²**r**/dt²
 
             ### 角动量
             
 \`\`\`
 
-                **L** = **r** × **p** = m(**r** × **v**)
+                **L** = **r** \\times **p** = m(**r** \\times \\mathbf{v})
 
             ## 电磁学
 
@@ -4437,13 +4435,13 @@ export const physicsLesson: SubLesson = {
 
 \`\`\`
 
-                    ∇ · **E** = ρ/ε₀ （高斯电场定律）
+                    ∇ \\cdot **E** = ρ/ε₀ （高斯电场定律）
 
-                    ∇ · **B** = 0 （高斯磁场定律）
+                    ∇ \\cdot \\mathbf{B} = 0 （高斯磁场定律）
 
-                    ∇ × **E** = -∂**B**/∂t （法拉第定律）
+                    ∇ \\times **E** = -∂\\mathbf{B}/∂t （法拉第定律）
 
-                    ∇ × **B** = μ₀**J** + μ₀ε₀∂**E**/∂t （安培-麦克斯韦定律）
+                    ∇ \\times \\mathbf{B} = μ₀\\mathbf{J} + μ₀ε₀∂**E**/∂t （安培-麦克斯韦定律）
 
             ### 电势与电场
             
@@ -4455,7 +4453,7 @@ export const physicsLesson: SubLesson = {
             
 \`\`\`
 
-                **F** = -GmM/r² · **r̂**
+                **F** = -GmM/r² \\cdot **r̂**
 
                 **g** = -∇Φ
 
@@ -4484,19 +4482,19 @@ export const physicsLesson: SubLesson = {
             
 \`\`\`
 
-                ∭_V (∇ · F) dV = ∯_S F · dS
+                ∭_V (∇ \\cdot F) dV = ∯_S F \\cdot dS
 
             ### 斯托克斯定理
             
 \`\`\`
 
-                ∬_S (∇ × F) · dS = ∮_∂S F · dr
+                ∬_S (∇ \\times F) \\cdot dS = ∮_∂S F \\cdot dr
 
             ### 电势与电场
             
 \`\`\`
 
-                E = -∇V, ∇ · E = ρ/ε₀
+                E = -∇V, ∇ \\cdot E = ρ/ε₀
   `,
   examples: [
   {
@@ -4510,7 +4508,7 @@ export const physicsLesson: SubLesson = {
       "速度=√145, 加速度=10"
     ],
     "correct": 0,
-    "explanation": "v = dr/dt = (6t, 4, 0), v(1) = (6, 4, 0), |v| = √(36+16) = √52\na = dv/dt = (6, 0, 0), |a| = 6\n注意：我需要重新计算... v = (6t, 4, 0)，在 t=1 时 v = (6,4,0)，|v|=√(36+16)=√52。题目可能有误，正确答案应为 速度=√52, 加速度=6。"
+    "explanation": "v = dr/dt = (6t, 4, 0), v(1) = (6, 4, 0), |v| = √(36+16) = √52\na = dv/dt = (6, 0, 0), |\\mathbf{a}| = 6\n注意：我需要重新计算... v = (6t, 4, 0)，在 t=1 时 v = (6,4,0)，|v|=√(36+16)=√52。题目可能有误，正确答案应为 速度=√52, 加速度=6。"
   },
   {
     "id": "phy-2",
@@ -4523,7 +4521,7 @@ export const physicsLesson: SubLesson = {
       "kq/r³"
     ],
     "correct": 0,
-    "explanation": "E = -∇V = -∂V/∂r · r̂ = -(-kq/r²)r̂ = (kq/r²)r̂\n在球坐标中，∇V = ∂V/∂r · eᵣ = -kq/r² · eᵣ\n所以 E = kq/r² · eᵣ，大小为 kq/r²。"
+    "explanation": "E = -∇V = -∂V/∂r \\cdot r̂ = -(-kq/r²)r̂ = (kq/r²)r̂\n在球坐标中，∇V = ∂V/∂r \\cdot eᵣ = -kq/r² \\cdot eᵣ\n所以 E = kq/r² \\cdot eᵣ，大小为 kq/r²。"
   }
 ]
 };
@@ -4540,7 +4538,7 @@ export const engineeringLesson: SubLesson = {
             
 \`\`\`
 
-                σ = E·ε （胡克定律）
+                σ = E\\cdotε （胡克定律）
 
             其中 σ 为应力，ε 为应变，E 为弹性模量。
 
@@ -4556,13 +4554,13 @@ export const engineeringLesson: SubLesson = {
             
 \`\`\`
 
-                ∂ρ/∂t + ∇ · (ρ**v**) = 0
+                ∂ρ/∂t + ∇ \\cdot (ρ\\mathbf{v}) = 0
 
             ### 纳维-斯托克斯方程
             
 \`\`\`
 
-                ρ(∂**v**/∂t + **v** · ∇**v**) = -∇p + μ∇²**v** + ρ**g**
+                ρ(∂\\mathbf{v}/∂t + \\mathbf{v} \\cdot ∇\\mathbf{v}) = -∇p + μ∇²\\mathbf{v} + ρ**g**
 
             ## 控制理论
 
@@ -4570,9 +4568,9 @@ export const engineeringLesson: SubLesson = {
             
 \`\`\`
 
-                d**x**/dt = A**x** + B**u**
+                d**x**/dt = A**x** + B\\mathbf{u}
 
-                **y** = C**x** + D**u**
+                **y** = C**x** + D\\mathbf{u}
 
             ## 信号处理
 
@@ -4618,13 +4616,13 @@ export const engineeringLesson: SubLesson = {
     "difficulty": "medium",
     "question": "简支梁跨度 L=4m，承受均布载荷 q=10kN/m，求跨中最大弯矩（EI为常数）。",
     "options": [
-      "M_max = qL²/8 = 20 kN·m",
-      "M_max = qL²/4 = 40 kN·m",
-      "M_max = qL/2 = 20 kN·m",
-      "M_max = qL²/12 ≈ 13.3 kN·m"
+      "M_max = qL²/8 = 20 kN\cdotm",
+      "M_max = qL²/4 = 40 kN\cdotm",
+      "M_max = qL/2 = 20 kN\cdotm",
+      "M_max = qL²/12 ≈ 13.3 kN\cdotm"
     ],
     "correct": 0,
-    "explanation": "简支梁受均布载荷，弯矩方程 M(x) = qLx/2 - qx²/2\n在 x = L/2 处取得最大值 M_max = qL²/8\n代入：M_max = 10 × 16 / 8 = 20 kN·m"
+    "explanation": "简支梁受均布载荷，弯矩方程 M(x) = qLx/2 - qx²/2\n在 x = L/2 处取得最大值 M_max = qL²/8\n代入：M_max = 10 \\times 16 / 8 = 20 kN\cdotm"
   },
   {
     "id": "eng-2",
@@ -4654,20 +4652,20 @@ export const mlLesson: SubLesson = {
             
 \`\`\`
 
-                θ := θ - α∇J(θ)
+                \theta := \theta - α∇J(\theta)
 
             ### 随机梯度下降（SGD）
             
 \`\`\`
 
-                θ := θ - α∇J(θ; x⁽ⁱ⁾, y⁽ⁱ⁾)
+                \theta := \theta - α∇J(\theta; x⁽ⁱ⁾, y⁽ⁱ⁾)
 
             ## 反向传播
             利用链式法则计算梯度：
 
 \`\`\`
 
-                ∂L/∂w = ∂L/∂z · ∂z/∂w
+                ∂L/∂w = ∂L/∂z \\cdot ∂z/∂w
 
             ## 优化方法
 
@@ -4675,9 +4673,9 @@ export const mlLesson: SubLesson = {
             
 \`\`\`
 
-                v := βv + (1-β)∇J(θ)
+                v := βv + (1-β)∇J(\theta)
 
-                θ := θ - αv
+                \theta := \theta - αv
 
             ### Adam优化器
             
@@ -4687,7 +4685,7 @@ export const mlLesson: SubLesson = {
 
                 v := β₂v + (1-β₂)g²
 
-                θ := θ - α·m/(√v + ε)
+                \theta := \theta - α\cdotm/(√v + ε)
 
             ## 主成分分析（PCA）
             对协方差矩阵进行特征分解：
@@ -4702,7 +4700,7 @@ export const mlLesson: SubLesson = {
 
                 min (1/2)||w||² + CΣξᵢ
 
-                s.t. yᵢ(w·xᵢ + b) ≥ 1 - ξᵢ
+                s.t. yᵢ(w\cdotxᵢ + b) ≥ 1 - ξᵢ
   `,
   formula: `
 ## 机器学习中的优化推导
@@ -4711,13 +4709,13 @@ export const mlLesson: SubLesson = {
             
 \`\`\`
 
-                θ⁽ᵗ⁺¹⁾ = θ⁽ᵗ⁾ - α∇J(θ⁽ᵗ⁾)
+                \theta⁽ᵗ⁺¹⁾ = \theta⁽ᵗ⁾ - α∇J(\theta⁽ᵗ⁾)
 
             ### 反向传播的链式法则
             
 \`\`\`
 
-                ∂L/∂w = ∂L/∂z · ∂z/∂w = δ · aₚᵣₑᵥ
+                ∂L/∂w = ∂L/∂z \\cdot ∂z/∂w = δ \\cdot aₚᵣₑᵥ
 
             ### PCA 投影
             
@@ -4731,7 +4729,7 @@ export const mlLesson: SubLesson = {
             
 \`\`\`
 
-                K(x, x') = φ(x) · φ(x')
+                K(x, x') = φ(x) \\cdot φ(x')
   `,
   examples: [
   {
@@ -4745,7 +4743,7 @@ export const mlLesson: SubLesson = {
       "∂L/∂w = (y - ŷ)w"
     ],
     "correct": 0,
-    "explanation": "链式法则：∂L/∂w = ∂L/∂ŷ · ∂ŷ/∂w\n∂L/∂ŷ = -(y - ŷ)\n∂ŷ/∂w = x\n所以 ∂L/∂w = -(y - ŷ)x"
+    "explanation": "链式法则：∂L/∂w = ∂L/∂ŷ \\cdot ∂ŷ/∂w\n∂L/∂ŷ = -(y - ŷ)\n∂ŷ/∂w = x\n所以 ∂L/∂w = -(y - ŷ)x"
   },
   {
     "id": "ml-2",
@@ -4772,13 +4770,13 @@ export const graphicsLesson: SubLesson = {
 ## 三维变换
 
             ### 旋转矩阵
-            绕 z 轴旋转角度 θ：
+            绕 z 轴旋转角度 \theta：
 
 \`\`\`
 
-                Rₓ(θ) = [cos(θ) -sin(θ) 0]
+                Rₓ(\theta) = [cos(\theta) -sin(\theta) 0]
 
-                            [sin(θ)  cos(θ) 0]
+                            [sin(\theta)  cos(\theta) 0]
 
                             [0       0      1]
 
@@ -4787,7 +4785,7 @@ export const graphicsLesson: SubLesson = {
 
 \`\`\`
 
-                q = cos(θ/2) + sin(θ/2)(uₓi + uᵧj + uᵤk)
+                q = cos(\theta/2) + sin(\theta/2)(uₓi + uᵧj + uᵤk)
 
             ## 光照模型
 
@@ -4795,7 +4793,7 @@ export const graphicsLesson: SubLesson = {
             
 \`\`\`
 
-                I = Iₐkₐ + Iₚ[kₐ(**N**·**L**) + kₛ(**R**·**V**)ⁿ]
+                I = Iₐkₐ + Iₚ[kₐ(\\mathbf{N}\\cdot**L**) + kₛ(**R**\\cdot\\mathbf{V})ⁿ]
 
             ## 贝塞尔曲线
             
@@ -4824,9 +4822,9 @@ export const graphicsLesson: SubLesson = {
             
 \`\`\`
 
-                R_z(θ) = [[cos(θ), -sin(θ), 0],
+                R_z(\theta) = [[cos(\theta), -sin(\theta), 0],
 
-                          [sin(θ),  cos(θ), 0],
+                          [sin(\theta),  cos(\theta), 0],
 
                           [0,       0,      1]]
 
@@ -4834,7 +4832,7 @@ export const graphicsLesson: SubLesson = {
             
 \`\`\`
 
-                q = [cos(θ/2), sin(θ/2)·n̂]
+                q = [cos(\theta/2), sin(\theta/2)\cdotn̂]
 
                 p' = qpq⁻¹
 
@@ -4864,7 +4862,7 @@ export const graphicsLesson: SubLesson = {
       "(1, -2, 3)"
     ],
     "correct": 0,
-    "explanation": "绕 z 轴旋转矩阵：R_z(90°) = [[0,-1,0],[1,0,0],[0,0,1]]\n[x', y', z']ᵀ = R_z · [1, 2, 3]ᵀ = [-2, 1, 3]ᵀ"
+    "explanation": "绕 z 轴旋转矩阵：R_z(90°) = [[0,-1,0],[1,0,0],[0,0,1]]\n[x', y', z']ᵀ = R_z \\cdot [1, 2, 3]ᵀ = [-2, 1, 3]ᵀ"
   },
   {
     "id": "cg-2",
@@ -4877,7 +4875,7 @@ export const graphicsLesson: SubLesson = {
       "(2.5, 1.5)"
     ],
     "correct": 0,
-    "explanation": "三次贝塞尔曲线：B(t) = (1-t)³P₀ + 3(1-t)²tP₁ + 3(1-t)t²P₂ + t³P₃\nt=0.5 时：B(0.5) = 1/8·(0,0) + 3/8·(1,2) + 3/8·(3,2) + 1/8·(4,0)\n= (0+3/8+9/8+4/8, 0+6/8+6/8+0) = (2, 1.5)"
+    "explanation": "三次贝塞尔曲线：B(t) = (1-t)³P₀ + 3(1-t)²tP₁ + 3(1-t)t²P₂ + t³P₃\nt=0.5 时：B(0.5) = 1/8\\cdot(0,0) + 3/8\\cdot(1,2) + 3/8\\cdot(3,2) + 1/8\\cdot(4,0)\n= (0+3/8+9/8+4/8, 0+6/8+6/8+0) = (2, 1.5)"
   }
 ]
 };
@@ -4914,7 +4912,7 @@ export const economicsLesson: SubLesson = {
             
 \`\`\`
 
-                Eₙ = (dQ/dP)·(P/Q)
+                Eₙ = (dQ/dP)\\cdot(P/Q)
 
             ## 生产函数
 
@@ -4969,7 +4967,7 @@ export const economicsLesson: SubLesson = {
             
 \`\`\`
 
-                E_d = (dQ/dP)·(P/Q)
+                E_d = (dQ/dP)\\cdot(P/Q)
 
             ### 柯布-道格拉斯函数性质
             
@@ -5003,20 +5001,20 @@ export const economicsLesson: SubLesson = {
       "MC = 100/Q + 5 + 0.1Q = 16"
     ],
     "correct": 0,
-    "explanation": "边际成本 MC = dC/dQ = 5 + 0.2Q\n当 Q=10 时，MC = 5 + 0.2×10 = 7"
+    "explanation": "边际成本 MC = dC/dQ = 5 + 0.2Q\n当 Q=10 时，MC = 5 + 0.2\\times10 = 7"
   },
   {
     "id": "eco-2",
     "difficulty": "hard",
-    "question": "柯布-道格拉斯生产函数 Y = K^0.5·L^0.5，求资本边际产出 MPK。",
+    "question": "柯布-道格拉斯生产函数 Y = K^0.5\cdotL^0.5，求资本边际产出 MPK。",
     "options": [
-      "MPK = 0.5·(L/K)^0.5",
-      "MPK = 0.5·(K/L)^0.5",
-      "MPK = K^0.5·L^0.5",
-      "MPK = 0.5·K^(-0.5)·L^0.5"
+      "MPK = 0.5\\cdot(L/K)^0.5",
+      "MPK = 0.5\\cdot(K/L)^0.5",
+      "MPK = K^0.5\cdotL^0.5",
+      "MPK = 0.5\cdotK^(-0.5)\cdotL^0.5"
     ],
     "correct": 0,
-    "explanation": "MPK = ∂Y/∂K = 0.5·K^(-0.5)·L^0.5 = 0.5·(L/K)^0.5\n这表示增加一单位资本所带来的产出增加量。"
+    "explanation": "MPK = ∂Y/∂K = 0.5\cdotK^(-0.5)\cdotL^0.5 = 0.5\\cdot(L/K)^0.5\n这表示增加一单位资本所带来的产出增加量。"
   }
 ]
 };
@@ -5120,13 +5118,13 @@ export const biologyLesson: SubLesson = {
     "difficulty": "medium",
     "question": "指数增长模型 dN/dt = 0.1N，N(0)=100，求 N(10)。",
     "options": [
-      "N(10) = 100·e¹ ≈ 271.8",
-      "N(10) = 100·e⁰·¹ ≈ 110.5",
-      "N(10) = 100 + 0.1×10 = 101",
-      "N(10) = 100·e¹⁰ ≈ 2.2×10⁶"
+      "N(10) = 100\cdote¹ ≈ 271.8",
+      "N(10) = 100\cdote⁰\\cdot¹ ≈ 110.5",
+      "N(10) = 100 + 0.1\\times10 = 101",
+      "N(10) = 100\cdote¹⁰ ≈ 2.2\\times10⁶"
     ],
     "correct": 0,
-    "explanation": "dN/dt = rN 的解为 N(t) = N₀e^(rt)\nN(10) = 100·e^(0.1×10) = 100·e¹ ≈ 271.8"
+    "explanation": "dN/dt = rN 的解为 N(t) = N₀e^(rt)\nN(10) = 100\cdote^(0.1\\times10) = 100\cdote¹ ≈ 271.8"
   },
   {
     "id": "bio-2",
@@ -5260,19 +5258,19 @@ lim(x→x₀) f(x) 存在 ⟺ ∀ε > 0, ∃δ > 0, 当 0 < |x'-x₀|,|x''-x₀|
 ## 关键定理
 
 ### 确界原理
-$$
+$
 \\forall A \\subseteq \\mathbb{R}, A \\neq \\emptyset, \\text{有上界} \\Rightarrow \\exists \\sup A \\in \\mathbb{R}
-$$
+$
 
 ### 柯西收敛准则
-$$
+$
 \\{a_n\\} \\text{收敛} \\Leftrightarrow \\forall \\varepsilon > 0, \\exists N, \\forall m,n > N: |a_m - a_n| < \\varepsilon
-$$
+$
 
 ### 单调有界原理
-$$
+$
 \\{a_n\\} \\text{单调递增有上界} \\Rightarrow \\lim_{n\\to\\infty} a_n = \\sup\\{a_n\\}
-$$
+$
   `,
   examples: [
     {
@@ -5326,19 +5324,19 @@ export const uniformContinuityLesson: SubLesson = {
 ## 核心公式
 
 ### 一致连续定义
-$$
+$
 \\forall \\varepsilon > 0, \\exists \\delta > 0, \\forall x_1, x_2 \\in I: |x_1 - x_2| < \\delta \\Rightarrow |f(x_1) - f(x_2)| < \\varepsilon
-$$
+$
 
 ### 利普希茨条件
-$$
+$
 |f(x_1) - f(x_2)| \\leq L|x_1 - x_2|, \\quad L > 0
-$$
+$
 
 ### 康托尔定理
-$$
+$
 f \\in C[a,b] \\Rightarrow f \\text{ 在 } [a,b] \\text{ 上一致连续}
-$$
+$
   `,
   examples: [
     {
@@ -5401,24 +5399,24 @@ f(∫g(x)dμ) ≤ ∫f(g(x))dμ
 ## 核心公式
 
 ### 凸函数定义
-$$
+$
 f(\\lambda x_1 + (1-\\lambda)x_2) \\leq \\lambda f(x_1) + (1-\\lambda)f(x_2)
-$$
+$
 
 ### Jensen 不等式
-$$
+$
 f\\left(\\sum_{i=1}^n \\lambda_i x_i\\right) \\leq \\sum_{i=1}^n \\lambda_i f(x_i)
-$$
+$
 
 ### 二阶判定
-$$
+$
 f \\text{ 凸} \\Leftrightarrow f''(x) \\geq 0
-$$
+$
 
 ### 算术-几何平均不等式（由 Jensen 不等式导出）
-$$
+$
 \\frac{x_1 + x_2 + ... + x_n}{n} \\geq \\sqrt[n]{x_1 x_2 ... x_n}
-$$
+$
   `,
   examples: [
     {
@@ -5474,30 +5472,30 @@ export const improperIntegralAdvancedLesson: SubLesson = {
 - 条件收敛：∫f 收敛但 ∫|f| 发散
 
 ### 狄利克雷判别法
-若 F(b) = ∫ₐᵇ f 有界，g 单调趋于0，则 ∫ₐ^∞ f·g 收敛。
+若 F(b) = ∫ₐᵇ f 有界，g 单调趋于0，则 ∫ₐ^∞ f\cdotg 收敛。
   `,
   formula: `
 ## 核心公式
 
 ### p-积分
-$$
+$
 \\int_1^\\infty \\frac{1}{x^p}dx \\begin{cases} \\text{收敛}, & p > 1 \\\\ \\text{发散}, & p \\leq 1 \\end{cases}
-$$
+$
 
 ### 极限比较法
-$$
+$
 \\lim_{x\\to\\infty} \\frac{f(x)}{g(x)} = L \\in (0,\\infty) \\Rightarrow \\int f \\text{ 与 } \\int g \\text{ 同敛散}
-$$
+$
 
 ### 伽马函数
-$$
+$
 \\Gamma(s) = \\int_0^\\infty x^{s-1}e^{-x}dx, \\quad s > 0
-$$
+$
 
 ### 重要反常积分
-$$
+$
 \\int_0^\\infty \\frac{\\sin x}{x}dx = \\frac{\\pi}{2} \\quad (\\text{条件收敛})
-$$
+$
   `,
   examples: [
     {
@@ -5558,22 +5556,22 @@ export const functionSeriesLesson: SubLesson = {
 ## 核心公式
 
 ### 一致收敛定义
-$$
+$
 \\forall \\varepsilon > 0, \\exists N, \\forall n > N, \\forall x \\in I: |S_n(x) - S(x)| < \\varepsilon
-$$
+$
 
 ### M-判别法
-$$
+$
 |f_n(x)| \\leq M_n, \\quad \\sum M_n \\text{ 收敛} \\Rightarrow \\sum f_n \\text{ 一致收敛}
-$$
+$
 
 ### 阿贝尔定理（幂级数）
 若幂级数在 x = R 收敛，则在 [0,R] 上一致收敛。
 
 ### 泰勒级数余项
-$$
+$
 R_n(x) = \\frac{f^{(n+1)}(\\xi)}{(n+1)!}(x-a)^{n+1}
-$$
+$
   `,
   examples: [
     {
@@ -5630,35 +5628,35 @@ f(x) = ∫₋∞^∞ f̂(ξ)e^(2πiξx)dξ
 - 线性性
 - 时移：f(x-a) ̂ → e^(-2πiaξ)f̂(ξ)
 - 频移：e^(2πiax)f(x) ̂ → f̂(ξ-a)
-- 卷积定理：(f * g)̂ = f̂ · ĝ
+- 卷积定理：(f * g)̂ = f̂ \\cdot ĝ
   `,
   formula: `
 ## 核心公式
 
 ### 狄利克雷核
-$$
+$
 D_n(x) = \\sum_{k=-n}^n e^{ikx} = \\frac{\\sin((n+1/2)x)}{\\sin(x/2)}
-$$
+$
 
 ### 帕塞瓦尔恒等式
-$$
+$
 \\frac{1}{2\\pi}\\int_{-\\pi}^\\pi |f(x)|^2 dx = \\sum_{n=-\\infty}^\\infty |c_n|^2
-$$
+$
 
 ### 傅里叶变换
-$$
+$
 \\hat{f}(\\xi) = \\int_{-\\infty}^\\infty f(x)e^{-2\\pi i\\xi x}dx
-$$
+$
 
 ### 逆变换
-$$
+$
 f(x) = \\int_{-\\infty}^\\infty \\hat{f}(\\xi)e^{2\\pi i\\xi x}d\\xi
-$$
+$
 
 ### 卷积定理
-$$
+$
 \\widehat{f * g} = \\hat{f} \\cdot \\hat{g}
-$$
+$
   `,
   examples: [
     {
@@ -5733,24 +5731,24 @@ export const odeAdvancedLesson: SubLesson = {
 ## 核心公式
 
 ### 矩阵指数
-$$
+$
 e^{Ax} = \\sum_{n=0}^\\infty \\frac{(Ax)^n}{n!}
-$$
+$
 
 ### 常系数系统解
-$$
+$
 \\mathbf{y}' = A\\mathbf{y} \\Rightarrow \\mathbf{y} = e^{Ax}\\mathbf{y}_0
-$$
+$
 
 ### 常数变易公式
-$$
+$
 \\mathbf{y}' = A(x)\\mathbf{y} + \\mathbf{f}(x) \\Rightarrow \\mathbf{y} = \\Phi(x)\\left[\\mathbf{c} + \\int \\Phi^{-1}(s)\\mathbf{f}(s)ds\\right]
-$$
+$
 
 ### 稳定性判据
-$$
+$
 \\text{Re}(\\lambda_i) < 0 \\text{ 对所有 } i \\Rightarrow \\text{渐近稳定}
-$$
+$
   `,
   examples: [
     {

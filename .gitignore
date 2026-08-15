@@ -19,6 +19,14 @@
 
 # production
 /build
+# 静态导出产物（本地构建，由 GitHub Actions 重新构建发布）
+/dist/
+/dist4/
+/dist5/
+
+# 备份残留
+*.bak
+*.backup
 
 # misc
 .DS_Store

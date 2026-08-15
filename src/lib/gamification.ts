@@ -7,8 +7,6 @@ import {
   EXP_REWARDS,
   LEVEL_CONFIG,
   MATH_TITLES,
-  PHYSICS_TITLES,
-  CS_TITLES,
 } from '@/types/gamification';
 
 // 重新导出所有类型和常量
@@ -16,16 +14,7 @@ export * from '@/types/gamification';
 
 // 获取模块称号配置
 export function getModuleTitles(category: ModuleCategory): ModuleTitles {
-  switch (category) {
-    case 'math':
-      return MATH_TITLES;
-    case 'physics':
-      return PHYSICS_TITLES;
-    case 'cs':
-      return CS_TITLES;
-    default:
-      return MATH_TITLES;
-  }
+  return MATH_TITLES;
 }
 
 // 根据经验值获取等级
@@ -64,10 +53,8 @@ export function getTitleByLevel(
       return titles.level5;
     case 6:
       return titles.level6;
-    case 7:
-      return selectedTitle || titles.level7[0];
     default:
-      return titles.level1;
+      return titles.level6;
   }
 }
 
@@ -105,46 +92,53 @@ export function calculateAnswerExp(score: number): number {
 
 // 获取模块显示名称
 export function getModuleDisplayName(category: ModuleCategory): string {
-  switch (category) {
-    case 'math':
-      return '数学';
-    case 'physics':
-      return '物理';
-    case 'cs':
-      return '计算机';
-    default:
-      return '未知';
-  }
+  return '数学';
 }
 
-// 头像框样式 - 专业学术风格
+// 头像框样式 - 全新设计，从低到高越来越华丽
 export const FRAME_STYLES: Record<string, string> = {
   default: 'avatar-frame avatar-frame-default',
   bronze: 'avatar-frame avatar-frame-bronze',
   silver: 'avatar-frame avatar-frame-silver',
   gold: 'avatar-frame avatar-frame-gold',
   diamond: 'avatar-frame avatar-frame-diamond',
-  starry: 'avatar-frame avatar-frame-gold',
-  halo: 'avatar-frame avatar-frame-legendary',
+  starry: 'avatar-frame avatar-frame-starry',
 };
 
 // 头像框颜色
-export const FRAME_COLORS: Record<string, { bg: string; text: string }> = {
-  default: { bg: 'bg-gray-100', text: 'text-gray-600' },
-  bronze: { bg: 'bg-amber-100', text: 'text-amber-700' },
-  silver: { bg: 'bg-slate-100', text: 'text-slate-600' },
-  gold: { bg: 'bg-yellow-100', text: 'text-yellow-700' },
-  diamond: { bg: 'bg-cyan-100', text: 'text-cyan-700' },
-  starry: { bg: 'bg-indigo-100', text: 'text-indigo-700' },
-  halo: { bg: 'bg-amber-50', text: 'text-amber-600' },
+export const FRAME_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  default: { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-300' },
+  bronze: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-500' },
+  silver: { bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-400' },
+  gold: { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-500' },
+  diamond: { bg: 'bg-cyan-100', text: 'text-cyan-700', border: 'border-cyan-500' },
+  starry: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-500' },
+};
+
+// 等级显示名称
+export const LEVEL_NAMES: Record<number, string> = {
+  1: '初学者',
+  2: '铜阶学者',
+  3: '银阶学者',
+  4: '金阶学者',
+  5: '钻石学者',
+  6: '星空传奇',
+};
+
+// 等级图标
+export const LEVEL_ICONS: Record<number, string> = {
+  1: '🌱',
+  2: '🥉',
+  3: '🥈',
+  4: '🥇',
+  5: '💎',
+  6: '⭐',
 };
 
 // 初始化模块数据
 export function initModuleData(): UserModuleData {
   return {
     math: { exp: 0, level: 1, selectedTitle: null },
-    physics: { exp: 0, level: 1, selectedTitle: null },
-    cs: { exp: 0, level: 1, selectedTitle: null },
   };
 }
 
@@ -157,42 +151,15 @@ export function addExperience(
   const newModuleData = { ...moduleData };
   const current = newModuleData[category];
 
-  const newExp = current.exp + expToAdd;
+  // 添加经验值（最高到6级）
+  const newExp = Math.min(current.exp + expToAdd, LEVEL_CONFIG[LEVEL_CONFIG.length - 1].minExp);
   const newLevel = getLevelByExp(newExp);
-
-  let newSelectedTitle = current.selectedTitle;
-  if (newLevel === 7 && current.level < 7 && !newSelectedTitle) {
-    const titles = getModuleTitles(category);
-    newSelectedTitle = titles.level7[0];
-  }
 
   newModuleData[category] = {
     exp: newExp,
     level: newLevel,
-    selectedTitle: newSelectedTitle,
+    selectedTitle: current.selectedTitle,
   };
-
-  return newModuleData;
-}
-
-// 选择第7级称号
-export function selectLegendaryTitle(
-  moduleData: UserModuleData,
-  category: ModuleCategory,
-  title: string
-): UserModuleData {
-  const newModuleData = { ...moduleData };
-  const current = newModuleData[category];
-
-  if (current.level === 7) {
-    const titles = getModuleTitles(category);
-    if (titles.level7.includes(title)) {
-      newModuleData[category] = {
-        ...current,
-        selectedTitle: title,
-      };
-    }
-  }
 
   return newModuleData;
 }

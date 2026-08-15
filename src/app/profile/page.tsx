@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,12 +19,13 @@ import {
 import {
   FRAME_STYLES,
   FRAME_COLORS,
+  LEVEL_NAMES,
+  LEVEL_ICONS,
   getExpProgress,
   getExpToNextLevel,
   LEVEL_CONFIG,
   getModuleTitles,
   getTitleByLevel,
-  getPrimaryTitle,
   getPrimaryFrame,
   initModuleData,
   getModuleDisplayName,
@@ -36,7 +37,6 @@ import {
   Calendar,
   Trophy,
   Star,
-  Target,
   Settings,
   LogOut,
   Crown,
@@ -44,8 +44,6 @@ import {
   BookOpen,
   Award,
   Calculator,
-  Atom,
-  Cpu,
   ChevronRight,
   Info,
   CheckCircle2,
@@ -55,31 +53,72 @@ import {
   MessageSquare,
   Heart,
   Users,
+  MapPin,
+  Sparkles,
+  TrendingUp,
+  Zap,
+  Trash2,
+  PenLine,
+  ExternalLink,
+  Shield,
+  UserPlus,
 } from 'lucide-react';
 import Link from 'next/link';
-import { Post } from '@/types';
-import { getAllPosts } from '@/lib/db';
+import { Post, Note, User as UserType } from '@/types';
+import { getAllPosts, deletePost, getNotesByUser, deleteNote, getFollowing, getFollowers, getUserById, getAnswerRecordsByUser, areFriends } from '@/lib/db';
+import { getDailyQuestionsByDate } from '@/lib/daily-question-bank';
 import { formatRelativeTime } from '@/lib/utils';
+import { EditProfileDialog } from '@/components/profile/EditProfileDialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+
+import { LocationSettingDialog } from '@/components/location/LocationSettingDialog';
+import { UserProfileCard } from '@/components/user/UserProfileCard';
+import { PiPowerCalendarDialog } from '@/components/pipower/PiPowerOrb';
+import { LazyImage } from '@/components/LazyImage';
+
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, isAuthenticated, hasHydrated, logout, selectLegendaryTitle, setDisplayCategory } = useAuth();
+  const { user, isAuthenticated, hasHydrated, logout, updateUserInfo, updatePrivacy, followUser, unfollowUser, isFollowing } = useAuth();
   const [selectedModule, setSelectedModule] = useState<ModuleCategory | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'favorites' | 'posts' | 'following'>('overview');
-  const [followingList, setFollowingList] = useState<any[]>([]);
-  const [followersList, setFollowersList] = useState<any[]>([]);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'favorites' | 'posts' | 'following' | 'notes' | 'settings'>('overview');
+  const [followingList, setFollowingList] = useState<UserType[]>([]);
+  const [followersList, setFollowersList] = useState<UserType[]>([]);
+  const [followingSubTab, setFollowingSubTab] = useState<'following' | 'followers' | 'friends'>('following');
+  const [socialLoading, setSocialLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
+  const [selectedUserIsFriend, setSelectedUserIsFriend] = useState(false);
+  const [selectedUserPosts, setSelectedUserPosts] = useState<Post[]>([]);
+  const [selectedUserFollowing, setSelectedUserFollowing] = useState<UserType[]>([]);
+  const [selectedUserFollowers, setSelectedUserFollowers] = useState<UserType[]>([]);
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
+  const [answerStats, setAnswerStats] = useState<{
+    total: number;
+    correct: number;
+    avgScore: number;
+    byModule: Record<string, { total: number; correct: number }>;
+  } | null>(null);
+  const [postToDelete, setPostToDelete] = useState<Post | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [favoritesSubTab, setFavoritesSubTab] = useState<'posts' | 'questions'>('posts');
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [notesLoading, setNotesLoading] = useState(false);
+  // 待删除确认的笔记 id（应用内确认弹窗，替代原生 confirm）
+  const [noteDeleteId, setNoteDeleteId] = useState<string | null>(null);
+  const [isPiCalendarOpen, setIsPiCalendarOpen] = useState(false);
 
   useEffect(() => {
-    // 等待 hydration 完成后再检查认证状态
     if (hasHydrated && !isAuthenticated) {
       router.push('/login/');
     }
   }, [isAuthenticated, hasHydrated, router]);
 
-  // 加载帖子数据
   useEffect(() => {
     if (user) {
       loadPosts();
+      loadAnswerStats();
     }
   }, [user]);
 
@@ -88,34 +127,131 @@ export default function ProfilePage() {
     setPosts(allPosts);
   };
 
-  // 获取用户收藏的帖子
+  // 聚合答题记录：总数 / 正确率 / 平均分 / 按模块分布
+  const loadAnswerStats = async () => {
+    if (!user) return;
+    try {
+      const records = await getAnswerRecordsByUser(user.id);
+      const byModule: Record<string, { total: number; correct: number }> = {};
+      let correct = 0;
+      let scoreSum = 0;
+      for (const r of records) {
+        const m = r.questionId.match(/^daily-\d{4}-\d{2}-\d{2}-(.+)$/);
+        const mod = m ? m[1] : 'other';
+        byModule[mod] = byModule[mod] || { total: 0, correct: 0 };
+        byModule[mod].total++;
+        if (r.isCorrect) {
+          byModule[mod].correct++;
+          correct++;
+        }
+        scoreSum += r.aiScore || 0;
+      }
+      setAnswerStats({
+        total: records.length,
+        correct,
+        avgScore: records.length > 0 ? Math.round(scoreSum / records.length) : 0,
+        byModule,
+      });
+    } catch (err) {
+      console.error('Failed to load answer stats:', err);
+    }
+  };
+
+  const loadNotes = async () => {
+    if (!user) return;
+    setNotesLoading(true);
+    try {
+      const allNotes = await getNotesByUser(user.id);
+      allNotes.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+      setNotes(allNotes);
+    } catch (err) {
+      console.error('Failed to load notes:', err);
+    } finally {
+      setNotesLoading(false);
+    }
+  };
+
+  const handleDeleteNote = async (id: string) => {
+    try {
+      await deleteNote(id);
+      setNotes((prev) => prev.filter((n) => n.id !== id));
+    } catch (err) {
+      console.error('Failed to delete note:', err);
+    }
+  };
+
+  // 切换标签时保持滚动位置（避免内容高度变化导致页面回弹）
+  const handleTabChange = (tabId: typeof activeTab) => {
+    const scrollY = window.scrollY;
+    setActiveTab(tabId);
+    if (tabId === 'following') loadSocial();
+    if (tabId === 'notes') loadNotes();
+    // 内容切换 + 异步加载完成前多次恢复滚动位置
+    const restore = () => window.scrollTo({ top: scrollY, behavior: 'instant' as ScrollBehavior });
+    requestAnimationFrame(restore);
+    setTimeout(restore, 100);
+    setTimeout(restore, 350);
+  };
+
   const favoritePosts = posts.filter(post =>
     user?.favoritePosts?.includes(post.id)
   );
 
-  // 获取用户发布的帖子
   const myPosts = posts.filter(post => post.userId === user?.id);
 
-  // 获取关注列表
-  const fetchFollowing = async () => {
+  const loadSocial = async () => {
     if (!user) return;
+    setSocialLoading(true);
     try {
-      const res = await fetch(`/api/users/${user.id}/following`);
-      const data = await res.json();
-      setFollowingList(data.users || []);
+      const [following, followers] = await Promise.all([
+        getFollowing(user.id),
+        getFollowers(user.id),
+      ]);
+      setFollowingList(following);
+      setFollowersList(followers);
     } catch (error) {
-      console.error('Failed to fetch following:', error);
+      console.error('Failed to load social data:', error);
+    } finally {
+      setSocialLoading(false);
     }
   };
 
-  // 等待 hydration 完成
+  // 打开用户详情弹窗（替代静态导出下不存在的 /users/[id] 路由）
+  const handleOpenUserDialog = async (userId: string) => {
+    const userData = await getUserById(userId);
+    if (!userData) return;
+    setSelectedUser(userData);
+    setSelectedUserPosts(posts.filter((p) => p.userId === userId));
+    // 加载该用户的社交数据（新版用户卡片需要）
+    const [following, followers] = await Promise.all([
+      getFollowing(userId),
+      getFollowers(userId),
+    ]);
+    setSelectedUserFollowing(following);
+    setSelectedUserFollowers(followers);
+    // 好友（互相关注）才显示私信入口
+    setSelectedUserIsFriend(user ? await areFriends(user.id, userId) : false);
+    setIsUserDialogOpen(true);
+  };
+
+  // 在用户卡片中关注/取关后，同步刷新自己的关注列表
+  const handleToggleFollow = async () => {
+    if (!user || !selectedUser) return;
+    if (isFollowing(selectedUser.id)) {
+      await unfollowUser(selectedUser.id);
+    } else {
+      await followUser(selectedUser.id);
+    }
+    await loadSocial();
+  };
+
   if (!hasHydrated) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-slate-50">
         <Header />
         <main className="container mx-auto px-4 py-12 text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-500">加载中...</p>
+          <div className="animate-spin w-8 h-8 border-4 border-slate-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-slate-500">加载中...</p>
         </main>
       </div>
     );
@@ -123,445 +259,755 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-slate-50">
         <Header />
         <main className="container mx-auto px-4 py-12 text-center">
-          <p className="text-gray-500">请先登录</p>
+          <p className="text-slate-500">请先登录</p>
         </main>
       </div>
     );
   }
 
   const moduleData = user.moduleData || initModuleData();
-  const primaryTitleInfo = getPrimaryTitle(moduleData, user.displayCategory);
   const primaryFrame = getPrimaryFrame(moduleData, user.displayCategory);
 
-  // 获取各模块数据
-  const modules: { category: ModuleCategory; icon: React.ReactNode; color: string }[] = [
-    { category: 'math', icon: <Calculator className="w-5 h-5" />, color: 'from-blue-500 to-indigo-600' },
-    { category: 'physics', icon: <Atom className="w-5 h-5" />, color: 'from-pink-500 to-rose-600' },
-    { category: 'cs', icon: <Cpu className="w-5 h-5" />, color: 'from-cyan-500 to-blue-600' },
+  const modules: { category: ModuleCategory; icon: React.ReactNode; color: string; gradient: string }[] = [
+    {
+      category: 'math',
+      icon: <Calculator className="w-5 h-5" />,
+      color: 'text-indigo-600',
+      gradient: 'from-indigo-500 to-violet-600'
+    },
   ];
 
+  const handleSaveProfile = async (data: {
+    nickname: string;
+    avatar: string;
+    bio?: string;
+    coverImage?: string;
+  }) => {
+    await updateUserInfo({
+      nickname: data.nickname,
+      avatar: data.avatar,
+      bio: data.bio,
+      coverImage: data.coverImage,
+    });
+  };
+
+  const handleDeletePost = async () => {
+    if (!postToDelete) return;
+    try {
+      await deletePost(postToDelete.id);
+      // 重新加载帖子列表
+      await loadPosts();
+      setIsDeleteDialogOpen(false);
+      setPostToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete post:', error);
+    }
+  };
+
+  const openDeleteDialog = (post: Post) => {
+    setPostToDelete(post);
+    setIsDeleteDialogOpen(true);
+  };
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-slate-50">
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
-        {/* Profile Header */}
-        <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${
-          primaryTitleInfo.category === 'math' ? 'from-blue-500 to-indigo-600' :
-          primaryTitleInfo.category === 'physics' ? 'from-pink-500 to-rose-600' :
-          'from-cyan-500 to-blue-600'
-        } p-8 md:p-12 mb-8`}>
-          <div className="absolute inset-0 bg-pattern-dots opacity-20" />
+      <main className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* 个人资料头部 - 高级感设计 */}
+        <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm mb-8">
+          {/* 背景装饰（设置了封面图时以封面为准） */}
+          {user.coverImage ? (
+            <>
+              <img src={user.coverImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-slate-900/55" />
+            </>
+          ) : (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+              <div className="absolute inset-0 opacity-30">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+              </div>
+            </>
+          )}
 
-          <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
-            {/* Avatar */}
-            <div className={`w-24 h-24 md:w-32 md:h-32 rounded-full ${FRAME_STYLES[primaryFrame]} p-1 bg-white`}>
-              <Avatar className="w-full h-full">
-                <AvatarImage src={user.avatar} />
-                <AvatarFallback className="text-4xl bg-gradient-to-br from-purple-400 to-pink-400">
-                  {user.avatar}
-                </AvatarFallback>
-              </Avatar>
-            </div>
+          <div className="relative z-10 p-8 md:p-12">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              {/* 头像 - 全新等级头像框设计 */}
+              <div className="relative group">
+                <div className={`w-32 h-32 md:w-40 md:h-40 avatar-frame avatar-frame-${primaryFrame} p-1`}>
+                  <div className="w-full h-full rounded-full overflow-hidden bg-slate-800">
+                    <Avatar className="w-full h-full">
+                      <AvatarImage src={user.avatar} className="object-cover" />
+                      <AvatarFallback className="text-4xl bg-gradient-to-br from-slate-700 to-slate-600 text-white">
+                        {user.avatar?.startsWith('data:') || user.avatar?.startsWith('http') ? '👤' : (user.avatar || '👤')}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </div>
 
-            {/* Info */}
-            <div className="text-center md:text-left text-white">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl md:text-3xl font-bold">{user.nickname}</h1>
-                {user.isAdmin && (
-                  <Badge className="bg-yellow-400 text-yellow-900">管理员</Badge>
+                {/* 等级徽章 */}
+                <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 level-badge level-badge-${moduleData.math.level}`}>
+                  <span>{LEVEL_ICONS[moduleData.math.level]}</span>
+                  <span>LV.{moduleData.math.level}</span>
+                </div>
+
+                {/* 6级特殊皇冠标识 */}
+                {moduleData.math.level >= 6 && (
+                  <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                    <Crown className="w-6 h-6 text-amber-900" />
+                  </div>
                 )}
               </div>
 
-              <div className="flex items-center gap-2 mb-4">
-                <Crown className="w-5 h-5" />
-                <span className="text-xl font-bold">{primaryTitleInfo.title}</span>
-                <Badge className="bg-white/20 text-white">
-                  {getModuleDisplayName(primaryTitleInfo.category)}
-                </Badge>
+              {/* 用户信息 */}
+              <div className="text-center md:text-left flex-1">
+                <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
+                  <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                    {user.nickname}
+                  </h1>
+                  {user.isAdmin && (
+                    <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30">
+                      管理员
+                    </Badge>
+                  )}
+                </div>
+
+                {/* 个性签名 */}
+                {user.bio && (
+                  <p className="text-slate-300 text-sm mb-3 max-w-md">
+                    {user.bio}
+                  </p>
+                )}
+
+                {/* 等级名称 - 全新设计 */}
+                <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+                  <div className={`px-4 py-1.5 rounded-full text-sm font-bold ${FRAME_COLORS[primaryFrame]?.bg || 'bg-gray-100'} ${FRAME_COLORS[primaryFrame]?.text || 'text-gray-600'} border ${FRAME_COLORS[primaryFrame]?.border || 'border-gray-300'} shadow-sm`}>
+                    {LEVEL_NAMES[moduleData.math.level]}
+                  </div>
+                </div>
+
+                {/* 等级进度条 - 全新设计 */}
+                <div className="mb-6 max-w-md">
+                  <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+                    <span>等级进度</span>
+                    <span>{getExpProgress(moduleData.math.exp)}%</span>
+                  </div>
+                  <div className="h-2.5 bg-slate-700/50 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        moduleData.math.level >= 6
+                          ? 'bg-gradient-to-r from-amber-400 via-pink-500 to-purple-500'
+                          : moduleData.math.level >= 5
+                          ? 'bg-gradient-to-r from-cyan-400 to-blue-500'
+                          : moduleData.math.level >= 4
+                          ? 'bg-gradient-to-r from-yellow-400 to-amber-500'
+                          : moduleData.math.level >= 3
+                          ? 'bg-gradient-to-r from-slate-300 to-slate-400'
+                          : moduleData.math.level >= 2
+                          ? 'bg-gradient-to-r from-amber-600 to-orange-600'
+                          : 'bg-gradient-to-r from-gray-400 to-gray-500'
+                      }`}
+                      style={{ width: `${getExpProgress(moduleData.math.exp)}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-500 mt-1.5">
+                    <span>{moduleData.math.exp.toLocaleString()} EXP</span>
+                    <span>
+                      {getExpToNextLevel(moduleData.math.exp) > 0
+                        ? `还需 ${getExpToNextLevel(moduleData.math.exp).toLocaleString()} EXP 升级`
+                        : '已达到最高等级'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                  <button
+                    onClick={() => setIsEditDialogOpen(true)}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white text-sm font-medium transition-all border border-white/10"
+                  >
+                    <Settings className="w-4 h-4" />
+                    编辑资料
+                  </button>
+                  <div className="flex items-center gap-2 px-4 py-2.5 text-slate-400 text-sm">
+                    <Star className="w-4 h-4 text-amber-400" />
+                    <span>{moduleData.math.exp.toLocaleString()} 总经验</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2.5 text-slate-400 text-sm">
+                    <Calendar className="w-4 h-4" />
+                    <span>加入于 {new Date(user.createdAt).toLocaleDateString('zh-CN')}</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm">
-                <span className="flex items-center gap-1">
-                  <Star className="w-4 h-4" />
-                  {moduleData.math.exp + moduleData.physics.exp + moduleData.cs.exp} 总EXP
-                </span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  加入于 {new Date(user.createdAt).toLocaleDateString('zh-CN')}
-                </span>
+              {/* 等级徽章 - 全新设计 */}
+              <div className="hidden lg:flex flex-col items-center gap-3">
+                <div className={`w-28 h-28 rounded-2xl ${FRAME_COLORS[primaryFrame]?.bg || 'bg-gray-100'} border-2 ${FRAME_COLORS[primaryFrame]?.border || 'border-gray-300'} flex flex-col items-center justify-center backdrop-blur-sm shadow-lg relative overflow-hidden`}
+                >
+                  {/* 背景装饰 */}
+                  <div className="absolute inset-0 opacity-20">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-white to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
+                  </div>
+
+                  <span className="text-4xl mb-1">{LEVEL_ICONS[moduleData.math.level]}</span>
+                  <span className={`text-2xl font-bold ${FRAME_COLORS[primaryFrame]?.text || 'text-gray-600'}`}>Lv.{moduleData.math.level}</span>
+                  <span className="text-[10px] text-slate-500 mt-0.5">{LEVEL_NAMES[moduleData.math.level]}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 底部进度条 */}
+          <div className="relative z-10 px-8 md:px-12 pb-6">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-slate-400">等级进度</span>
+                  <span className="text-indigo-400 font-medium">{getExpProgress(moduleData.math.exp)}%</span>
+                </div>
+                <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500"
+                    style={{ width: `${getExpProgress(moduleData.math.exp)}%` }}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'overview'
-                ? 'bg-purple-500 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            概览
-          </button>
-          <button
-            onClick={() => setActiveTab('favorites')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-              activeTab === 'favorites'
-                ? 'bg-purple-500 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <Bookmark className="w-4 h-4" />
-            收藏夹 ({favoritePosts.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('posts')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-              activeTab === 'posts'
-                ? 'bg-purple-500 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <MessageSquare className="w-4 h-4" />
-            我的帖子 ({myPosts.length})
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('following');
-              fetchFollowing();
-            }}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-              activeTab === 'following'
-                ? 'bg-purple-500 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            关注
-          </button>
+        {/* 标签页导航 -  pill 样式 */}
+        <div className="flex gap-2 mb-8 p-1 bg-white rounded-xl border border-slate-200 shadow-sm w-fit">
+          {[
+            { id: 'overview', label: '概览', icon: User },
+            { id: 'favorites', label: '收藏夹', icon: Bookmark, count: (user?.favoritePosts?.length || 0) + (user?.favoriteQuestions?.length || 0) },
+            { id: 'notes', label: '笔记', icon: PenLine, count: notes.length },
+            { id: 'posts', label: '我的帖子', icon: MessageSquare, count: myPosts.length },
+            { id: 'following', label: '关注', icon: Users },
+            { id: 'settings', label: '设置', icon: Settings },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id as typeof activeTab)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                activeTab === tab.id
+                  ? 'bg-slate-900 text-white shadow-md'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+              {tab.count !== undefined && tab.count > 0 && (
+                <span className={`px-1.5 py-0.5 text-xs rounded-full ${
+                  activeTab === tab.id ? 'bg-white/20' : 'bg-slate-200 text-slate-600'
+                }`}>
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
 
         {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left Column - Module Stats */}
-          <div className="space-y-6">
-            {/* 展示称号选择 */}
-            <Card className="p-6 cartoon-card">
-              <h3 className="font-bold mb-4 flex items-center gap-2">
-                <Award className="w-5 h-5 text-purple-500" />
-                展示称号设置
-              </h3>
-              <p className="text-sm text-gray-500 mb-4">
-                选择要展示给其他用户看的称号（每个模块的称号都可以选择）
-              </p>
-              <div className="space-y-2">
-                {modules.map(({ category, icon, color }) => {
-                  const data = moduleData[category];
-                  const title = getTitleByLevel(category, data.level, data.selectedTitle);
-                  const isSelected = user.displayCategory === category ||
-                    (!user.displayCategory && primaryTitleInfo.category === category);
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* 左侧栏 */}
+            <div className="space-y-6">
+              {/* 数学模块卡片 */}
+              {modules.map(({ category, icon, color, gradient }) => {
+                const data = moduleData[category];
+                const expProgress = getExpProgress(data.exp);
+                const expToNext = getExpToNextLevel(data.exp);
+                const nextLevel = LEVEL_CONFIG.find(l => l.level === data.level + 1);
+                const title = getTitleByLevel(category, data.level, data.selectedTitle);
 
-                  return (
-                    <button
-                      key={category}
-                      onClick={() => setDisplayCategory(category)}
-                      className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
-                        isSelected
-                          ? 'border-purple-500 bg-purple-50'
-                          : 'border-gray-200 hover:border-purple-300'
-                      }`}
-                    >
-                      <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center text-white`}>
+                return (
+                  <Card key={category} className="p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-lg`}>
                         {icon}
                       </div>
-                      <div className="flex-1 text-left">
-                        <div className="font-bold">{title}</div>
-                        <div className="text-xs text-gray-500">{getModuleDisplayName(category)} Lv.{data.level}</div>
+                      <div>
+                        <h3 className="font-bold text-slate-900 text-lg">{getModuleDisplayName(category)}</h3>
+                        <p className={`text-sm ${color} font-medium`}>{title}</p>
                       </div>
-                      {isSelected && <CheckCircle2 className="w-5 h-5 text-purple-500" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </Card>
-
-            {/* Module Experience Cards */}
-            {modules.map(({ category, icon, color }) => {
-              const data = moduleData[category];
-              const expProgress = getExpProgress(data.exp);
-              const expToNext = getExpToNextLevel(data.exp);
-              const currentLevel = LEVEL_CONFIG.find(l => l.level === data.level);
-              const nextLevel = LEVEL_CONFIG.find(l => l.level === data.level + 1);
-              const title = getTitleByLevel(category, data.level, data.selectedTitle);
-
-              return (
-                <Card key={category} className="p-6 cartoon-card">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white`}>
-                      {icon}
                     </div>
-                    <div>
-                      <h3 className="font-bold">{getModuleDisplayName(category)}</h3>
-                      <p className="text-sm text-gray-500">{title}</p>
-                    </div>
-                  </div>
 
-                  <div className="mb-4">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-gray-500">等级 {data.level}</span>
-                      <span className="font-bold">{expProgress}%</span>
-                    </div>
-                    <Progress value={expProgress} className="h-2" />
-                  </div>
-
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">当前经验</span>
-                      <span className="font-bold">{data.exp} EXP</span>
-                    </div>
-                    {nextLevel && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">升级还需</span>
-                        <span className="font-bold text-purple-600">{expToNext} EXP</span>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-slate-500">等级 {data.level}</span>
+                          <span className="font-semibold text-slate-900">{expProgress}%</span>
+                        </div>
+                        <AnimatedExpBar value={expProgress} className="h-2 bg-slate-100" />
                       </div>
-                    )}
-                  </div>
 
-                  {/* 7级称号选择按钮 */}
-                  {data.level === 7 && (
-                    <Dialog>
-                      <DialogTrigger>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full mt-4"
-                          onClick={() => setSelectedModule(category)}
-                        >
-                          <Award className="w-4 h-4 mr-2" />
-                          选择传奇称号
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>选择你的传奇称号</DialogTitle>
-                        </DialogHeader>
-                        <LegendaryTitleSelector
-                          category={category}
-                          currentTitle={data.selectedTitle}
-                          onSelect={(title) => selectLegendaryTitle(category, title)}
-                        />
-                      </DialogContent>
-                    </Dialog>
-                  )}
-                </Card>
-              );
-            })}
-          </div>
-
-          {/* Right Column - Achievements & Settings */}
-          <div className="md:col-span-2 space-y-6">
-            {/* Module Progress Overview */}
-            <Card className="p-6 cartoon-card">
-              <h3 className="font-bold mb-4 flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-yellow-500" />
-                等级成长路线
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {modules.map(({ category, icon, color }) => {
-                  const data = moduleData[category];
-                  const titles = getModuleTitles(category);
-
-                  return (
-                    <div key={category} className="space-y-2">
-                      <div className={`flex items-center gap-2 p-2 rounded-lg bg-gradient-to-r ${color} text-white`}>
-                        {icon}
-                        <span className="font-bold">{getModuleDisplayName(category)}</span>
+                      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                        <div>
+                          <div className="text-2xl font-bold text-slate-900">{data.exp}</div>
+                          <div className="text-xs text-slate-500">当前经验</div>
+                        </div>
+                        {nextLevel ? (
+                          <div>
+                            <div className="text-2xl font-bold text-indigo-600">{expToNext}</div>
+                            <div className="text-xs text-slate-500">升级还需</div>
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="text-2xl font-bold text-amber-500">MAX</div>
+                            <div className="text-xs text-slate-500">已达满级</div>
+                          </div>
+                        )}
                       </div>
-                      <div className="space-y-1">
-                        {LEVEL_CONFIG.map((level) => {
-                          const isCurrent = level.level === data.level;
-                          const isPast = level.level < data.level;
-                          const title = level.level === 7
-                            ? (data.selectedTitle || titles.level7[0])
-                            : getTitleByLevel(category, level.level, null);
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
 
-                          return (
-                            <div
-                              key={level.level}
-                              className={`flex items-center gap-2 p-2 rounded text-sm ${
-                                isCurrent ? 'bg-purple-50 border border-purple-200' :
-                                isPast ? 'bg-gray-50 text-gray-400' :
-                                'bg-white text-gray-300'
-                              }`}
-                            >
-                              <div className={`w-6 h-6 rounded-full ${FRAME_STYLES[level.frame]} flex-shrink-0`} />
-                              <span className="truncate flex-1">{title}</span>
-                              {isCurrent && <Badge className="bg-purple-500 text-xs">当前</Badge>}
+            {/* 右侧栏 */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* π力 + 答题统计合并卡片（点击进入π力日历） */}
+              <Card
+                onClick={() => setIsPiCalendarOpen(true)}
+                className="relative overflow-hidden p-6 bg-gradient-to-br from-violet-50/80 via-white to-fuchsia-50/60 border-violet-200 shadow-sm hover:shadow-lg hover:shadow-violet-500/10 hover:border-violet-300 cursor-pointer group motion-safe:transition-all motion-safe:duration-300 motion-safe:active:duration-75 motion-safe:active:scale-[0.99]"
+                title="点击查看π力日历"
+              >
+                {/* 右上角装饰光晕 */}
+                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-gradient-to-br from-violet-200/40 to-fuchsia-200/30 blur-2xl pointer-events-none group-hover:scale-125 motion-safe:transition-transform motion-safe:duration-500" />
+
+                <div className="relative flex items-center justify-between mb-6">
+                  <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-100 to-fuchsia-100 border border-violet-200 flex items-center justify-center shadow-inner">
+                      <span className="text-violet-600 text-sm font-bold" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>π</span>
+                    </div>
+                    我的π力 · 答题情况
+                  </h3>
+                  <span className="flex items-center gap-1 text-xs text-violet-500 group-hover:text-violet-700 group-hover:translate-x-0.5 motion-safe:transition-all motion-safe:duration-200">
+                    <Calendar className="w-3.5 h-3.5" />
+                    π力日历
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+
+                {/* π力数据 */}
+                <div className="relative grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: '累计π力', value: `${user.piPower?.currentPi || 0}π`, icon: TrendingUp, iconBg: 'bg-indigo-100 text-indigo-600' },
+                    { label: '本月π力', value: `${user.piPower?.monthlyPi || 0}π`, icon: Flame, iconBg: 'bg-violet-100 text-violet-600' },
+                    { label: '累计答对', value: user.piPower?.totalAnswered || 0, icon: CheckCircle2, iconBg: 'bg-emerald-100 text-emerald-600' },
+                    { label: '连续答对', value: `${user.piPower?.currentStreak || 0}天`, icon: Zap, iconBg: 'bg-rose-100 text-rose-500' },
+                  ].map((stat) => (
+                    <div key={stat.label} className="flex items-center gap-3 p-3.5 rounded-xl bg-white/80 backdrop-blur border border-violet-100 hover:border-violet-300 hover:shadow-sm motion-safe:transition-all motion-safe:duration-200">
+                      <div className={`w-9 h-9 rounded-lg ${stat.iconBg} flex items-center justify-center shrink-0`}>
+                        <stat.icon className="w-4.5 h-4.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-lg font-bold text-slate-900 leading-tight truncate">{stat.value}</div>
+                        <div className="text-[11px] text-slate-500">{stat.label}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 答题统计 */}
+                {answerStats && answerStats.total > 0 && (
+                  <div className="relative mt-6 pt-5 border-t border-violet-100">
+                    <div className="grid grid-cols-3 gap-4 mb-5">
+                      <div className="text-center p-3 rounded-xl bg-white/80 border border-violet-100">
+                        <div className="text-xl font-bold text-slate-900">{answerStats.total}</div>
+                        <div className="text-[11px] text-slate-500">累计答题</div>
+                      </div>
+                      <div className="text-center p-3 rounded-xl bg-white/80 border border-violet-100">
+                        <div className="text-xl font-bold text-emerald-600">
+                          {Math.round((answerStats.correct / answerStats.total) * 100)}%
+                        </div>
+                        <div className="text-[11px] text-slate-500">正确率</div>
+                      </div>
+                      <div className="text-center p-3 rounded-xl bg-white/80 border border-violet-100">
+                        <div className="text-xl font-bold text-indigo-600">{answerStats.avgScore}</div>
+                        <div className="text-[11px] text-slate-500">平均得分</div>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      {Object.entries(answerStats.byModule).map(([mod, stat]) => {
+                        const name =
+                          mod === 'highschool-math' ? '高中数学'
+                          : mod === 'advanced-math' ? '高等数学'
+                          : mod === 'linear-algebra' ? '线性代数'
+                          : mod;
+                        const rate = Math.round((stat.correct / stat.total) * 100);
+                        return (
+                          <div key={mod}>
+                            <div className="flex justify-between text-sm mb-1.5">
+                              <span className="text-slate-600">{name}</span>
+                              <span className="text-slate-500">{stat.correct}/{stat.total} · {rate}%</span>
                             </div>
-                          );
-                        })}
+                            <div className="h-2 bg-white rounded-full overflow-hidden border border-violet-100">
+                              <div
+                                className="h-full bg-gradient-to-r from-violet-400 to-fuchsia-400 rounded-full transition-all duration-500"
+                                style={{ width: `${rate}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div className="relative mt-5 pt-4 border-t border-violet-100 flex items-center justify-between">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsLocationDialogOpen(true);
+                    }}
+                    className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    {user.location?.province ? `当前位置：${user.location.province}` : '设置位置'}
+                  </button>
+                  <span className="text-[11px] text-violet-400">点击查看答题日历与每日题目 →</span>
+                </div>
+              </Card>
+
+              {/* 登基之路 */}
+              <Card className="p-6 bg-white border-slate-200 shadow-sm">
+                <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-amber-500" />
+                  登基之路
+                </h3>
+                <div className="space-y-3">
+                  {modules.map(({ category, icon, color, gradient }) => {
+                    const data = moduleData[category];
+                    const titles = getModuleTitles(category);
+
+                    return (
+                      <div key={category} className="space-y-3">
+                        <div className={`flex items-center gap-2 p-3 rounded-xl bg-gradient-to-r ${gradient} text-white`}>
+                          {icon}
+                          <span className="font-bold">{getModuleDisplayName(category)}</span>
+                        </div>
+                        <div className="grid grid-cols-6 gap-2">
+                          {LEVEL_CONFIG.map((level) => {
+                            const isCurrent = level.level === data.level;
+                            const isPast = level.level < data.level;
+                            const title = getTitleByLevel(category, level.level, null);
+
+                            return (
+                              <div
+                                key={level.level}
+                                className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
+                                  isCurrent
+                                    ? 'border-indigo-500 bg-indigo-50 shadow-md'
+                                    : isPast
+                                      ? 'border-slate-200 bg-slate-50 opacity-60'
+                                      : 'border-slate-100 bg-white opacity-40'
+                                }`}
+                              >
+                                <div className={`w-10 h-10 avatar-frame avatar-frame-${level.frame} mb-2 flex items-center justify-center text-sm font-bold ${
+                                  isCurrent ? 'scale-110' : ''
+                                } ${isPast || isCurrent ? 'opacity-100' : 'opacity-50'}`}
+                                >
+                                  {LEVEL_ICONS[level.level]}
+                                </div>
+                                <span className={`text-xs text-center font-medium line-clamp-2 ${
+                                  isCurrent ? 'text-slate-900' : 'text-slate-500'
+                                }`}>
+                                  {title}
+                                </span>
+                                {isCurrent && (
+                                  <Badge className="mt-2 bg-indigo-500 text-[10px]">当前</Badge>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </Card>
+                    );
+                  })}
+                </div>
+              </Card>
 
-            {/* 经验值获得规则 */}
-            <Card className="p-6 cartoon-card">
-              <h3 className="font-bold mb-4 flex items-center gap-2">
-                <Info className="w-5 h-5 text-blue-500" />
-                经验值获得规则
-              </h3>
-              <div className="space-y-4">
+              {/* 欧拉称号记录 */}
+              {user.eulerTitleHistory && user.eulerTitleHistory.length > 0 && (
+                <Card className="p-6 bg-white border-slate-200 shadow-sm">
+                  <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <Crown className="w-5 h-5 text-amber-500" />
+                    欧拉称号记录
+                  </h3>
+                  <div className="space-y-3">
+                    {[...user.eulerTitleHistory].reverse().slice(0, 5).map((record) => (
+                      <div
+                        key={record.id}
+                        className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white shadow-md">
+                            <Crown className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <div className="font-bold text-slate-900">{record.title}</div>
+                            <div className="text-xs text-slate-500">
+                              {record.rankType === 'global' ? '全站排行' : '全省排行'} 第{record.rank}名
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-medium text-slate-700">{record.month}</div>
+                          <div className="text-xs text-slate-400">
+                            {new Date(record.obtainedAt).toLocaleDateString('zh-CN')}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* 经验值规则 */}
+              <Card className="p-6 bg-white border-slate-200 shadow-sm">
+                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <Info className="w-5 h-5 text-blue-500" />
+                  经验值获得规则
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl bg-green-50 border border-green-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle2 className="w-5 h-5 text-green-600" />
-                      <span className="font-bold text-green-700">完全正确</span>
+                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                      <span className="font-bold text-emerald-800">完全正确</span>
                     </div>
-                    <p className="text-2xl font-bold text-green-600">+{EXP_REWARDS.CORRECT_ANSWER} EXP</p>
-                    <p className="text-xs text-green-600 mt-1">得分 ≥ 90分</p>
+                    <p className="text-2xl font-bold text-emerald-600 mb-1">+{EXP_REWARDS.CORRECT_ANSWER}</p>
+                    <p className="text-xs text-emerald-600">得分 ≥ 90分</p>
                   </div>
-                  <div className="p-4 rounded-xl bg-yellow-50 border border-yellow-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <HelpCircle className="w-5 h-5 text-yellow-600" />
-                      <span className="font-bold text-yellow-700">部分正确</span>
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <HelpCircle className="w-5 h-5 text-amber-600" />
+                      <span className="font-bold text-amber-800">部分正确</span>
                     </div>
-                    <p className="text-2xl font-bold text-yellow-600">+{EXP_REWARDS.PARTIAL_ANSWER} EXP</p>
-                    <p className="text-xs text-yellow-600 mt-1">{'60分 ≤ 得分 < 90分'}</p>
+                    <p className="text-2xl font-bold text-amber-600 mb-1">+{EXP_REWARDS.PARTIAL_ANSWER}</p>
+                    <p className="text-xs text-amber-600">60分 ≤ 得分 &lt; 90分</p>
                   </div>
-                  <div className="p-4 rounded-xl bg-red-50 border border-red-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <XCircle className="w-5 h-5 text-red-600" />
-                      <span className="font-bold text-red-700">需要努力</span>
+                  <div className="p-4 rounded-xl bg-rose-50 border border-rose-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <XCircle className="w-5 h-5 text-rose-600" />
+                      <span className="font-bold text-rose-800">需要努力</span>
                     </div>
-                    <p className="text-2xl font-bold text-red-600">+{EXP_REWARDS.WRONG_ANSWER} EXP</p>
-                    <p className="text-xs text-red-600 mt-1">{'得分 < 60分'}</p>
+                    <p className="text-2xl font-bold text-rose-600 mb-1">+{EXP_REWARDS.WRONG_ANSWER}</p>
+                    <p className="text-xs text-rose-600">得分 &lt; 60分</p>
                   </div>
                 </div>
-                <div className="p-4 rounded-xl bg-blue-50 border border-blue-200">
+                <div className="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
                   <div className="flex items-center gap-2 mb-2">
-                    <Flame className="w-5 h-5 text-blue-600" />
-                    <span className="font-bold text-blue-700">每日首帖</span>
+                    <Flame className="w-5 h-5 text-indigo-600" />
+                    <span className="font-bold text-slate-800">每日首帖</span>
+                    <span className="text-lg font-bold text-indigo-600 ml-auto">+{EXP_REWARDS.DAILY_FIRST_POST}</span>
                   </div>
-                  <p className="text-lg font-bold text-blue-600">+{EXP_REWARDS.DAILY_FIRST_POST} EXP</p>
-                  <p className="text-xs text-blue-600 mt-1">每天在社区发布第一个帖子可获得额外经验值</p>
+                  <p className="text-xs text-slate-500">每天在社区发布第一个帖子可获得额外经验值</p>
                 </div>
-                <div className="text-sm text-gray-500">
-                  <p className="font-medium mb-1">等级说明：</p>
-                  <ul className="list-disc list-inside space-y-1">
-                    <li>每个模块的经验值独立计算</li>
-                    <li>每日一题根据题目所属模块增加对应经验值</li>
-                    <li>达到7级后可以选择传奇称号展示给其他用户</li>
-                    <li>等级头像框根据你选择的展示称号决定</li>
-                  </ul>
-                </div>
-              </div>
-            </Card>
-
-            {/* Quick Stats */}
-            <Card className="p-6 cartoon-card">
-              <h3 className="font-bold mb-4 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-blue-500" />
-                学习统计
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatBox icon="📝" label="答题数" value="0" />
-                <StatBox icon="🔥" label="连续打卡" value="0天" />
-                <StatBox icon="💬" label="发帖数" value="0" />
-                <StatBox icon="👍" label="获赞数" value="0" />
-              </div>
-            </Card>
-
-            {/* Actions */}
-            <Card className="p-6 cartoon-card">
-              <h3 className="font-bold mb-4 flex items-center gap-2">
-                <Settings className="w-5 h-5 text-gray-500" />
-                设置
-              </h3>
-              <div className="space-y-3">
-                <Link href="/daily/">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Target className="w-4 h-4 mr-2" />
-                    去答题
-                  </Button>
-                </Link>
-                <Link href="/community/">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Flame className="w-4 h-4 mr-2" />
-                    去社区
-                  </Button>
-                </Link>
-                <Button
-                  variant="destructive"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    logout();
-                    router.push('/');
-                  }}
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  退出登录
-                </Button>
-              </div>
-            </Card>
+              </Card>
+            </div>
           </div>
-        </div>
         )}
 
         {/* 收藏夹 */}
         {activeTab === 'favorites' && (
           <div className="space-y-4">
-            <h3 className="font-semibold text-slate-700 mb-4 flex items-center gap-2">
-              <Bookmark className="w-5 h-5 text-purple-500" />
-              我的收藏 ({favoritePosts.length})
-            </h3>
-            {favoritePosts.length === 0 ? (
-              <Card className="p-8 text-center text-slate-500">
-                <Bookmark className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>暂无收藏帖子</p>
-                <Link href="/community/">
-                  <Button variant="outline" className="mt-4">
-                    去社区看看
+            {/* 子标签切换 */}
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={() => setFavoritesSubTab('posts')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  favoritesSubTab === 'posts' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                帖子 ({user?.favoritePosts?.length || 0})
+              </button>
+              <button
+                onClick={() => setFavoritesSubTab('questions')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  favoritesSubTab === 'questions' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                题目 ({user?.favoriteQuestions?.length || 0})
+              </button>
+            </div>
+
+            {favoritesSubTab === 'posts' && (
+              <>
+                {favoritePosts.length === 0 ? (
+                  <Card className="p-12 text-center bg-white border-slate-200 shadow-sm">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center">
+                      <Bookmark className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <p className="text-slate-500 mb-4">暂无收藏帖子</p>
+                    <Link href="/community/">
+                      <Button className="bg-slate-900 hover:bg-slate-800">
+                        去社区看看
+                      </Button>
+                    </Link>
+                  </Card>
+                ) : (
+                  <div className="grid gap-4">
+                    {favoritePosts.map((post) => (
+                      <Card
+                        key={post.id}
+                        onClick={() => router.push(`/community/post/#id=${post.id}`)}
+                        className="p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-600 flex items-center justify-center text-white text-xl flex-shrink-0 overflow-hidden">
+                            {post.userAvatar?.startsWith('data:') || post.userAvatar?.startsWith('http')
+                              ? <LazyImage src={post.userAvatar} alt="" className="w-full h-full object-cover" />
+                              : (post.userAvatar || '👤')
+                            }
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="font-medium text-slate-900">{post.userNickname}</span>
+                              <span className="text-xs text-slate-400">{formatRelativeTime(post.createdAt)}</span>
+                            </div>
+                            <h4 className="font-bold text-slate-900 hover:text-indigo-600 transition-colors mb-2">{post.title}</h4>
+                            <p className="text-slate-600 text-sm line-clamp-2">{post.content}</p>
+                            <div className="flex items-center gap-6 mt-3 text-sm text-slate-500">
+                              <span className="flex items-center gap-1.5">
+                                <Heart className="w-4 h-4" />
+                                {post.likes}
+                              </span>
+                              <span className="flex items-center gap-1.5">
+                                <MessageSquare className="w-4 h-4" />
+                                {post.comments.length} 评论
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            {favoritesSubTab === 'questions' && (
+              <>
+                {(user?.favoriteQuestions?.length || 0) === 0 ? (
+                  <Card className="p-12 text-center bg-white border-slate-200 shadow-sm">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center">
+                      <Bookmark className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <p className="text-slate-500 mb-4">暂无收藏题目</p>
+                    <Link href="/daily/">
+                      <Button className="bg-slate-900 hover:bg-slate-800">
+                        去每日一题
+                      </Button>
+                    </Link>
+                  </Card>
+                ) : (
+                  <div className="grid gap-4">
+                    {(user?.favoriteQuestions || []).map((qid) => {
+                      const match = qid.match(/^daily-(\d{4}-\d{2}-\d{2})-(.+)$/);
+                      if (!match) return null;
+                      const [, dateStr, moduleId] = match;
+                      const dailyQs = getDailyQuestionsByDate(dateStr);
+                      const q = dailyQs.find(dq => dq.moduleId === moduleId);
+                      if (!q) return null;
+                      return (
+                        <Card
+                          key={qid}
+                          onClick={() => router.push(`/daily/#date=${dateStr}&module=${moduleId}`)}
+                          className="p-5 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="secondary" className="text-xs">
+                                  {dateStr}
+                                </Badge>
+                                <Badge className="tag-math text-xs">
+                                  {moduleId === 'highschool-math' ? '高中数学' : moduleId === 'advanced-math' ? '高等数学' : '线性代数'}
+                                </Badge>
+                                <div className="flex items-center gap-0.5">
+                                  {Array(5).fill(0).map((_, i) => (
+                                    <Star key={i} className={`w-3 h-3 ${i < q.difficulty ? 'text-yellow-500 fill-yellow-500' : 'text-slate-300'}`} />
+                                  ))}
+                                </div>
+                              </div>
+                              <h4 className="font-bold text-slate-900 hover:text-indigo-600 transition-colors mb-1">{q.title}</h4>
+                              <p className="text-slate-600 text-sm line-clamp-2">{q.content.replace(/\$.*?\$/g, '').replace(/\\/g, '')}</p>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-indigo-500 shrink-0 self-center">
+                              前往该题
+                              <ChevronRight className="w-4 h-4" />
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* 笔记 */}
+        {activeTab === 'notes' && (
+          <div className="space-y-4">
+            {notesLoading ? (
+              <div className="text-center py-12 text-slate-500">加载中...</div>
+            ) : notes.length === 0 ? (
+              <Card className="p-12 text-center bg-white border-slate-200 shadow-sm">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center">
+                  <PenLine className="w-8 h-8 text-slate-400" />
+                </div>
+                <p className="text-slate-500 mb-4">暂无笔记</p>
+                <Link href="/courses">
+                  <Button className="bg-slate-900 hover:bg-slate-800">
+                    去知识库学习并记笔记
                   </Button>
                 </Link>
               </Card>
             ) : (
-              <div className="space-y-4">
-                {favoritePosts.map((post) => (
-                  <Card key={post.id} className="p-4">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-lg">
-                        {post.userAvatar}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {notes.map((note) => (
+                  <Card key={note.id} className="overflow-hidden bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+                    <div className="p-4 flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {note.moduleId === 'highschool-math' ? '高中数学' : note.moduleId === 'advanced-math' ? '高等数学' : '线性代数'}
+                        </Badge>
+                        <span className="text-xs text-slate-400">
+                          {new Date(note.updatedAt).toLocaleDateString('zh-CN')}
+                        </span>
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-sm">{post.userNickname}</span>
-                          <span className="text-xs text-slate-400">{formatRelativeTime(post.createdAt)}</span>
+                      <h4 className="font-bold text-slate-900 text-sm mb-1 truncate">{note.title || (note.content || '').split('\n')[0] || '空便签'}</h4>
+                      <p className="text-xs text-slate-500 truncate mb-2">{note.chapterTitle}</p>
+                      {note.content ? (
+                        <p className="text-xs text-slate-600 line-clamp-3 bg-slate-50 rounded p-2">{note.content}</p>
+                      ) : (
+                        <p className="text-xs text-slate-400 italic">无文本内容</p>
+                      )}
+                      {note.canvasData && (
+                        <div className="mt-2 h-20 bg-amber-50 rounded overflow-hidden">
+                          <img src={note.canvasData} alt="涂鸦" className="w-full h-full object-contain" />
                         </div>
-                        <Link href={`/community/post/${post.id}/`}>
-                          <h4 className="font-bold hover:text-purple-600 transition-colors">{post.title}</h4>
-                        </Link>
-                        <p className="text-slate-600 text-sm line-clamp-2 mt-1">{post.content}</p>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
-                          <span className="flex items-center gap-1">
-                            <Heart className="w-4 h-4" />
-                            {post.likes}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MessageSquare className="w-4 h-4" />
-                            {post.comments.length} 评论
-                          </span>
-                        </div>
-                      </div>
+                      )}
+                    </div>
+                    <div className="px-4 py-3 border-t border-slate-100 flex items-center gap-3">
+                      <Link href={`/module/${note.moduleId}/#chapter=${encodeURIComponent(note.chapterTitle)}&note=${encodeURIComponent(note.id)}`} className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors">
+                        <ExternalLink className="w-3 h-3" />
+                        前往原文
+                      </Link>
+                      <button
+                        onClick={() => setNoteDeleteId(note.id)}
+                        className="text-xs text-slate-400 hover:text-rose-500 flex items-center gap-1 transition-colors"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        删除
+                      </button>
                     </div>
                   </Card>
                 ))}
@@ -573,49 +1019,62 @@ export default function ProfilePage() {
         {/* 我的帖子 */}
         {activeTab === 'posts' && (
           <div className="space-y-4">
-            <h3 className="font-semibold text-slate-700 mb-4 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-purple-500" />
-              我的帖子 ({myPosts.length})
-            </h3>
             {myPosts.length === 0 ? (
-              <Card className="p-8 text-center text-slate-500">
-                <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>还没有发布过帖子</p>
+              <Card className="p-12 text-center bg-white border-slate-200 shadow-sm">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center">
+                  <MessageSquare className="w-8 h-8 text-slate-400" />
+                </div>
+                <p className="text-slate-500 mb-4">还没有发布过帖子</p>
                 <Link href="/community/">
-                  <Button variant="outline" className="mt-4">
+                  <Button className="bg-slate-900 hover:bg-slate-800">
                     去发布第一条帖子
                   </Button>
                 </Link>
               </Card>
             ) : (
-              <div className="space-y-4">
+              <div className="grid gap-4">
                 {myPosts.map((post) => (
-                  <Card key={post.id} className="p-4">
+                  <Card
+                    key={post.id}
+                    onClick={() => router.push(`/community/post/#id=${post.id}`)}
+                    className="p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                  >
                     <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-lg">
-                        {post.userAvatar}
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xl flex-shrink-0 overflow-hidden">
+                        {post.userAvatar?.startsWith('data:') || post.userAvatar?.startsWith('http')
+                          ? <LazyImage src={post.userAvatar} alt="" className="w-full h-full object-cover" />
+                          : (post.userAvatar || '👤')
+                        }
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-2">
                           <span className="text-xs text-slate-400">{formatRelativeTime(post.createdAt)}</span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDeleteDialog(post);
+                            }}
+                            className="p-2 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                            title="删除帖子"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
-                        <Link href={`/community/post/${post.id}/`}>
-                          <h4 className="font-bold hover:text-purple-600 transition-colors">{post.title}</h4>
-                        </Link>
-                        <p className="text-slate-600 text-sm line-clamp-2 mt-1">{post.content}</p>
+                        <h4 className="font-bold text-slate-900 hover:text-indigo-600 transition-colors mb-2">{post.title}</h4>
+                        <p className="text-slate-600 text-sm line-clamp-2">{post.content}</p>
                         {post.images.length > 0 && (
-                          <div className="flex gap-2 mt-2">
+                          <div className="flex gap-2 mt-3">
                             {post.images.slice(0, 3).map((img, idx) => (
-                              <img key={idx} src={img} alt="" className="w-16 h-16 object-cover rounded-lg" />
+                              <LazyImage key={idx} src={img} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200" />
                             ))}
                           </div>
                         )}
-                        <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
-                          <span className="flex items-center gap-1">
+                        <div className="flex items-center gap-6 mt-3 text-sm text-slate-500">
+                          <span className="flex items-center gap-1.5">
                             <Heart className="w-4 h-4" />
                             {post.likes}
                           </span>
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1.5">
                             <MessageSquare className="w-4 h-4" />
                             {post.comments.length} 评论
                           </span>
@@ -629,100 +1088,360 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* 关注列表 */}
-        {activeTab === 'following' && (
-          <div className="space-y-4">
-            <h3 className="font-semibold text-slate-700 mb-4 flex items-center gap-2">
-              <Users className="w-5 h-5 text-purple-500" />
-              我的关注 ({followingList.length})
-            </h3>
-            {followingList.length === 0 ? (
-              <Card className="p-8 text-center text-slate-500">
-                <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>还没有关注任何人</p>
-                <Link href="/community/">
-                  <Button variant="outline" className="mt-4">
-                    去社区发现有趣的作者
-                  </Button>
-                </Link>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {followingList.map((followedUser) => (
-                  <Card key={followedUser.id} className="p-4">
-                    <Link href={`/users/${followedUser.id}`} className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xl">
-                        {followedUser.avatar}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold">{followedUser.nickname}</h4>
-                        <p className="text-sm text-slate-500">{followedUser.followerCount} 粉丝</p>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400" />
-                    </Link>
-                  </Card>
+        {/* 关注 / 粉丝 / 好友 */}
+        {activeTab === 'following' && (() => {
+          const followerIds = new Set(followersList.map((u) => u.id));
+          const friendsList = followingList.filter((u) => followerIds.has(u.id));
+          const displayList =
+            followingSubTab === 'following' ? followingList
+            : followingSubTab === 'followers' ? followersList
+            : friendsList;
+          const emptyText =
+            followingSubTab === 'following' ? '还没有关注任何人'
+            : followingSubTab === 'followers' ? '还没有粉丝'
+            : '还没有互相关注的好友';
+
+          return (
+            <div className="space-y-4">
+              {/* 子标签切换 */}
+              <div className="flex gap-2 mb-4">
+                {([
+                  { id: 'following', label: `关注 (${followingList.length})` },
+                  { id: 'followers', label: `粉丝 (${followersList.length})` },
+                  { id: 'friends', label: `好友 (${friendsList.length})` },
+                ] as const).map((sub) => (
+                  <button
+                    key={sub.id}
+                    onClick={() => setFollowingSubTab(sub.id)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      followingSubTab === sub.id ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {sub.label}
+                  </button>
                 ))}
               </div>
-            )}
+
+              {socialLoading ? (
+                <div className="text-center py-12 text-slate-500">加载中...</div>
+              ) : displayList.length === 0 ? (
+                <Card className="p-12 text-center bg-white border-slate-200 shadow-sm">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center">
+                    <Users className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <p className="text-slate-500 mb-4">{emptyText}</p>
+                  <Link href="/community/">
+                    <Button className="bg-slate-900 hover:bg-slate-800">
+                      去社区发现有趣的作者
+                    </Button>
+                  </Link>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {displayList.map((u) => (
+                    <Card key={u.id} className="p-5 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                      <button onClick={() => handleOpenUserDialog(u.id)} className="flex items-center gap-4 w-full text-left">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-slate-700 to-slate-600 flex items-center justify-center text-white text-2xl overflow-hidden shrink-0">
+                          {u.avatar?.startsWith('data:') || u.avatar?.startsWith('http')
+                            ? <LazyImage src={u.avatar} alt="" className="w-full h-full object-cover" />
+                            : (u.avatar || '👤')
+                          }
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-slate-900 truncate">{u.nickname}</h4>
+                          <p className="text-sm text-slate-500 truncate">
+                            {u.bio || `Lv.${u.moduleData?.math?.level || 1} ${LEVEL_NAMES[u.moduleData?.math?.level || 1]}`}
+                          </p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                      </button>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* 设置 */}
+        {activeTab === 'settings' && (
+          <div className="max-w-2xl space-y-4">
+            <Card className="p-6 bg-white border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <User className="w-5 h-5 text-indigo-500" />
+                账号与资料
+              </h3>
+              <div className="divide-y divide-slate-100">
+                <button
+                  onClick={() => setIsEditDialogOpen(true)}
+                  className="w-full flex items-center justify-between py-3.5 hover:text-indigo-600 transition-colors"
+                >
+                  <span className="flex items-center gap-3 text-slate-700">
+                    <PenLine className="w-4 h-4 text-slate-400" />
+                    编辑资料（昵称 / 头像 / 签名 / 封面）
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                </button>
+                <button
+                  onClick={() => setIsLocationDialogOpen(true)}
+                  className="w-full flex items-center justify-between py-3.5 hover:text-indigo-600 transition-colors"
+                >
+                  <span className="flex items-center gap-3 text-slate-700">
+                    <MapPin className="w-4 h-4 text-slate-400" />
+                    位置设置{user.location?.province ? `（${user.location.province}）` : ''}
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                </button>
+              </div>
+            </Card>
+
+            <Card className="p-6 bg-white border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-900 mb-1 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-emerald-500" />
+                隐私设置
+              </h3>
+              <p className="text-xs text-slate-400 mb-4">控制其他用户在你的个人简介页能看到的内容</p>
+              <div className="space-y-3">
+                {([
+                  {
+                    key: 'showFollowing' as const,
+                    label: '关注列表',
+                    desc: '允许其他人查看你关注的用户',
+                    icon: <Users className="w-4 h-4 text-blue-600" />,
+                    iconBg: 'bg-blue-100',
+                  },
+                  {
+                    key: 'showFollowers' as const,
+                    label: '粉丝列表',
+                    desc: '允许其他人查看关注你的用户',
+                    icon: <UserPlus className="w-4 h-4 text-green-600" />,
+                    iconBg: 'bg-green-100',
+                  },
+                  {
+                    key: 'showBio' as const,
+                    label: '个性签名',
+                    desc: '允许其他人查看你的个性签名',
+                    icon: <PenLine className="w-4 h-4 text-amber-600" />,
+                    iconBg: 'bg-amber-100',
+                  },
+                ]).map((item) => {
+                  const enabled = user.privacy?.[item.key] !== false;
+                  return (
+                    <div key={item.key} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-9 h-9 ${item.iconBg} rounded-full flex items-center justify-center shrink-0`}>
+                          {item.icon}
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-slate-800">{item.label}</div>
+                          <div className="text-xs text-slate-400">{item.desc}</div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => updatePrivacy({ [item.key]: !enabled })}
+                        className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${
+                          enabled ? 'bg-indigo-500' : 'bg-slate-300'
+                        }`}
+                        title={enabled ? '点击关闭' : '点击开启'}
+                      >
+                        <div
+                          className={`w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-all ${
+                            enabled ? 'left-[22px]' : 'left-0.5'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-slate-400 mt-3">关闭后，其他用户将无法在你的个人简介页查看对应信息</p>
+            </Card>
+
+            <Card className="p-6 bg-white border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-500" />
+                数据
+              </h3>
+              <div className="divide-y divide-slate-100">
+                <Link href="/export-data/" className="w-full flex items-center justify-between py-3.5 hover:text-indigo-600 transition-colors">
+                  <span className="flex items-center gap-3 text-slate-700">
+                    <ExternalLink className="w-4 h-4 text-slate-400" />
+                    导出我的数据
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                </Link>
+              </div>
+            </Card>
+
+            <Card className="p-6 bg-white border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <LogOut className="w-5 h-5 text-rose-500" />
+                会话
+              </h3>
+              <Button
+                variant="outline"
+                className="w-full justify-between hover:bg-red-50 hover:text-red-600 hover:border-red-200 border-slate-200"
+                onClick={() => {
+                  logout();
+                  router.push('/');
+                }}
+              >
+                <span className="flex items-center gap-2">
+                  <LogOut className="w-4 h-4" />
+                  退出登录
+                </span>
+              </Button>
+            </Card>
           </div>
+        )}
+
+        {/* 编辑资料对话框 */}
+        {user && (
+          <>
+            <EditProfileDialog
+              open={isEditDialogOpen}
+              onOpenChange={setIsEditDialogOpen}
+              currentNickname={user.nickname}
+              currentAvatar={user.avatar}
+              currentBio={user.bio}
+              currentCoverImage={user.coverImage}
+              onSave={handleSaveProfile}
+            />
+            <LocationSettingDialog
+              open={isLocationDialogOpen}
+              onOpenChange={setIsLocationDialogOpen}
+            />
+            <PiPowerCalendarDialog
+              open={isPiCalendarOpen}
+              onClose={() => setIsPiCalendarOpen(false)}
+            />
+            <ConfirmDialog
+              open={noteDeleteId !== null}
+              onOpenChange={(o) => {
+                if (!o) setNoteDeleteId(null);
+              }}
+              title="删除笔记"
+              description="删除后不可恢复，这条笔记的内容将一并移除。"
+              confirmText="删除"
+              onConfirm={() => {
+                if (noteDeleteId) void handleDeleteNote(noteDeleteId);
+              }}
+            />
+
+            {/* 用户详情弹窗 - 知乎风格卡片（与社区页一致） */}
+            <Dialog open={isUserDialogOpen} onOpenChange={(o) => {
+              if (!o) {
+                setIsUserDialogOpen(false);
+                setSelectedUser(null);
+              }
+            }}>
+              <DialogContent className="!w-[94vw] !max-w-3xl !h-[85vh] p-0 overflow-hidden flex flex-col rounded-2xl gap-0">
+                {selectedUser && (
+                  <>
+                    <DialogTitle className="sr-only">{selectedUser.nickname} 的主页</DialogTitle>
+                    <UserProfileCard
+                      user={selectedUser}
+                      posts={selectedUserPosts}
+                      following={selectedUserFollowing}
+                      followers={selectedUserFollowers}
+                      friends={selectedUserFollowing.filter((u) =>
+                        selectedUserFollowers.some((f) => f.id === u.id)
+                      )}
+                      isCurrentUser={user.id === selectedUser.id}
+                      isFollowing={isFollowing(selectedUser.id)}
+                      onToggleFollow={handleToggleFollow}
+                      onMessage={
+                        user.id !== selectedUser.id && selectedUserIsFriend
+                          ? () => {
+                              setIsUserDialogOpen(false);
+                              setSelectedUser(null);
+                              window.location.href = `/messages/#user=${encodeURIComponent(selectedUser.id)}`;
+                            }
+                          : undefined
+                      }
+                      onPostClick={(post) => {
+                        setIsUserDialogOpen(false);
+                        setSelectedUser(null);
+                        window.location.href = `/community/post/#id=${post.id}`;
+                      }}
+                      canViewFollowing={selectedUser.privacy?.showFollowing !== false}
+                      canViewFollowers={selectedUser.privacy?.showFollowers !== false}
+                    />
+                  </>
+                )}
+              </DialogContent>
+            </Dialog>
+
+            {/* 删除帖子确认对话框 */}
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2 text-rose-600">
+                    <Trash2 className="w-5 h-5" />
+                    确认删除帖子
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="py-4">
+                  <p className="text-slate-600 mb-2">
+                    你确定要删除这篇帖子吗？此操作不可恢复。
+                  </p>
+                  {postToDelete && (
+                    <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                      <p className="font-medium text-slate-900 line-clamp-1">{postToDelete.title}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsDeleteDialogOpen(false);
+                      setPostToDelete(null);
+                    }}
+                  >
+                    取消
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDeletePost}
+                    className="bg-rose-600 hover:bg-rose-700 text-white font-medium"
+                  >
+                    确认删除
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </>
         )}
       </main>
     </div>
   );
 }
 
-// 传奇称号选择组件
-function LegendaryTitleSelector({
-  category,
-  currentTitle,
-  onSelect,
-}: {
-  category: ModuleCategory;
-  currentTitle: string | null;
-  onSelect: (title: string) => void;
-}) {
-  const titles = getModuleTitles(category);
-  const [selected, setSelected] = useState(currentTitle || titles.level7[0]);
+// 经验进度条：挂载/数值变化时以 easeOut 动画增长，reduced-motion 时直接取值
+function AnimatedExpBar({ value, className }: { value: number; className?: string }) {
+  const [display, setDisplay] = useState(0);
+  const currentRef = useRef(0);
 
-  return (
-    <div className="space-y-4">
-      <p className="text-sm text-gray-500">
-        你已到达{getModuleDisplayName(category)}最高等级，可以选择一个传奇称号展示给其他用户。
-      </p>
-      <div className="grid grid-cols-2 gap-3">
-        {titles.level7.map((title) => (
-          <button
-            key={title}
-            onClick={() => setSelected(title)}
-            className={`p-4 rounded-xl border-2 transition-all ${
-              selected === title
-                ? 'border-purple-500 bg-purple-50'
-                : 'border-gray-200 hover:border-purple-300'
-            }`}
-          >
-            <div className="font-bold text-lg">{title}</div>
-            <div className="text-xs text-gray-500 mt-1">
-              {selected === title ? '已选择' : '点击选择'}
-            </div>
-          </button>
-        ))}
-      </div>
-      <Button
-        className="w-full bg-gradient-to-r from-purple-500 to-pink-500"
-        onClick={() => onSelect(selected)}
-      >
-        确认选择
-      </Button>
-    </div>
-  );
-}
+  useEffect(() => {
+    const from = currentRef.current;
+    const to = value;
+    if (from === to) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let raf = 0;
+    const start = performance.now();
+    const duration = reduce ? 0 : 700;
+    const tick = (now: number) => {
+      const t = duration === 0 ? 1 : Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const v = from + (to - from) * eased;
+      currentRef.current = v;
+      setDisplay(v);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
 
-function StatBox({ icon, label, value }: { icon: string; label: string; value: string }) {
-  return (
-    <div className="text-center p-3 rounded-lg bg-gray-50">
-      <div className="text-2xl mb-1">{icon}</div>
-      <div className="font-bold text-lg">{value}</div>
-      <div className="text-xs text-gray-500">{label}</div>
-    </div>
-  );
+  return <Progress value={display} className={className} />;
 }

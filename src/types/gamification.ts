@@ -1,5 +1,5 @@
 // 模块类型
-export type ModuleCategory = 'math' | 'physics' | 'cs';
+export type ModuleCategory = 'math';
 
 // 模块经验值
 export interface ModuleExperience {
@@ -11,8 +11,6 @@ export interface ModuleExperience {
 // 用户模块数据
 export interface UserModuleData {
   math: ModuleExperience;
-  physics: ModuleExperience;
-  cs: ModuleExperience;
 }
 
 // 等级配置
@@ -32,7 +30,6 @@ export interface ModuleTitles {
   level4: string;
   level5: string;
   level6: string;
-  level7: string[]; // 第7级多个选项
 }
 
 // 经验值奖励
@@ -50,55 +47,22 @@ export const LEVEL_CONFIG: LevelConfig[] = [
   { level: 3, minExp: 150, maxExp: 299, frame: 'silver', reward: '银色头像框' },
   { level: 4, minExp: 300, maxExp: 499, frame: 'gold', reward: '金色头像框' },
   { level: 5, minExp: 500, maxExp: 799, frame: 'diamond', reward: '钻石头像框' },
-  { level: 6, minExp: 800, maxExp: 1199, frame: 'starry', reward: '星空头像框' },
-  { level: 7, minExp: 1200, maxExp: 1699, frame: 'halo', reward: '光晕头像框 + 传奇称号' },
+  { level: 6, minExp: 800, maxExp: 1200, frame: 'starry', reward: '星空头像框' },
 ];
 
-// 数学模块称号
+// 数学模块称号 - 与等级头像框统一
 export const MATH_TITLES: ModuleTitles = {
-  level1: '数学学徒',
-  level2: '数学新锐',
-  level3: '数学达人',
-  level4: '数学精英',
-  level5: '数学宗师',
-  level6: '数学传奇',
-  level7: ['欧拉', '高斯', '黎曼', '笛卡尔', '柯西', '傅里叶'],
-};
-
-// 物理模块称号
-export const PHYSICS_TITLES: ModuleTitles = {
-  level1: '物理学徒',
-  level2: '物理新锐',
-  level3: '物理达人',
-  level4: '物理精英',
-  level5: '物理宗师',
-  level6: '物理传奇',
-  level7: ['牛顿', '麦克斯韦', '爱因斯坦', '薛定谔', '伽利略', '普朗克'],
-};
-
-// 计算机模块称号
-export const CS_TITLES: ModuleTitles = {
-  level1: '计算机学徒',
-  level2: '计算机新锐',
-  level3: '计算机达人',
-  level4: '计算机精英',
-  level5: '计算机宗师',
-  level6: '计算机传奇',
-  level7: ['图灵', '冯·诺依曼', '香农'],
+  level1: '初学者',
+  level2: '铜阶学者',
+  level3: '银阶学者',
+  level4: '金阶学者',
+  level5: '钻石学者',
+  level6: '星空传奇',
 };
 
 // 获取模块称号配置
 export function getModuleTitles(category: ModuleCategory): ModuleTitles {
-  switch (category) {
-    case 'math':
-      return MATH_TITLES;
-    case 'physics':
-      return PHYSICS_TITLES;
-    case 'cs':
-      return CS_TITLES;
-    default:
-      return MATH_TITLES;
-  }
+  return MATH_TITLES;
 }
 
 // 根据经验值获取等级
@@ -133,11 +97,8 @@ export function getTitleByLevel(category: ModuleCategory, level: number, selecte
       return titles.level5;
     case 6:
       return titles.level6;
-    case 7:
-      // 第7级使用用户选择的称号，如果未选择则使用第一个
-      return selectedTitle || titles.level7[0];
     default:
-      return titles.level1;
+      return titles.level6;
   }
 }
 
@@ -175,16 +136,7 @@ export function calculateAnswerExp(score: number): number {
 
 // 获取模块显示名称
 export function getModuleDisplayName(category: ModuleCategory): string {
-  switch (category) {
-    case 'math':
-      return '数学';
-    case 'physics':
-      return '物理';
-    case 'cs':
-      return '计算机';
-    default:
-      return '未知';
-  }
+  return '数学';
 }
 
 // 头像框样式
@@ -195,7 +147,6 @@ export const FRAME_STYLES: Record<string, string> = {
   gold: 'border-4 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.6)]',
   diamond: 'border-4 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.6)]',
   starry: 'border-4 border-indigo-400 shadow-[0_0_20px_rgba(129,140,248,0.7)]',
-  halo: 'border-4 border-amber-300 shadow-[0_0_20px_rgba(252,211,77,0.8)]',
 };
 
 // 头像框颜色
@@ -206,15 +157,109 @@ export const FRAME_COLORS: Record<string, { bg: string; text: string }> = {
   gold: { bg: 'bg-yellow-100', text: 'text-yellow-700' },
   diamond: { bg: 'bg-cyan-100', text: 'text-cyan-700' },
   starry: { bg: 'bg-indigo-100', text: 'text-indigo-700' },
-  halo: { bg: 'bg-amber-50', text: 'text-amber-600' },
 };
+
+// 省份列表（中国34个省级行政区）
+export const PROVINCES = [
+  '北京', '天津', '上海', '重庆',
+  '河北', '山西', '辽宁', '吉林', '黑龙江',
+  '江苏', '浙江', '安徽', '福建', '江西', '山东',
+  '河南', '湖北', '湖南', '广东', '海南',
+  '四川', '贵州', '云南', '陕西', '甘肃', '青海', '台湾',
+  '内蒙古', '广西', '西藏', '宁夏', '新疆',
+  '香港', '澳门'
+] as const;
+
+export type Province = typeof PROVINCES[number];
+
+// π力数据结构
+export interface PiPowerData {
+  currentPi: number;           // 当前π力值
+  monthlyPi: number;           // 本月π力值
+  totalAnswered: number;       // 累计答对题数
+  monthlyAnswered: number;     // 本月答对题数
+  lastAnswerDate: string | null; // 最后答题日期
+  currentStreak: number;       // 连续答对天数
+  monthlyResetDate: string;    // 下次清零日期
+  isFirstAttemptToday: boolean; // 今日是否首次尝试
+}
+
+// 称号历史记录
+export interface TitleHistoryRecord {
+  id: string;
+  title: string;           // 称号名称（如"北京欧拉"、"欧拉本尊"）
+  province?: Province;     // 省份（全站称号无省份）
+  rankType: 'province' | 'global'; // 排行类型
+  rank: number;            // 排名
+  obtainedAt: string;      // 获得时间
+  month: string;           // 所属月份（YYYY-MM）
+}
+
+// 初始化π力数据
+export function initPiPowerData(): PiPowerData {
+  const now = new Date();
+  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  return {
+    currentPi: 0,
+    monthlyPi: 0,
+    totalAnswered: 0,
+    monthlyAnswered: 0,
+    lastAnswerDate: null,
+    currentStreak: 0,
+    monthlyResetDate: nextMonth.toISOString(),
+    isFirstAttemptToday: true,
+  };
+}
+
+// 检查是否需要清零
+export function shouldResetMonthlyPi(piPower: PiPowerData): boolean {
+  const now = new Date();
+  const resetDate = new Date(piPower.monthlyResetDate);
+  return now >= resetDate;
+}
+
+// 重置月度π力
+export function resetMonthlyPi(piPower: PiPowerData): PiPowerData {
+  const now = new Date();
+  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  return {
+    ...piPower,
+    monthlyPi: 0,
+    monthlyAnswered: 0,
+    currentStreak: 0,
+    monthlyResetDate: nextMonth.toISOString(),
+    isFirstAttemptToday: true,
+  };
+}
+
+// 计算π力旋转角度（1π = 180°）
+export function calculatePiRotation(piPower: number): number {
+  return piPower * 180;
+}
+
+// 格式化π力显示
+export function formatPiPower(piPower: number): string {
+  if (piPower === 0) return '0π';
+  if (piPower === Math.floor(piPower)) return `${piPower}π`;
+  return `${piPower.toFixed(1)}π`;
+}
+
+// 获取省份欧拉称号名称
+export function getProvinceEulerTitle(province: Province): string {
+  return `${province}欧拉`;
+}
+
+// 获取全站称号名称
+export function getGlobalEulerTitle(): string {
+  return '欧拉本尊';
+}
 
 // 初始化模块数据
 export function initModuleData(): UserModuleData {
   return {
     math: { exp: 0, level: 1, selectedTitle: null },
-    physics: { exp: 0, level: 1, selectedTitle: null },
-    cs: { exp: 0, level: 1, selectedTitle: null },
   };
 }
 
@@ -227,45 +272,16 @@ export function addExperience(
   const newModuleData = { ...moduleData };
   const current = newModuleData[category];
 
-  // 添加经验值
-  const newExp = current.exp + expToAdd;
+  // 添加经验值（最高到6级）
+  const newExp = Math.min(current.exp + expToAdd, LEVEL_CONFIG[LEVEL_CONFIG.length - 1].minExp);
   const newLevel = getLevelByExp(newExp);
-
-  // 如果升级到7级且没有选择过称号，默认选择第一个
-  let newSelectedTitle = current.selectedTitle;
-  if (newLevel === 7 && current.level < 7 && !newSelectedTitle) {
-    const titles = getModuleTitles(category);
-    newSelectedTitle = titles.level7[0];
-  }
 
   newModuleData[category] = {
     exp: newExp,
     level: newLevel,
-    selectedTitle: newSelectedTitle,
+    selectedTitle: current.selectedTitle,
   };
 
   return newModuleData;
 }
 
-// 选择第7级称号
-export function selectLegendaryTitle(
-  moduleData: UserModuleData,
-  category: ModuleCategory,
-  title: string
-): UserModuleData {
-  const newModuleData = { ...moduleData };
-  const current = newModuleData[category];
-
-  // 只有在7级才能选择称号
-  if (current.level === 7) {
-    const titles = getModuleTitles(category);
-    if (titles.level7.includes(title)) {
-      newModuleData[category] = {
-        ...current,
-        selectedTitle: title,
-      };
-    }
-  }
-
-  return newModuleData;
-}

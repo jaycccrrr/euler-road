@@ -52,8 +52,8 @@
   --primary: #1e40af;
   --primary-foreground: #ffffff;
 
-  /* 背景色 */
-  --background: #f8fafc;
+  /* 背景色：白色 */
+  --background: #ffffff;
   --foreground: #1e293b;
 
   /* 卡片 */
@@ -64,8 +64,8 @@
   --secondary: #f1f5f9;
   --secondary-foreground: #334155;
 
-  /* 强调色：学术金 */
-  --accent: #d4af37;
+  /* 强调色：清新蓝 */
+  --accent: #60a5fa;
   --accent-foreground: #1e293b;
 
   /* 中性色 */
@@ -88,7 +88,7 @@
   --popover-foreground: #1e293b;
 
   /* Sidebar */
-  --sidebar: #f8fafc;
+  --sidebar: #ffffff;
   --sidebar-foreground: #1e293b;
   --sidebar-primary: #1e40af;
   --sidebar-primary-foreground: #ffffff;
@@ -145,6 +145,8 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    box-shadow: inset 0 0 120px rgba(0,0,0,0.03);
+    min-height: 100vh;
   }
   html {
     @apply font-sans;
@@ -226,44 +228,227 @@
     box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
   }
 
-  /* 头像框样式 - 更 subtle */
+  /* ==================== 头像框样式 - 全新设计 ==================== */
+  /* 基础样式 */
   .avatar-frame {
     border-radius: 50%;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .avatar-frame::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .avatar-frame:hover {
+    transform: scale(1.05);
+  }
+
+  /* Level 1: 初学者 - 简洁清新 */
+  .avatar-frame-default {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+    border: 2px solid #94a3b8;
+    box-shadow:
+      0 0 0 1px #f1f5f9,
+      0 2px 4px rgba(148, 163, 184, 0.3);
+  }
+
+  .avatar-frame-default::before {
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8) 0%, rgba(203, 213, 225, 0.4) 50%, transparent 70%);
+    opacity: 1;
+  }
+
+  /* Level 2: 铜阶 - 温暖光泽 */
+  .avatar-frame-bronze {
+    background: linear-gradient(135deg, #cd7f32 0%, #b87333 50%, #8b5a2b 100%);
+    border: 3px solid #a0522d;
+    box-shadow:
+      0 0 0 2px #deb887,
+      0 2px 8px rgba(139, 90, 43, 0.3),
+      inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  }
+
+  .avatar-frame-bronze::before {
+    background: radial-gradient(circle at 30% 30%, rgba(222, 184, 135, 0.5) 0%, transparent 60%);
+    opacity: 1;
+  }
+
+  /* Level 3: 银阶 - 冷峻金属 */
+  .avatar-frame-silver {
+    background: linear-gradient(135deg, #e8e8e8 0%, #c0c0c0 50%, #a8a8a8 100%);
+    border: 3px solid #808080;
+    box-shadow:
+      0 0 0 3px #d3d3d3,
+      0 0 10px rgba(192, 192, 192, 0.5),
+      0 3px 12px rgba(128, 128, 128, 0.3),
+      inset 0 1px 3px rgba(255, 255, 255, 0.5);
+  }
+
+  .avatar-frame-silver::before {
+    background:
+      radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.6) 0%, transparent 40%),
+      radial-gradient(circle at 75% 75%, rgba(192, 192, 192, 0.4) 0%, transparent 40%);
+    opacity: 1;
+  }
+
+  /* Level 4: 金阶 - 璀璨光芒 */
+  .avatar-frame-gold {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb700 30%, #ff8c00 70%, #daa520 100%);
+    border: 4px solid #b8860b;
+    box-shadow:
+      0 0 0 4px #ffe4b5,
+      0 0 15px rgba(255, 183, 0, 0.6),
+      0 4px 20px rgba(184, 134, 11, 0.4),
+      inset 0 2px 5px rgba(255, 255, 255, 0.4);
+  }
+
+  .avatar-frame-gold::before {
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255, 255, 200, 0.8) 0%, transparent 50%),
+      radial-gradient(circle at 70% 70%, rgba(255, 183, 0, 0.5) 0%, transparent 50%);
+    opacity: 1;
+    animation: goldShine 3s ease-in-out infinite;
+  }
+
+  @keyframes goldShine {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+  }
+
+  /* Level 5: 钻石 - 冰晶璀璨 */
+  .avatar-frame-diamond {
+    background: linear-gradient(135deg, #e0ffff 0%, #00ced1 30%, #20b2aa 70%, #008b8b 100%);
+    border: 4px solid #008b8b;
+    box-shadow:
+      0 0 0 4px #e0ffff,
+      0 0 0 6px rgba(0, 206, 209, 0.3),
+      0 0 25px rgba(0, 206, 209, 0.7),
+      0 5px 25px rgba(0, 139, 139, 0.5),
+      inset 0 2px 8px rgba(255, 255, 255, 0.6);
+  }
+
+  .avatar-frame-diamond::before {
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.9) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(0, 255, 255, 0.5) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.3) 0%, transparent 60%);
+    opacity: 1;
+    animation: diamondSparkle 2s ease-in-out infinite;
+  }
+
+  @keyframes diamondSparkle {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+  }
+
+  /* Level 6: 星空传奇 - 最高级，动态星空 */
+  .avatar-frame-starry {
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(255, 255, 255, 0.9) 0%, transparent 30%),
+      radial-gradient(ellipse at 80% 80%, rgba(147, 51, 234, 0.6) 0%, transparent 40%),
+      radial-gradient(ellipse at 40% 70%, rgba(59, 130, 246, 0.5) 0%, transparent 35%),
+      linear-gradient(135deg, #4c1d95 0%, #7c3aed 25%, #9333ea 50%, #c026d3 75%, #db2777 100%);
+    background-size: 200% 200%;
+    border: 5px solid transparent;
+    border-image: linear-gradient(135deg, #fbbf24 0%, #f59e0b 25%, #ec4899 50%, #8b5cf6 75%, #3b82f6 100%) 1;
+    border-radius: 50%;
+    box-shadow:
+      0 0 0 5px rgba(147, 51, 234, 0.3),
+      0 0 0 10px rgba(147, 51, 234, 0.15),
+      0 0 40px rgba(147, 51, 234, 0.8),
+      0 0 80px rgba(219, 39, 119, 0.5),
+      0 10px 40px rgba(0, 0, 0, 0.4),
+      inset 0 0 20px rgba(255, 255, 255, 0.3);
+    animation: starryGlow 4s ease-in-out infinite, starryRotate 20s linear infinite;
+  }
+
+  .avatar-frame-starry::before {
+    background:
+      radial-gradient(1px 1px at 20% 30%, white, transparent),
+      radial-gradient(1px 1px at 40% 70%, white, transparent),
+      radial-gradient(2px 2px at 60% 20%, white, transparent),
+      radial-gradient(1px 1px at 80% 60%, white, transparent),
+      radial-gradient(2px 2px at 30% 50%, white, transparent),
+      radial-gradient(1px 1px at 70% 80%, white, transparent),
+      radial-gradient(2px 2px at 90% 40%, white, transparent),
+      radial-gradient(1px 1px at 10% 80%, white, transparent);
+    opacity: 1;
+    animation: starsTwinkle 3s ease-in-out infinite;
+  }
+
+  @keyframes starryGlow {
+    0%, 100% {
+      background-position: 0% 50%;
+      filter: brightness(1);
+    }
+    50% {
+      background-position: 100% 50%;
+      filter: brightness(1.2);
+    }
+  }
+
+  @keyframes starryRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes starsTwinkle {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  /* 头像框悬停效果增强 */
+  .avatar-frame-bronze:hover,
+  .avatar-frame-silver:hover,
+  .avatar-frame-gold:hover,
+  .avatar-frame-diamond:hover,
+  .avatar-frame-starry:hover {
+    transform: scale(1.08);
+    filter: brightness(1.1);
+  }
+
+  /* 等级标签样式 */
+  .level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
     transition: all 0.3s ease;
   }
 
-  .avatar-frame-default {
-    border: 2px solid #e2e8f0;
+  .level-badge-1 { background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #64748b; }
+  .level-badge-2 { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #b45309; }
+  .level-badge-3 { background: linear-gradient(135deg, #f1f5f9, #cbd5e1); color: #475569; }
+  .level-badge-4 { background: linear-gradient(135deg, #fef9c3, #fde047); color: #a16207; }
+  .level-badge-5 { background: linear-gradient(135deg, #cffafe, #22d3ee); color: #0e7490; }
+  .level-badge-6 {
+    background: linear-gradient(135deg, #e0e7ff, #c084fc, #f472b6);
+    color: #581c87;
+    box-shadow: 0 0 15px rgba(192, 132, 252, 0.5);
+    animation: legendaryPulse 2s ease-in-out infinite;
   }
 
-  .avatar-frame-bronze {
-    border: 2px solid #d97706;
-    box-shadow: 0 0 0 2px #fef3c7;
-  }
-
-  .avatar-frame-silver {
-    border: 2px solid #64748b;
-    box-shadow: 0 0 0 2px #f1f5f9;
-  }
-
-  .avatar-frame-gold {
-    border: 2px solid #eab308;
-    box-shadow: 0 0 0 2px #fef9c3;
-  }
-
-  .avatar-frame-diamond {
-    border: 2px solid #06b6d4;
-    box-shadow: 0 0 0 2px #ecfeff;
-  }
-
-  .avatar-frame-legendary {
-    border: 3px solid #d97706;
-    box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+  @keyframes legendaryPulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(192, 132, 252, 0.5); }
+    50% { box-shadow: 0 0 25px rgba(192, 132, 252, 0.8), 0 0 40px rgba(244, 114, 182, 0.4); }
   }
 
   /* 学术主题背景 */
   .bg-academic-gradient {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    background: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
   }
 
   .bg-math-gradient {
@@ -406,6 +591,35 @@
     }
   }
 
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fadeOutScale {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  /* π力日历：已答题日期标记 */
+  .pi-answered .rdp-day_button,
+  .pi-answered > button {
+    background: linear-gradient(135deg, #ede9fe, #fae8ff);
+    color: #7c3aed;
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(139, 92, 246, 0.25);
+  }
+
   @keyframes slideInRight {
     from {
       opacity: 0;
@@ -470,6 +684,39 @@
     animation: shimmer 2s infinite;
   }
 
+  /* Letter flip animation for hero title */
+  @keyframes letter-flip {
+    0% {
+      opacity: 0;
+      transform: perspective(400px) rotateX(-90deg) translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: perspective(400px) rotateX(0deg) translateY(0);
+    }
+  }
+
+  .animate-letter-flip {
+    animation: letter-flip 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+  }
+
+  /* Slow pulse for background symbols */
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 0.4;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scale(1.02);
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+  }
+
   /* Stagger children animation - 增强版 */
   .stagger-children > * {
     opacity: 0;
@@ -482,6 +729,84 @@
   .stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
   .stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
   .stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+
+  /* Popover entrance - 弹层从触发点展开 */
+  @keyframes popoverIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .animate-popover-in {
+    animation: popoverIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* 便签拖拽松手后的弹性落定 */
+  @keyframes noteSettle {
+    from {
+      transform: scale(1.04);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  .animate-note-settle {
+    animation: noteSettle 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* 「前往原文」定位到笔记后的高亮脉冲（一次性，3 次后停止） */
+  @keyframes noteHighlight {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 2px rgb(59 130 246 / 0.9),
+        0 0 24px 4px rgb(59 130 246 / 0.35);
+    }
+    50% {
+      box-shadow:
+        0 0 0 2px rgb(59 130 246 / 0.25),
+        0 0 6px 1px rgb(59 130 246 / 0.1);
+    }
+  }
+
+  .animate-note-highlight {
+    animation: noteHighlight 0.8s ease-in-out 3;
+  }
+
+  /* 减弱动效偏好：保留快速淡入反馈，去掉位移/缩放 */
+  @keyframes fadeOnly {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in,
+    .animate-fade-in-scale,
+    .animate-popover-in {
+      animation: fadeOnly 0.15s ease-out forwards;
+    }
+
+    /* 减弱动效：高亮退化为静态描边 */
+    .animate-note-highlight {
+      animation: none;
+      box-shadow: 0 0 0 2px rgb(59 130 246 / 0.9);
+    }
+
+    .stagger-children > * {
+      animation: fadeOnly 0.15s ease-out forwards;
+      animation-delay: 0s;
+    }
+  }
 
   /* Hover lift - 更平滑 */
   .hover-lift {
@@ -550,7 +875,7 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: #f0ede6;
     border-radius: 4px;
   }
 
@@ -641,7 +966,7 @@
   .formula-content .katex-display {
     margin: 1.5em 0;
     padding: 1rem;
-    background: #f8fafc;
+    background: #f0f7ff;
     border-radius: 0.5rem;
     border-left: 4px solid #6366f1;
   }

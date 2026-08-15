@@ -1,22 +1,27 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DailyQuestion, AnswerRecord, AnswerComment } from '@/types';
+import { DailyQuestion, AnswerRecord, AnswerComment, DiscussionMessage, DiscussionReply } from '@/types';
 import {
   getDailyQuestionByDate,
   getDailyQuestionById,
   createDailyQuestion,
-  deleteDailyQuestion,
   createAnswerRecord,
   getAnswerRecordByUserAndQuestion,
+  getAnswerRecordsByUserAndQuestionAll,
   getAnswerRecordsByQuestion,
   getAllDailyQuestions,
   updateAnswerRecord,
   getAnswerRecordsByUser,
   deleteAnswerRecord,
-  getHistoricalQuestions,
+  createDiscussionMessage,
+  getDiscussionMessagesByQuestion,
+  deleteDiscussionMessage,
+  updateDiscussionMessage,
 } from '@/lib/db';
-import { getTodayString, generateId } from '@/lib/utils';
-import { gradeAnswer, generateRandomQuestion } from '@/lib/ai-grader';
+import { generateId, formatLocalDate } from '@/lib/utils';
+import { gradeAnswerDual } from '@/lib/dual-grader';
+import { generateDailyQuestions, getQuestionDateString, getDailyQuestionByIdFallback } from '@/lib/ai-question-generator';
+import { getDailyQuestionsByDate } from '@/lib/daily-question-bank';
 import { calculateAnswerExp } from '@/lib/gamification';
 import { useAuth } from './useAuth';
 import { KNOWLEDGE_MODULES } from '@/data/modules';
@@ -32,6 +37,22 @@ interface DailyQuestionState {
   error: string | null;
   selectedModule: string | null; // 当前选中的模块
   userAnswerHistory: AnswerRecord[]; // 用户历史答题记录
+  questionMyRecords: AnswerRecord[]; // 当前题目下我的全部提交记录（按时间倒序）
+  myRecordsQuestionId: string | null; // questionMyRecords 对应的题目ID
+
+  // 讨论区消息（用户主动发送，可引用题目 / 自己的解答）
+  discussionMessages: DiscussionMessage[];
+  discussionQuestionId: string | null; // discussionMessages 对应的题目ID
+  loadDiscussionMessages: (questionId: string) => Promise<void>;
+  postDiscussionMessage: (
+    questionId: string,
+    content: string,
+    refs?: { refQuestionId?: string; refAnswerId?: string }
+  ) => Promise<boolean>;
+  removeDiscussionMessage: (messageId: string) => Promise<boolean>;
+  toggleDiscussionMessageLike: (messageId: string) => Promise<boolean>;
+  replyDiscussionMessage: (messageId: string, content: string, replyToNickname?: string) => Promise<boolean>;
+  toggleDiscussionReplyLike: (messageId: string, replyId: string) => Promise<boolean>;
 
   // 历史题目
   historicalQuestions: DailyQuestion[];
@@ -63,6 +84,13 @@ interface DailyQuestionState {
   addComment: (answerId: string, content: string) => Promise<boolean>;
   // 删除答题记录
   deleteAnswer: (answerId: string) => Promise<boolean>;
+  // 我的提交记录（按题目）
+  loadMyRecordsForQuestion: (questionId: string) => Promise<void>;
+  saveAnswerNote: (answerId: string, note: string) => Promise<boolean>;
+  // 公开/取消公开答案（讨论区可见性）
+  setAnswerPublic: (answerId: string, isPublic: boolean) => Promise<boolean>;
+  // 退出登录时清除用户相关数据
+  clearUserSession: () => void;
 }
 
 export const useDailyQuestion = create<DailyQuestionState>()(
@@ -78,50 +106,45 @@ export const useDailyQuestion = create<DailyQuestionState>()(
       error: null,
       selectedModule: null,
       userAnswerHistory: [],
+      questionMyRecords: [],
+      myRecordsQuestionId: null,
+      discussionMessages: [],
+      discussionQuestionId: null,
       historicalQuestions: [],
 
       loadTodayQuestions: async () => {
         set({ isLoading: true });
         try {
-          const today = getTodayString();
+          // 使用新的日期逻辑（以早上5点为分界）
+          const today = getQuestionDateString();
           const questions: DailyQuestion[] = [];
           const answers: AnswerRecord[] = [];
 
-          // 获取今天的所有题目，检查是否需要清理
-          const { getAllDailyQuestions } = await import('@/lib/db');
-          const allQuestions = await getAllDailyQuestions();
-          const todayQuestions = allQuestions.filter(q => q.date === today);
+          // 三个核心模块，按需生成今天的题目（使用稳定ID，不再删除重建）
+          const targetModules = ['highschool-math', 'advanced-math', 'linear-algebra'];
 
-          // 如果有旧题目，检查是否包含错误的 LaTeX
-          for (const q of todayQuestions) {
-            if (q.content.includes('\\rac') || q.answer.includes('\\rac') || q.id.startsWith('dq-') && !q.id.startsWith('dq-v')) {
-              console.log('[DataFix] 删除旧题目:', q.id, q.content.substring(0, 50));
-              await deleteDailyQuestion(q.id);
+          for (const moduleId of targetModules) {
+            let question = await getDailyQuestionByDate(today, moduleId);
+
+            if (!question) {
+              // 该模块今天没有题目，从题库生成并保存
+              const generated = await generateDailyQuestions(today);
+              const moduleQuestion = generated.find(q => q.moduleId === moduleId);
+              if (moduleQuestion) {
+                await createDailyQuestion(moduleQuestion);
+                question = moduleQuestion;
+              }
+            }
+
+            if (question) {
+              questions.push(question);
             }
           }
 
-          // 为每个模块生成一道题
-          for (const module of KNOWLEDGE_MODULES) {
-            let question = await getDailyQuestionByDate(today, module.id);
-
-            // 检查旧数据是否有错误的 LaTeX (如 \rac 而不是 \frac)
-            if (question && (question.content.includes('\\rac') || question.answer.includes('\\rac'))) {
-              console.log('[DataFix] 检测到错误的 LaTeX，删除旧题目:', question.id);
-              await deleteDailyQuestion(question.id);
-              question = undefined; // 强制重新生成
-            }
-
-            if (!question) {
-              question = generateRandomQuestion(today, module.id);
-              console.log('[DataFix] 生成新题目:', question.id, question.content.substring(0, 50));
-              await createDailyQuestion(question);
-            }
-
-            questions.push(question);
-
-            // 检查用户是否已回答此题
-            const user = useAuth.getState().user;
-            if (user) {
+          // 检查用户是否已回答此题
+          const user = useAuth.getState().user;
+          if (user) {
+            for (const question of questions) {
               const record = await getAnswerRecordByUserAndQuestion(user.id, question.id);
               if (record) {
                 answers.push(record);
@@ -131,6 +154,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
 
           set({ todayQuestions: questions, todayAnswers: answers, isLoading: false });
         } catch (error) {
+          console.error('[Daily Question] Failed to load questions:', error);
           set({ error: '加载题目失败', isLoading: false });
         }
       },
@@ -149,7 +173,13 @@ export const useDailyQuestion = create<DailyQuestionState>()(
       loadQuestionById: async (id: string) => {
         set({ isLoading: true });
         try {
-          const question = await getDailyQuestionById(id);
+          let question = await getDailyQuestionById(id);
+
+          // 如果 IndexedDB 中没有，从备用题库生成（稳定ID支持）
+          if (!question) {
+            question = await getDailyQuestionByIdFallback(id);
+          }
+
           set({ currentQuestion: question || null, isLoading: false });
           return question || null;
         } catch (error) {
@@ -186,12 +216,47 @@ export const useDailyQuestion = create<DailyQuestionState>()(
         }
       },
 
-      // 加载历史题目（过去的每日一题）
+      // 加载历史题目（从网站上线日 2026-03-14 开始，逐日生成到今天）
       loadHistoricalQuestions: async (moduleId?: string) => {
         set({ isLoading: true });
         try {
-          const today = getTodayString();
-          const questions = await getHistoricalQuestions(today, moduleId);
+          const questions: DailyQuestion[] = [];
+
+          // 网站上线日
+          const launchDate = new Date('2026-03-14T00:00:00');
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          // 从上线日到今天，逐日生成
+          const current = new Date(launchDate);
+          while (current <= today) {
+            const dateStr = formatLocalDate(current);
+
+            const dailyQuestions = getDailyQuestionsByDate(dateStr);
+            for (const q of dailyQuestions) {
+              if (moduleId && q.moduleId !== moduleId) continue;
+
+              questions.push({
+                id: `daily-${dateStr}-${q.moduleId}`,
+                moduleId: q.moduleId,
+                date: dateStr,
+                title: q.title,
+                content: q.content,
+                images: [],
+                answer: q.answer,
+                answerImages: [],
+                difficulty: q.difficulty,
+                isAutoGenerated: true,
+                createdAt: current.toISOString(),
+              });
+            }
+
+            current.setDate(current.getDate() + 1);
+          }
+
+          // 按日期倒序排列
+          questions.sort((a, b) => b.date.localeCompare(a.date));
+
           set({ historicalQuestions: questions, isLoading: false });
         } catch (error) {
           console.error('Failed to load historical questions:', error);
@@ -211,8 +276,8 @@ export const useDailyQuestion = create<DailyQuestionState>()(
         set({ isLoading: true });
 
         try {
-          // Grade the answer
-          const grading = await gradeAnswer(question, content, images);
+          // Grade the answer（双通道：本地算法 + 低置信度时 AI 二次批改）
+          const grading = await gradeAnswerDual(question, content, images);
 
           // Calculate experience
           const expGained = calculateAnswerExp(grading.score);
@@ -233,14 +298,13 @@ export const useDailyQuestion = create<DailyQuestionState>()(
             likes: 0,
             likedBy: [],
             comments: [],
+            gradingMeta: grading.meta,
           };
 
           await createAnswerRecord(record);
 
           // Update module experience
-          const moduleCategory = question.moduleId.startsWith('math') ? 'math' :
-                                question.moduleId.startsWith('physics') ? 'physics' :
-                                question.moduleId.startsWith('cs') ? 'cs' : 'math';
+          const moduleCategory = 'math' as const;
 
           await useAuth.getState().addModuleExp(moduleCategory, expGained);
 
@@ -266,6 +330,10 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           set({
             todayAnswers: newTodayAnswers,
             userAnswerHistory: newUserAnswerHistory,
+            // 若正在查看该题的提交记录，同步插入新纪录
+            questionMyRecords: get().myRecordsQuestionId === questionId
+              ? [record, ...get().questionMyRecords]
+              : get().questionMyRecords,
             isLoading: false
           });
 
@@ -292,8 +360,8 @@ export const useDailyQuestion = create<DailyQuestionState>()(
         set({ isLoading: true });
 
         try {
-          // Grade the answer
-          const grading = await gradeAnswer(currentQuestion, content, images);
+          // Grade the answer（双通道：本地算法 + 低置信度时 AI 二次批改）
+          const grading = await gradeAnswerDual(currentQuestion, content, images);
 
           // Create answer record
           const record: AnswerRecord = {
@@ -311,6 +379,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
             likes: 0,
             likedBy: [],
             comments: [],
+            gradingMeta: grading.meta,
           };
 
           await createAnswerRecord(record);
@@ -318,7 +387,13 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           // Reload answers
           await get().loadQuestionAnswers(questionId);
 
-          set({ currentAnswer: record, isLoading: false });
+          set({
+            currentAnswer: record,
+            questionMyRecords: get().myRecordsQuestionId === questionId
+              ? [record, ...get().questionMyRecords]
+              : get().questionMyRecords,
+            isLoading: false,
+          });
 
           return {
             success: true,
@@ -363,18 +438,28 @@ export const useDailyQuestion = create<DailyQuestionState>()(
       },
 
       generateQuestionsIfNeeded: async () => {
-        const today = getTodayString();
+        const today = getQuestionDateString();
         const questions: DailyQuestion[] = [];
 
-        for (const module of KNOWLEDGE_MODULES) {
-          let question = await getDailyQuestionByDate(today, module.id);
+        // 只生成三个核心模块的题目
+        const targetModules = ['highschool-math', 'advanced-math', 'linear-algebra'];
+
+        for (const moduleId of targetModules) {
+          let question = await getDailyQuestionByDate(today, moduleId);
 
           if (!question) {
-            question = generateRandomQuestion(today, module.id);
-            await createDailyQuestion(question);
+            // 使用AI生成新题目
+            const generated = await generateDailyQuestions(today);
+            const moduleQuestion = generated.find(q => q.moduleId === moduleId);
+            if (moduleQuestion) {
+              await createDailyQuestion(moduleQuestion);
+              question = moduleQuestion;
+            }
           }
 
-          questions.push(question);
+          if (question) {
+            questions.push(question);
+          }
         }
 
         set({ todayQuestions: questions });
@@ -499,8 +584,10 @@ export const useDailyQuestion = create<DailyQuestionState>()(
         if (!user) return false;
 
         try {
-          const { userAnswerHistory, todayAnswers, questionAnswers } = get();
-          const record = userAnswerHistory.find(a => a.id === answerId);
+          const { userAnswerHistory, todayAnswers, questionAnswers, questionMyRecords } = get();
+          const record =
+            userAnswerHistory.find(a => a.id === answerId) ||
+            questionMyRecords.find(a => a.id === answerId);
 
           if (!record || record.userId !== user.id) {
             return false;
@@ -512,6 +599,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
             userAnswerHistory: userAnswerHistory.filter(a => a.id !== answerId),
             todayAnswers: todayAnswers.filter(a => a.id !== answerId),
             questionAnswers: questionAnswers.filter(a => a.id !== answerId),
+            questionMyRecords: questionMyRecords.filter(a => a.id !== answerId),
           });
 
           return true;
@@ -519,6 +607,265 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           console.error('Failed to delete answer:', error);
           return false;
         }
+      },
+
+      // ===== 讨论区消息 =====
+
+      loadDiscussionMessages: async (questionId: string) => {
+        try {
+          const messages = await getDiscussionMessagesByQuestion(questionId);
+          set({ discussionMessages: messages, discussionQuestionId: questionId });
+        } catch (error) {
+          console.error('Failed to load discussion messages:', error);
+        }
+      },
+
+      postDiscussionMessage: async (questionId, content, refs) => {
+        const user = useAuth.getState().user;
+        if (!user || !content.trim()) return false;
+
+        try {
+          const message: DiscussionMessage = {
+            id: generateId(),
+            questionId,
+            userId: user.id,
+            content: content.trim(),
+            likes: 0,
+            likedBy: [],
+            replies: [],
+            createdAt: new Date().toISOString(),
+          };
+
+          // 引用题目：快照标题/模块/日期（题库未持久化的日期用 fallback 重建）
+          if (refs?.refQuestionId) {
+            const q =
+              (await getDailyQuestionById(refs.refQuestionId)) ||
+              (await getDailyQuestionByIdFallback(refs.refQuestionId));
+            if (q) {
+              message.refQuestionId = q.id;
+              message.refQuestionTitle = q.title;
+              message.refQuestionModuleId = q.moduleId;
+              message.refQuestionDate = q.id.match(/^daily-(\d{4}-\d{2}-\d{2})-/)?.[1] || q.date;
+            }
+          }
+
+          // 引用自己的解答：快照摘要/得分（发布时截取，私密答案原文不随消息扩散）
+          if (refs?.refAnswerId) {
+            const mine = await getAnswerRecordsByUser(user.id);
+            const record = mine.find((r) => r.id === refs.refAnswerId);
+            if (record) {
+              message.refAnswerId = record.id;
+              message.refAnswerExcerpt = record.content.replace(/\$+/g, '').slice(0, 80);
+              message.refAnswerScore = record.aiScore;
+              message.refAnswerIsCorrect = record.isCorrect;
+            }
+          }
+
+          await createDiscussionMessage(message);
+          const { discussionMessages, discussionQuestionId } = get();
+          if (discussionQuestionId === questionId) {
+            set({ discussionMessages: [message, ...discussionMessages] });
+          }
+          return true;
+        } catch (error) {
+          console.error('Failed to post discussion message:', error);
+          return false;
+        }
+      },
+
+      removeDiscussionMessage: async (messageId: string) => {
+        const user = useAuth.getState().user;
+        if (!user) return false;
+
+        try {
+          const target = get().discussionMessages.find((m) => m.id === messageId);
+          if (!target || target.userId !== user.id) return false;
+          await deleteDiscussionMessage(messageId);
+          set({ discussionMessages: get().discussionMessages.filter((m) => m.id !== messageId) });
+          return true;
+        } catch (error) {
+          console.error('Failed to delete discussion message:', error);
+          return false;
+        }
+      },
+
+      toggleDiscussionMessageLike: async (messageId: string) => {
+        const user = useAuth.getState().user;
+        if (!user) return false;
+
+        try {
+          const target = get().discussionMessages.find((m) => m.id === messageId);
+          if (!target) return false;
+          const likedBy = target.likedBy || [];
+          const hasLiked = likedBy.includes(user.id);
+          const updated: DiscussionMessage = {
+            ...target,
+            likedBy: hasLiked ? likedBy.filter((id) => id !== user.id) : [...likedBy, user.id],
+            likes: (target.likes ?? likedBy.length) + (hasLiked ? -1 : 1),
+          };
+          await updateDiscussionMessage(updated);
+          set({
+            discussionMessages: get().discussionMessages.map((m) => (m.id === messageId ? updated : m)),
+          });
+          return true;
+        } catch (error) {
+          console.error('Failed to like discussion message:', error);
+          return false;
+        }
+      },
+
+      replyDiscussionMessage: async (messageId: string, content: string, replyToNickname?: string) => {
+        const user = useAuth.getState().user;
+        if (!user || !content.trim()) return false;
+
+        try {
+          const target = get().discussionMessages.find((m) => m.id === messageId);
+          if (!target) return false;
+          const reply: DiscussionReply = {
+            id: generateId(),
+            userId: user.id,
+            userNickname: user.nickname,
+            userAvatar: user.avatar,
+            content: content.trim(),
+            replyToNickname,
+            likes: 0,
+            likedBy: [],
+            createdAt: new Date().toISOString(),
+          };
+          const updated: DiscussionMessage = {
+            ...target,
+            replies: [...(target.replies || []), reply],
+          };
+          await updateDiscussionMessage(updated);
+          set({
+            discussionMessages: get().discussionMessages.map((m) => (m.id === messageId ? updated : m)),
+          });
+          return true;
+        } catch (error) {
+          console.error('Failed to reply discussion message:', error);
+          return false;
+        }
+      },
+
+      toggleDiscussionReplyLike: async (messageId: string, replyId: string) => {
+        const user = useAuth.getState().user;
+        if (!user) return false;
+
+        try {
+          const target = get().discussionMessages.find((m) => m.id === messageId);
+          if (!target) return false;
+          const updated: DiscussionMessage = {
+            ...target,
+            replies: (target.replies || []).map((r) => {
+              if (r.id !== replyId) return r;
+              const likedBy = r.likedBy || [];
+              const hasLiked = likedBy.includes(user.id);
+              return {
+                ...r,
+                likedBy: hasLiked ? likedBy.filter((id) => id !== user.id) : [...likedBy, user.id],
+                likes: (r.likes ?? likedBy.length) + (hasLiked ? -1 : 1),
+              };
+            }),
+          };
+          await updateDiscussionMessage(updated);
+          set({
+            discussionMessages: get().discussionMessages.map((m) => (m.id === messageId ? updated : m)),
+          });
+          return true;
+        } catch (error) {
+          console.error('Failed to like discussion reply:', error);
+          return false;
+        }
+      },
+
+      // 加载我在某题下的全部提交记录（按时间倒序）
+      loadMyRecordsForQuestion: async (questionId: string) => {
+        const user = useAuth.getState().user;
+        if (!user) {
+          set({ questionMyRecords: [], myRecordsQuestionId: null });
+          return;
+        }
+
+        try {
+          const records = await getAnswerRecordsByUserAndQuestionAll(user.id, questionId);
+          set({ questionMyRecords: records, myRecordsQuestionId: questionId });
+        } catch (error) {
+          console.error('Failed to load my records for question:', error);
+        }
+      },
+
+      // 保存/更新某条提交记录的备注
+      saveAnswerNote: async (answerId: string, note: string) => {
+        const user = useAuth.getState().user;
+        if (!user) return false;
+
+        try {
+          const { questionMyRecords, userAnswerHistory, todayAnswers, currentAnswer } = get();
+          const record =
+            questionMyRecords.find(a => a.id === answerId) ||
+            userAnswerHistory.find(a => a.id === answerId);
+
+          if (!record || record.userId !== user.id) return false;
+
+          const updated = { ...record, note: note.trim() || undefined };
+          await updateAnswerRecord(updated);
+
+          set({
+            questionMyRecords: questionMyRecords.map(a => a.id === answerId ? updated : a),
+            userAnswerHistory: userAnswerHistory.map(a => a.id === answerId ? updated : a),
+            todayAnswers: todayAnswers.map(a => a.id === answerId ? updated : a),
+            currentAnswer: currentAnswer?.id === answerId ? updated : currentAnswer,
+          });
+
+          return true;
+        } catch (error) {
+          console.error('Failed to save answer note:', error);
+          return false;
+        }
+      },
+
+      // 公开/取消公开答案（控制讨论区可见性）
+      setAnswerPublic: async (answerId: string, isPublic: boolean) => {
+        const user = useAuth.getState().user;
+        if (!user) return false;
+
+        try {
+          const { questionMyRecords, userAnswerHistory, todayAnswers, questionAnswers, currentAnswer } = get();
+          const record =
+            questionMyRecords.find(a => a.id === answerId) ||
+            userAnswerHistory.find(a => a.id === answerId);
+
+          if (!record || record.userId !== user.id) return false;
+
+          const updated = { ...record, isPublic };
+          await updateAnswerRecord(updated);
+
+          set({
+            questionMyRecords: questionMyRecords.map(a => a.id === answerId ? updated : a),
+            userAnswerHistory: userAnswerHistory.map(a => a.id === answerId ? updated : a),
+            todayAnswers: todayAnswers.map(a => a.id === answerId ? updated : a),
+            currentAnswer: currentAnswer?.id === answerId ? updated : currentAnswer,
+            // 公开状态影响讨论区列表：公开则加入，取消公开则移除
+            questionAnswers: isPublic
+              ? [updated, ...questionAnswers.filter(a => a.id !== answerId)]
+              : questionAnswers.filter(a => a.id !== answerId),
+          });
+
+          return true;
+        } catch (error) {
+          console.error('Failed to update answer visibility:', error);
+          return false;
+        }
+      },
+
+      clearUserSession: () => {
+        set({
+          userAnswerHistory: [],
+          todayAnswers: [],
+          currentAnswer: null,
+          questionMyRecords: [],
+          myRecordsQuestionId: null,
+        });
       },
     }),
     {
@@ -528,7 +875,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
         todayAnswers: state.todayAnswers,
         selectedModule: state.selectedModule,
         userAnswerHistory: state.userAnswerHistory,
-        historicalQuestions: state.historicalQuestions,
+        // 历史题目每次都重新生成，避免旧缓存导致显示异常
       }),
       onRehydrateStorage: () => (state) => {
         // 确保新字段有默认值
@@ -539,6 +886,36 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           if (!state.historicalQuestions) state.historicalQuestions = [];
         }
       },
+      // 合并前检查日期，避免旧日期的数据在 loadTodayQuestions 完成前被渲染
+      merge: (persistedState: any, currentState: DailyQuestionState) => {
+        const today = getQuestionDateString();
+        const loaded = persistedState?.state || {};
+
+        // 检查缓存的今日题目是否属于当天
+        const cachedQuestions = loaded.todayQuestions || [];
+        const isDateMatched = cachedQuestions.every((q: DailyQuestion) => q.date === today);
+
+        if (!isDateMatched || cachedQuestions.length === 0) {
+          // 日期不匹配或为空，清除脏数据
+          cachedQuestions.length = 0;
+          loaded.todayAnswers = [];
+          if (loaded.hasOwnProperty('selectedModule')) {
+            loaded.selectedModule = null;
+          }
+        }
+
+        return {
+          ...currentState,
+          ...loaded,
+        };
+      },
     }
   )
 );
+
+// 监听退出登录事件，立即清除用户相关数据（无需依赖组件挂载）
+useAuth.subscribe((state, prevState) => {
+  if (prevState.isAuthenticated && !state.isAuthenticated) {
+    useDailyQuestion.getState().clearUserSession();
+  }
+});

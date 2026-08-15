@@ -1,19 +1,73 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import bcrypt from 'bcryptjs';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Simple hash function for passwords
-export function hashPassword(password: string): string {
-  let hash = 0
+const BCRYPT_SALT_ROUNDS = 10;
+
+/**
+ * 使用 bcryptjs 对密码进行哈希。
+ * 注意：此应用在浏览器端使用 IndexedDB，没有真正的服务端。
+ * 在浏览器内做哈希只能防止存储明文密码，无法替代服务端认证。
+ */
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+}
+
+/**
+ * 使用 bcryptjs 比较明文密码和存储的哈希。
+ */
+export async function comparePassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
+
+/**
+ * 判断字符串是否为 bcrypt 哈希格式。
+ */
+export function isBcryptHash(hash: string): boolean {
+  return typeof hash === 'string' && hash.startsWith('$2') && hash.length >= 59;
+}
+
+/**
+ * 旧的弱哈希函数（仅用于一次性迁移）。
+ * 新代码不应使用此函数存储密码。
+ */
+function legacyWeakHash(password: string): string {
+  let hash = 0;
   for (let i = 0; i < password.length; i++) {
-    const char = password.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
-    hash = hash & hash
+    const char = password.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
   }
-  return hash.toString(16)
+  return hash.toString(16);
+}
+
+/**
+ * 兼容旧用户数据的一次性校验。
+ * 如果密码以明文或旧弱哈希存储，则视为匹配（随后会重新哈希）。
+ */
+export function legacyComparePassword(password: string, storedHash: string): boolean {
+  return storedHash === password || storedHash === legacyWeakHash(password);
+}
+
+/**
+ * 校验密码强度。
+ * 要求至少 8 位，且包含字母和数字。
+ */
+export function validatePasswordStrength(password: string): {
+  valid: boolean;
+  message: string;
+} {
+  if (password.length < 8) {
+    return { valid: false, message: '密码长度至少为8位' };
+  }
+  if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+    return { valid: false, message: '密码需同时包含字母和数字' };
+  }
+  return { valid: true, message: '' };
 }
 
 // Generate unique ID
@@ -48,9 +102,15 @@ export function formatRelativeTime(dateString: string): string {
   return formatDate(dateString)
 }
 
+// 本地日期格式化（YYYY-MM-DD）。不要用 toISOString().split('T')[0]——
+// 那是 UTC 日期，北京时间 00:00–08:00 会错算成前一天。
+export function formatLocalDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 // Get today's date string (YYYY-MM-DD)
 export function getTodayString(): string {
-  return new Date().toISOString().split('T')[0]
+  return formatLocalDate(new Date())
 }
 
 // Check if it's past 5 AM

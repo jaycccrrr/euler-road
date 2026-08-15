@@ -1,35 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display, Noto_Serif_SC } from "next/font/google";
 import "./globals.css";
 import "katex/dist/katex.min.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const notoSerifSC = Noto_Serif_SC({
-  variable: "--font-noto-serif-sc",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
+import { AnimationProvider } from "@/contexts/AnimationContext";
+import { CloudSyncProvider } from "@/components/providers/CloudSyncProvider";
 
 export const metadata: Metadata = {
-  title: "欧拉登基之路 - 理科学习交流平台",
-  description: "针对高中及大学的理科教学沟通互动平台，包含数学、物理、计算机等科目的知识库和每日一题挑战",
-  keywords: ["数学", "物理", "计算机", "学习", "教育", "每日一题", "论坛"],
+  title: "欧拉之路 - 数学学习交流平台",
+  description: "针对高中及大学的数学教学沟通互动平台，包含高中数学、高等数学、线性代数的知识库和每日一题挑战",
+  keywords: ["数学", "高中数学", "高等数学", "线性代数", "学习", "教育", "每日一题"],
 };
 
 export default function RootLayout({
@@ -39,10 +17,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${notoSerifSC.variable} antialiased bg-slate-50 min-h-screen`}
-      >
-        {children}
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Noto+Serif+SC:wght@400;500;600;700&family=Playfair+Display:wght@400..900&family=Caveat:wght@500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="antialiased bg-white min-h-screen">
+        <AnimationProvider>
+          <CloudSyncProvider>
+            {children}
+          </CloudSyncProvider>
+        </AnimationProvider>
       </body>
     </html>
   );

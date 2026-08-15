@@ -1,8 +1,26 @@
 import Header from '@/components/layout/Header';
+import CourseSearch from '@/components/search/CourseSearch';
 import { KNOWLEDGE_MODULES } from '@/data/modules';
+import { staticAdvancedTopics } from '@/data/highschoolStatic';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowRight, BookOpen } from 'lucide-react';
+
+// 搜索索引：高中数学页实际渲染的是提高篇 staticAdvancedTopics，
+// 其标题与 KNOWLEDGE_MODULES 的主题标题不一致（如「函数」vs「函数与方程」），
+// 而模块页按标题匹配 #topic= 定位，故搜索索引必须用页面真实主题，否则跳转落空。
+const SEARCH_MODULES = KNOWLEDGE_MODULES.map((m) =>
+  m.id === 'highschool-math'
+    ? {
+        ...m,
+        topics: staticAdvancedTopics.map((t) => ({
+          id: t.id,
+          title: t.title,
+          difficulty: 3,
+        })),
+      }
+    : m
+);
 
 export default function CoursesPage() {
   return (
@@ -11,29 +29,40 @@ export default function CoursesPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="relative py-20 bg-slate-50">
+        <section className="relative py-16 bg-slate-50">
           <div className="container mx-auto px-4 max-w-6xl text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full mb-6 shadow-sm">
               <BookOpen className="w-4 h-4 text-blue-600" />
               <span className="text-sm font-medium text-slate-600">全部课程</span>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               选择你的学习领域
             </h1>
 
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              六大核心模块，涵盖数学、物理、计算机科学。
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-8">
+              三大核心模块，涵盖高中数学、高等数学、线性代数。
               <br className="hidden md:block" />
-              从基础概念到高级理论，循序渐进掌握理科知识。
+              从基础概念到高级理论，循序渐进掌握数学知识。
             </p>
+
+            {/* 搜索框 */}
+            <div className="max-w-2xl mx-auto">
+              <CourseSearch modules={SEARCH_MODULES} />
+            </div>
           </div>
         </section>
 
         {/* Course Grid */}
         <section className="py-16">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-slate-900">所有课程</h2>
+              <span className="text-sm text-slate-500">
+                共 {KNOWLEDGE_MODULES.length} 个模块
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
               {KNOWLEDGE_MODULES.map((module, index) => (
                 <ModuleCard key={module.id} module={module} index={index} />
               ))}
@@ -59,7 +88,7 @@ function ModuleCard({ module, index }: { module: typeof KNOWLEDGE_MODULES[0]; in
 
   return (
     <Link href={`/module/${module.id}/`} className="group">
-      <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-100 h-full">
+      <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 motion-safe:active:scale-[0.98] border border-slate-100 h-full">
         <div className="flex items-start gap-4">
           <div className={`w-14 h-14 ${bgColor} rounded-2xl flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
             {module.icon}
