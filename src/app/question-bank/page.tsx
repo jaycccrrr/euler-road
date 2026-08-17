@@ -513,6 +513,36 @@ function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
+// 缓存图片引用是否缺失（HEAD 探测，结果跨题目复用）
+const refStatusCache: Record<string, boolean> = {};
+
+function useMissingRefs(refs: string[]) {
+  const [missing, setMissing] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(refs.filter((r) => r in refStatusCache).map((r) => [r, refStatusCache[r]]))
+  );
+  const key = refs.join('|');
+  useEffect(() => {
+    let alive = true;
+    for (const ref of refs) {
+      if (ref in refStatusCache) continue;
+      fetch(assetPath(ref), { method: 'HEAD' })
+        .then((r) => {
+          refStatusCache[ref] = !r.ok;
+          if (alive) setMissing((prev) => ({ ...prev, [ref]: !r.ok }));
+        })
+        .catch(() => {
+          refStatusCache[ref] = true;
+          if (alive) setMissing((prev) => ({ ...prev, [ref]: true }));
+        });
+    }
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return missing;
+}
+
 function QuestionItem({
   question,
   index,
@@ -538,6 +568,12 @@ function QuestionItem({
   const [qImages, setQImages] = useState<FillImage[]>(edit?.questionImages ?? []);
   const [hImages, setHImages] = useState<FillImage[]>(edit?.hintImages ?? []);
   const extraInputRef = useRef<HTMLInputElement>(null);
+  const solMissingMap = useMissingRefs(question.solutionImageRefs);
+  const blkMissingMap = useMissingRefs(question.blockImageRefs);
+  const hintMissingMap = useMissingRefs(question.hintImageRefs);
+  const solMissCount = question.solutionImageRefs.filter((r) => solMissingMap[r] === true).length;
+  const blkMissCount = question.blockImageRefs.filter((r) => blkMissingMap[r] === true).length;
+  const hintMissCount = question.hintImageRefs.filter((r) => hintMissingMap[r] === true).length;
 
   const isCorrect = useMemo(() => {
     if (!submitted) return null;
@@ -627,6 +663,7 @@ function QuestionItem({
   const renderRefSlots = (
     refs: string[],
     list: FillImage[],
+    missingMap: Record<string, boolean>,
     onUpload: (ref: string, file?: File | null) => void,
     onRemove: (ref: string) => void
   ) =>
@@ -666,8 +703,12 @@ function QuestionItem({
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             </>
+          ) : missingMap[ref] === false ? (
+            <span className="text-emerald-600/70">已存在</span>
+          ) : missingMap[ref] === true ? (
+            <span className="text-rose-600/70">缺失，待上传</span>
           ) : (
-            <span className="text-amber-600/70">未上传</span>
+            <span className="text-amber-600/70">检测中…</span>
           )}
         </div>
       );
@@ -805,6 +846,9 @@ function QuestionItem({
               改动保存在本机浏览器，完成后点右上角“导出编辑数据”
             </span>
           </div>
+          <div className="text-xs text-amber-800/90">
+            本题目缺失：解析图 {solMissCount} · 题目图 {blkMissCount} · 提示图 {hintMissCount}
+          </div>
           <div>
             <div className="text-xs font-medium text-amber-800 mb-1">解析文本（支持 LaTeX / Markdown）</div>
             <Textarea
@@ -819,48 +863,7 @@ function QuestionItem({
             <div>
               <div className="text-xs font-medium text-amber-800 mb-1">解析图片（对应引用路径）</div>
               <div className="space-y-1.5">
-                {question.solutionImageRefs.map((ref) => {
-                  const img = images.find((i) => i.ref === ref);
-                  return (
-                    <div key={ref} className="flex items-center gap-2 text-xs">
-                      <code className="text-[11px] text-amber-800 bg-amber-100/70 px-1.5 py-0.5 rounded break-all">
-                        {ref}
-                      </code>
-                      <label className="cursor-pointer inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 shrink-0">
-                        <Upload className="w-3 h-3" />
-                        上传图片
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            void uploadForRef(ref, e.target.files?.[0]);
-                            e.target.value = '';
-                          }}
-                        />
-                      </label>
-                      {img ? (
-                        <>
-                          <img
-                            src={img.dataUrl}
-                            alt="预览"
-                            className="h-10 w-10 object-cover rounded border border-amber-200"
-                          />
-                          <button
-                            type="button"
-                            className="text-amber-700 hover:text-rose-600"
-                            onClick={() => removeImage(ref)}
-                            title="移除该图"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </>
-                      ) : (
-                        <span className="text-amber-600/70">未上传</span>
-                      )}
-                    </div>
-                  );
-                })}
+                {renderRefSlots(question.solutionImageRefs, images, solMissingMap, uploadForRef, removeImage)}
               </div>
             </div>
           )}
@@ -868,7 +871,7 @@ function QuestionItem({
             <div>
               <div className="text-xs font-medium text-amber-800 mb-1">题目配图（题目中的图）</div>
               <div className="space-y-1.5">
-                {renderRefSlots(question.blockImageRefs, qImages, uploadForBlockRef, removeQImage)}
+                {renderRefSlots(question.blockImageRefs, qImages, blkMissingMap, uploadForBlockRef, removeQImage)}
               </div>
             </div>
           )}
@@ -876,7 +879,7 @@ function QuestionItem({
             <div>
               <div className="text-xs font-medium text-amber-800 mb-1">提示图（当前界面不显示，可后补）</div>
               <div className="space-y-1.5">
-                {renderRefSlots(question.hintImageRefs, hImages, uploadForHintRef, removeHImage)}
+                {renderRefSlots(question.hintImageRefs, hImages, hintMissingMap, uploadForHintRef, removeHImage)}
               </div>
             </div>
           )}
