@@ -1168,7 +1168,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775022219208",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69ccafdfeae6e.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949746151-1.jpg",
             "width": 500
           }
         ]
@@ -1324,7 +1324,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
             "type": "text",
             "content": "解：函数 $f(x) = \\cos(\\omega x + \\varphi) (\\omega > 0, -\\dfrac{\\pi}{2} < \\varphi < 0)$，\n$|f(-\\dfrac{\\pi}{6})| = 1$，$f(\\dfrac{\\pi}{6}) = 0$，\n\n由题意知 $\\dfrac{\\pi}{6} - (-\\dfrac{\\pi}{6}) = (2k + 1) \\times \\dfrac{T}{4} (k \\in Z)$，\n则 $T = \\dfrac{4\\pi}{3(2k+1)}$，\n\n因为 $T = \\dfrac{2\\pi}{|\\omega|}$，\n所以 $\\omega = \\dfrac{3(2k+1)}{2}$，\n\n又因为 $f(x)$ 在区间 $(\\dfrac{\\pi}{6}, \\dfrac{5\\pi}{24})$ 上单调，\n所以 $\\dfrac{5\\pi}{24} - \\dfrac{\\pi}{6} \\le \\dfrac{T}{4}$，解得 $0 < \\omega \\le 12$，\n\n则 $\\omega$ 的最大值为 $\\dfrac{21}{2}$。\n\n故答案为：$\\dfrac{21}{2}$。"
           }
-        , { "id": "sol-qb-1774949747023-x1", "type": "image", "content": "/images/高中数学精编题库/三角函数/qb-1774949747023-1.jpg" }]
+        ]
       },
       {
         "id": "qb-1774949747132",
@@ -1596,7 +1596,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775053015895",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69cd27c2cff6c.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949748714-1.jpg",
             "width": 500
           }
         ]
