@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import { assetPath } from '@/lib/asset';
 
 interface MathRendererProps {
   children: string;
@@ -188,9 +189,11 @@ export function MathRenderer({ children, className = '' }: MathRendererProps) {
     html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => {
       const cleanUrl = url.trim();
       const cleanAlt = alt.trim();
-      const finalUrl = cleanUrl.startsWith('http') || cleanUrl.startsWith('//')
+      const rawUrl = cleanUrl.startsWith('http') || cleanUrl.startsWith('//')
         ? cleanUrl
         : cleanUrl.startsWith('/') ? cleanUrl : '/' + cleanUrl;
+      // GitHub Pages 子路径部署时，本地绝对路径需要补 basePath 前缀
+      const finalUrl = assetPath(rawUrl);
       return `<div class="my-4"><img src="${finalUrl}" alt="${cleanAlt}" class="max-w-full rounded-lg" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.parentElement.querySelector('.img-error').style.display='block';" /><div class="img-error" style="display:none; padding:12px; background:#fee; color:#c00; border:1px solid #fcc; border-radius:8px; word-break:break-all;"><strong>图片加载失败</strong><br/>路径: ${finalUrl}</div></div>`;
     });
 
@@ -250,7 +253,12 @@ export function MathRenderer({ children, className = '' }: MathRendererProps) {
         }
       }
 
-      // 其他保护的块（代码块、img 标签等）
+      // 受保护的 <img> 标签：补齐 GitHub Pages 子路径前缀
+      if (/^<img[\s>]/i.test(block)) {
+        return block.replace(/src\s*=\s*(["'])(.*?)\1/i, (_, q, src) => `src=${q}${assetPath(src)}${q}`);
+      }
+
+      // 其他保护的块（代码块等）
       return block;
     });
 

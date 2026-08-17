@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MathRenderer } from '@/components/math/MathRenderer';
+import { assetPath } from '@/lib/asset';
 import { staticQuestionBankChapters } from '@/data/highschoolStatic';
 import { advancedMathExerciseChapters, getGroupedChapters } from '@/data/advancedMathExerciseData';
 import { linearAlgebraExerciseChapters } from '@/data/linearAlgebraExerciseData';
@@ -113,16 +114,23 @@ function chapterProgress(ch: ChapterNode, progress: QbProgress) {
 // 高等数学习题数据里混有 `<span ...>标签: ...</span>` 原始 HTML 标签块，渲染前剔除
 const TAG_BLOCK_RE = /^\s*<span[^>]*>\s*标签[:：]/;
 
-function blocksToText(blocks: ContentBlock[]): string {
+// 题目内容/解析：文本块直接拼接，图片块转为 <img>（由 MathRenderer 统一渲染并补 basePath）
+function blocksToHtml(blocks: ContentBlock[]): string {
   return blocks
-    .filter((b) => b.type === 'text' && !TAG_BLOCK_RE.test(b.content))
-    .map((b) => b.content)
+    .filter((b) => !TAG_BLOCK_RE.test(b.content))
+    .map((b) => {
+      if (b.type === 'image' && b.content) {
+        const widthAttr = b.width ? ` width="${b.width}"` : '';
+        return `<img src="${assetPath(b.content)}" alt="题目图片"${widthAttr} class="max-w-full rounded-lg my-2" loading="lazy" decoding="async" />`;
+      }
+      return b.content;
+    })
     .join('\n');
 }
 
 function convertStaticQuestion(q: StaticQuestion): QuizQuestion {
-  const content = blocksToText(q.blocks);
-  const explanation = blocksToText(q.solutionBlocks || []);
+  const content = blocksToHtml(q.blocks);
+  const explanation = blocksToHtml(q.solutionBlocks || []);
   const correct = q.correctOptions?.length
     ? q.correctOptions
     : q.correctOption !== undefined

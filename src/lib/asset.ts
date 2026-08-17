@@ -5,7 +5,10 @@
  */
 export function assetPath(src: string): string {
   const base = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  if (!base || !src.startsWith('/')) return src;
+  // 外部/协议相对/data/blob URL 原样返回；本地绝对路径才加前缀
+  if (!base || !src.startsWith('/') || src.startsWith('//')) return src;
+  // 已带前缀时避免重复拼接
+  if (src.startsWith(base)) return src;
   return base + src;
 }
 
