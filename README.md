@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 欧拉之路 · Euler Road
 
-## Getting Started
+以实践驱动数学认知的数学学习平台：每天一道精选数学题，配套结构化讲义、题库笔记与社区交流，让学习保持节奏、步步可循。
 
-First, run the development server:
+在线体验：[https://jaycccrrr.github.io/euler-road/](https://jaycccrrr.github.io/euler-road/)
+
+## 核心功能
+
+- **每日挑战** — 每天 5:00 更新，高中数学、高等数学、线性代数三科题目轮换，当天作答、即时评分
+- **知识模块** — 概念、例题、习题层层递进的讲义体系，从基础到进阶有迹可循
+- **题库 · 笔记** — 题库按考点索引，支持个人笔记与收藏，把练习沉淀为专属复习路径
+- **π 力成长** — 连续作答积累 π 力，称号与头像框见证坚持
+- **社区交流** — 分享解法与笔记，让答案因交流而更完整
+
+## 技术栈
+
+- [Next.js](https://nextjs.org/) 16（静态导出 `output: 'export'`）
+- TypeScript
+- [Tailwind CSS](https://tailwindcss.com/) v4 + [shadcn/ui](https://ui.shadcn.com/)
+- [KaTeX](https://katex.org/) 数学公式渲染
+- [IndexedDB](https://developer.mozilla.org/zh-CN/docs/Web/API/IndexedDB_API)（`idb`）本地数据存储
+- [Zustand](https://zustand-demo.pmnd.rs/) 状态管理
+- [Prisma](https://www.prisma.io/)（schema 已定义，后端 API 暂未启用）
+
+## 本地开发
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+打开 [http://localhost:3000](http://localhost:3000) 即可。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 构建
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+```
 
-## Learn More
+静态导出产物输出到 `dist5/`。
 
-To learn more about Next.js, take a look at the following resources:
+## 部署
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+推送 `main` 分支后，GitHub Actions 会自动构建并部署到 GitHub Pages：
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+[部署工作流](.github/workflows/deploy.yml)
 
-## Deploy on Vercel
+在线地址：[https://jaycccrrr.github.io/euler-road/](https://jaycccrrr.github.io/euler-road/)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 数据存储说明
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+所有学习数据（用户、答题记录、笔记、收藏等）默认保存在浏览器本地（IndexedDB），无需后端即可使用。
+
+后端数据库连接等环境变量说明见 [DEPLOY.md](DEPLOY.md)。
+
+## 目录结构
+
+```
+src/app/          页面与路由
+src/components/   组件（UI、动画、模块内容等）
+src/data/         讲义与题目数据
+src/hooks/        状态管理与业务逻辑
+src/lib/          工具库（数据层、评分、题目生成等）
+public/           静态资源（图片等）
+scripts/          数据处理与维护脚本
+.github/          GitHub Actions 工作流
+```
