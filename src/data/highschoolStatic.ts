@@ -1193,13 +1193,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775028113056",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69ccc71a1782a.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949746341-1.jpg",
             "width": 500
           },
           {
             "id": "sol-1775028119013",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69ccc719f1151.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949746341-2.jpg",
             "width": 600
           }
         ]
@@ -1261,7 +1261,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
             "type": "text",
             "content": "解答：\nAB\n\n----------\n\n解析：\n本题考查圆内接四边形的性质、余弦定理、三角形面积公式以及向量的数量积运算。\n利用圆内接四边形对角互补，结合余弦定理求出$BD$的长度，进而求出四边形$ABCD$的面积，再根据向量的运算法则计算$\\overrightarrow{AO}\\cdot \\overrightarrow{BD}$与$\\overrightarrow{AC}\\cdot \\overrightarrow{BD}$。\n1.求$BD$的长度\n\n因为四边形$ABCD$是圆$O$的内接四边形，所以$\\angle A + \\angle C = \\pi$，即$\\cos A = -\\cos C$。\n\n在$\\triangle ABD$中，根据余弦定理$BD^{2}=AB^{2}+AD^{2}-2AB\\cdot AD\\cos A$，将$AB = 2$，$AD = 4$代入可得$BD^{2}=2^{2}+4^{2}-2\\times 2\\times 4\\cos A = 20 - 16\\cos A$。\n\n在$\\triangle BCD$中，根据余弦定理$BD^{2}=CB^{2}+CD^{2}-2CB\\cdot CD\\cos C$，将$CB = 6$，$CD = 4$代入可得$BD^{2}=6^{2}+4^{2}-2\\times 6\\times 4\\cos C = 52 - 48\\cos C$。\n\n由于$\\cos A = -\\cos C$，所以$20 - 16\\cos A = 52 + 48\\cos A$，移项可得$64\\cos A = -32$，解得$\\cos A = -\\frac{1}{2}$。\n\n因为$A\\in(0,\\pi)$，所以$A = \\frac{2\\pi}{3}$。\n\n将$\\cos A = -\\frac{1}{2}$代入$BD^{2}=20 - 16\\cos A$，可得$BD^{2}=20 - 16\\times(-\\frac{1}{2}) = 28$，则$BD = 2\\sqrt{7}$，故A选项正确。\n\n2.求四边形$ABCD$的面积\n\n四边形$ABCD$的面积$S = S_{\\triangle ABD} + S_{\\triangle BCD}$。\n\n根据三角形面积公式$S = \\frac{1}{2}ab\\sin C$，可得$S_{\\triangle ABD}=\\frac{1}{2}AB\\cdot AD\\sin A=\\frac{1}{2}\\times 2\\times 4\\times\\sin\\frac{2\\pi}{3}=4\\times\\frac{\\sqrt{3}}{2}=2\\sqrt{3}$。\n\n因为$\\cos A = -\\frac{1}{2}$，$A + \\angle C = \\pi$，所以$\\cos C = \\frac{1}{2}$，又$C\\in(0,\\pi)$，则$C = \\frac{\\pi}{3}$，那么$S_{\\triangle BCD}=\\frac{1}{2}CB\\cdot CD\\sin C=\\frac{1}{2}\\times 6\\times 4\\times\\sin\\frac{\\pi}{3}=12\\times\\frac{\\sqrt{3}}{2}=6\\sqrt{3}$。\n\n所以$S = S_{\\triangle ABD} + S_{\\triangle BCD}=2\\sqrt{3} + 6\\sqrt{3}=8\\sqrt{3}$，故B选项正确。\n\n3.求$\\overrightarrow{AO}\\cdot \\overrightarrow{BD}$的值\n\n取$BD$的中点$M$，则$\\overrightarrow{AO}=\\overrightarrow{AM}+\\overrightarrow{MO}$，所以$\\overrightarrow{AO}\\cdot \\overrightarrow{BD}=(\\overrightarrow{AM}+\\overrightarrow{MO})\\cdot \\overrightarrow{BD}=\\overrightarrow{AM}\\cdot \\overrightarrow{BD}+\\overrightarrow{MO}\\cdot \\overrightarrow{BD}$。\n\n因为$M$是$BD$的中点，所以$\\overrightarrow{MO}\\cdot \\overrightarrow{BD}=0$，则$\\overrightarrow{AO}\\cdot \\overrightarrow{BD}=\\overrightarrow{AM}\\cdot \\overrightarrow{BD}$。\n\n在$\\triangle ABD$中，$\\cos\\angle ABD=\\frac{AB^{2}+BD^{2}-AD^{2}}{2\\cdot AB\\cdot BD}=\\frac{2^{2}+(2\\sqrt{7})^{2}-4^{2}}{2\\times 2\\times 2\\sqrt{7}}=\\frac{2\\sqrt{7}}{7}$。\n$\\overrightarrow{AM}\\cdot \\overrightarrow{BD}=\\frac{1}{2}(\\overrightarrow{AB}+\\overrightarrow{AD})\\cdot (\\overrightarrow{AD}-\\overrightarrow{AB})=\\frac{1}{2}(\\overrightarrow{AD}^{2}-\\overrightarrow{AB}^{2})=\\frac{1}{2}(4^{2}-2^{2}) = 6$，故C选项错误。\n\n4.求$\\overrightarrow{AC}\\cdot \\overrightarrow{BD}$的值\n\n$\\overrightarrow{AC}\\cdot \\overrightarrow{BD}=(\\overrightarrow{AB}+\\overrightarrow{BC})\\cdot (\\overrightarrow{AD}-\\overrightarrow{AB})=\\overrightarrow{AB}\\cdot \\overrightarrow{AD}-\\overrightarrow{AB}^{2}+\\overrightarrow{BC}\\cdot \\overrightarrow{AD}-\\overrightarrow{BC}\\cdot \\overrightarrow{AB}$。\n\n$\\overrightarrow{AB}\\cdot \\overrightarrow{AD}=\\vert\\overrightarrow{AB}\\vert\\vert\\overrightarrow{AD}\\vert\\cos A = 2\\times 4\\times(-\\frac{1}{2}) = -4$，$\\overrightarrow{AB}^{2}=2^{2}=4$。\n\n在$\\triangle BCD$中，$\\cos\\angle CBD=\\frac{CB^{2}+BD^{2}-CD^{2}}{2\\cdot CB\\cdot BD}=\\frac{6^{2}+(2\\sqrt{7})^{2}-4^{2}}{2\\times 6\\times 2\\sqrt{7}}=\\frac{2\\sqrt{7}}{7}$，$\\overrightarrow{BC}\\cdot \\overrightarrow{AD}=\\vert\\overrightarrow{BC}\\vert\\vert\\overrightarrow{AD}\\vert\\cos(\\pi - \\angle CBD)=6\\times 4\\times(-\\frac{2\\sqrt{7}}{7})=-\\frac{48\\sqrt{7}}{7}$，$\\overrightarrow{BC}\\cdot \\overrightarrow{AB}=\\vert\\overrightarrow{BC}\\vert\\vert\\overrightarrow{AB}\\vert\\cos(\\pi - \\angle ABC)=6\\times 2\\times(-\\frac{2\\sqrt{7}}{7})=-\\frac{24\\sqrt{7}}{7}$。\n\n则$\\overrightarrow{AC}\\cdot \\overrightarrow{BD}=-4 - 4-\\frac{48\\sqrt{7}}{7}+\\frac{24\\sqrt{7}}{7}=-8-\\frac{24\\sqrt{7}}{7}\\neq16$，故D选项错误。\n\n综上，答案是AB选项。\n"
           }
-        ]
+        , { "id": "sol-qb-1774949746727-x1", "type": "image", "content": "/images/高中数学精编题库/三角函数/qb-1774949746727-1.jpg" }]
       },
       {
         "id": "qb-1774949746938",
@@ -1291,13 +1291,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775028137144",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69ccc71999483.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949746938-1.jpg",
             "width": 500
           },
           {
             "id": "sol-1775028143005",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69ccc719ebac4.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949746938-2.jpg",
             "width": 500
           }
         ]
@@ -1324,7 +1324,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
             "type": "text",
             "content": "解：函数 $f(x) = \\cos(\\omega x + \\varphi) (\\omega > 0, -\\dfrac{\\pi}{2} < \\varphi < 0)$，\n$|f(-\\dfrac{\\pi}{6})| = 1$，$f(\\dfrac{\\pi}{6}) = 0$，\n\n由题意知 $\\dfrac{\\pi}{6} - (-\\dfrac{\\pi}{6}) = (2k + 1) \\times \\dfrac{T}{4} (k \\in Z)$，\n则 $T = \\dfrac{4\\pi}{3(2k+1)}$，\n\n因为 $T = \\dfrac{2\\pi}{|\\omega|}$，\n所以 $\\omega = \\dfrac{3(2k+1)}{2}$，\n\n又因为 $f(x)$ 在区间 $(\\dfrac{\\pi}{6}, \\dfrac{5\\pi}{24})$ 上单调，\n所以 $\\dfrac{5\\pi}{24} - \\dfrac{\\pi}{6} \\le \\dfrac{T}{4}$，解得 $0 < \\omega \\le 12$，\n\n则 $\\omega$ 的最大值为 $\\dfrac{21}{2}$。\n\n故答案为：$\\dfrac{21}{2}$。"
           }
-        ]
+        , { "id": "sol-qb-1774949747023-x1", "type": "image", "content": "/images/高中数学精编题库/三角函数/qb-1774949747023-1.jpg" }]
       },
       {
         "id": "qb-1774949747132",
@@ -1342,7 +1342,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
             "type": "text",
             "content": "解答：\n解：(1)证明：当$M=\\{0$，$\\frac{\\pi }{2}\\}$时，$f_{2}(x)=\\sin ^{2}x+\\sin ^{2}(x-\\frac{\\pi }{2})=\\sin ^{2}x+\\cos ^{2}x=1$，此时$f_{2}(x)$是常数函数；\n\n(2)设$M=\\{\\theta _{1}$，$\\theta _{2}$，$\\theta _{3}\\}$，\n\n不妨令$\\theta _{1} \\gt \\theta _{2} \\gt \\theta _{3}$，则$f_{3}(x)=\\sin ^{2}(x-\\theta _{1})+\\sin ^{2}(x-\\theta _{2})+\\sin ^{2}(x-\\theta _{3})$\n\n$=\\frac{3}{2}-\\frac{1}{2}[\\cos (2x-2\\theta _{1})+\\cos (2x-2\\theta _{2})+\\cos (2x-2\\theta _{3})]$\n\n$=\\frac{3}{2}-\\frac{1}{2}[(\\cos 2\\theta _{1}+\\cos 2\\theta _{2}+\\cos 2\\theta _{3})\\cos 2x+(\\sin 2\\theta _{1}+\\sin 2\\theta _{2}+\\sin 2\\theta _{3})\\sin 2x]$.\n\n若函数$f_{3}(x)$是常数函数，则$\\left\\{\\begin{array}{l}cos2{\\theta }_{1}+cos2{\\theta }_{2}+cos2{\\theta }_{3}=0，\\\\ sin2{\\theta }_{1}+sin2{\\theta }_{2}+sin2{\\theta }_{3}=0，\\end{array}\\right.$\n\n则${(cos{2\\theta }_{1}+cos{2\\theta }_{2})}^{2}+{(sin{2\\theta }_{1}+sin{2\\theta }_{2})}^{2}=1$，\n\n得$2+2\\cos (2\\theta _{1}-2\\theta _{2})=1$，所以$\\cos (2\\theta _{1}-2\\theta _{2})=-\\frac{1}{2}$，\n\n得$2\\theta _{1}-2\\theta _{2}=\\frac{2\\pi }{3}+2k_{1}\\pi $或$\\frac{4\\pi }{3}+2k_{1}\\pi $，$k_{1}\\in N$，\n\n所以$\\theta _{1}-\\theta _{2}=\\frac{\\pi }{3}+k_{1}\\pi $或$\\frac{2\\pi }{3}+k_{1}\\pi $，$k_{1}\\in N$，\n\n同理$\\theta _{1}-\\theta _{3}=\\frac{\\pi }{3}+k_{2}\\pi $或$\\frac{2\\pi }{3}+k_{2}\\pi $，$k_{2}\\in N$，\n\n$\\theta _{2}-\\theta _{3}=\\frac{\\pi }{3}+k_{3}\\pi $或$\\frac{2\\pi }{3}+k_{3}\\pi $，$k_{3}\\in N$，\n\n则$\\left\\{\\begin{array}{l}\\theta _1-\\theta _2=\\frac{\\pi }{3}+k_1\\pi ，k_1\\in N，\\\\ \\theta _1-\\theta _3=\\frac{2\\pi }{3}+k_2\\pi ，k_2\\in N，\\end{array}\\right.$\n\n①满足①的集合$M$有$\\{0$，$\\frac{\\pi }{3}$，$\\frac{2\\pi }{3}\\}$，$\\{\\frac{\\pi }{3}$，$\\frac{2\\pi }{3}$，$\\pi \\}$，共$2$个.\n\n(3)不妨令$\\theta _{1} \\gt \\theta _{2} \\gt \\cdots\\ \\ \\gt \\theta _{n}$，\n\n因为$f_2(x)=sin^2(x-\\theta _1)+sin^2(x-\\theta _2)$$=1-\\frac{1}{2}[cos(2x-2\\theta _1)+cos(2x-2\\theta _2)]$\n\n$=1-\\frac{1}{2}[(cos2{\\theta }_{1}+cos2{\\theta }_{2})cos2x+(sin2{\\theta }_{1}+sin2{\\theta }_{2})sin2x]$，\n\n若函数$f_{2}(x)$是常数函数，则$\\left\\{\\begin{array}{l}cos2\\theta _1+cos2\\theta _2=0，\\\\ sin2\\theta _1+sin2\\theta _2=0，\\end{array}\\right.$得$2+2\\cos (2\\theta _{1}-2\\theta _{2})=0$，\n\n所以$\\cos (2\\theta _{1}-2\\theta _{2})=-1$，得$2\\theta _{1}-2\\theta _{2}=\\pi +2k\\pi $，$k\\in N$，\n\n所以$\\theta _{1}-\\theta _{2}=\\frac{\\pi }{2}+k\\pi $，$k\\in N$，\n\n①当$n$为偶数时，$f_{n}(x)$可以拆分成$\\frac{n}{2}$组两项$[\\sin ^{2}(x-\\theta _{i-1})+\\sin ^{2}(x-\\theta _{i})](i=2k$，$k\\in \\{1$，$2$，$\\ldots $，$\\frac{n}{2}\\})$的和，每一组为定值时，$f_{n}(x)$也为定值，\n\n所以函数$f_{n}(x)$是常数函数的一个充分条件可以是$M=\\{\\theta _{i}|\\theta _{i}=\\frac{(i-1)\\pi }{2}$，$1\\leqslant i\\leqslant n$，$i\\in N^{*}\\}$.\n\n②当$n$为奇数时，$f_{n}(x)$可以拆分成$1$组三项$[\\sin ^{2}(x-\\theta _{1})+\\sin ^{2}(x-\\theta _{2})+\\sin ^{2}(x-\\theta _{3})]$的和与$\\frac{n-3}{2}$组两项$[\\sin ^{2}(x-\\theta _{i})+\\sin ^{2}(x-\\theta _{i+1})](i=2k$，\n\n$k\\in \\{2$，$\\ldots $，$\\frac{n-1}{2}\\})$的和，每一组为定值时，$f_{n}(x)$也为定值，\n\n所以当$n$为奇数时，函数$f_{n}(x)$是常数函数的一个充分条件可以是$M=\\{{\\theta }_{i}|{\\theta }_{i}=\\left\\{\\begin{array}{l}\\frac{(i-1)\\pi }{3}，1\\leqslant i\\leqslant 3，i\\in {N}^{*}\\\\ \\frac{2\\pi }{3}+\\frac{(i-3)\\pi }{2}，4\\leqslant i\\leqslant n，i\\in {N}^{*}\\end{array}\\right.$.\n\n----------\n\n解析：\n(1)$M=\\{0$，$\\frac{\\pi }{2}\\}$时，$f_{2}(x)=\\sin ^{2}x+\\sin ^{2}(x-\\frac{\\pi }{2})=1$，得出$f_{2}(x)$是常数函数；\n\n(2)设$M=\\{\\theta _{1}$，$\\theta _{2}$，$\\theta _{3}\\}$，不妨令$\\theta _{1} \\gt \\theta _{2} \\gt \\theta _{3}$，得出$f\\left(x\\right)$的解析式，由函数$f_{3}(x)$是常数函数，得出满足$M$的集合.\n\n(3)不妨令$\\theta _{1} \\gt \\theta _{2} \\gt \\cdots\\ \\ \\gt \\theta _{n}$，由函数$f_{2}(x)$是常数函数，得$\\theta _{1}-\\theta _{2}$的解析式，由此$f_{n}(x)$是常数函数的一个充分条件.\n"
           }
-        ]
+        , { "id": "sol-qb-1774949747132-x1", "type": "image", "content": "/images/高中数学精编题库/三角函数/qb-1774949747132-1.jpg" }, { "id": "sol-qb-1774949747132-x2", "type": "image", "content": "/images/高中数学精编题库/三角函数/qb-1774949747132-2.jpg" }, { "id": "sol-qb-1774949747132-x3", "type": "image", "content": "/images/高中数学精编题库/三角函数/qb-1774949747132-3.jpg" }]
       },
       {
         "id": "qb-1774949747231",
@@ -1358,13 +1358,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775049701243",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69cd1b7e49560.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949747231-1.jpg",
             "width": 500
           },
           {
             "id": "sol-1775049718703",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69cd1b7f2aa23.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949747231-2.jpg",
             "width": 500
           }
         ]
@@ -1400,7 +1400,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775049773776",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69cd1b7f028e6.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949747334-1.jpg",
             "width": 500
           }
         ]
@@ -1552,7 +1552,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775052878323",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69cd27c2cff6c.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949748522-1.jpg",
             "width": 500
           }
         ]
@@ -1571,7 +1571,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775052999532",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69cd27c2b66ee.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949748606-1.jpg",
             "width": 500
           }
         ]
