@@ -1700,13 +1700,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775053794461",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd2b44cc491.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960809190-1.jpg",
             "width": 500
           },
           {
             "id": "sol-1775053806973",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd2b4583dde.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960809190-2.jpg",
             "width": 500
           }
         ]
@@ -1733,13 +1733,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775053849716",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd2b44a12ef.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960809313-1.jpg",
             "width": 500
           },
           {
             "id": "sol-1775053856955",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd2b45a3cbd.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960809313-2.jpg",
             "width": 500
           }
         ]
@@ -1788,7 +1788,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775055060078",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd3068cc62c.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960809602-1.jpg",
             "width": 500
           }
         ]
@@ -1813,13 +1813,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775055086935",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd306a8de9d.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960809778-1.jpg",
             "width": 500
           },
           {
             "id": "sol-1775055093102",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd3068a89ed.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960809778-2.jpg",
             "width": 500
           }
         ]
@@ -1844,7 +1844,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775055122113",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd306a53d59.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960809903-1.jpg",
             "width": 500
           }
         ]
@@ -1869,19 +1869,19 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775055136287",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd306a65f5f.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960810091-1.jpg",
             "width": 500
           },
           {
             "id": "sol-1775055276158",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd30f2a4d9b.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960810091-2.jpg",
             "width": 500
           },
           {
             "id": "sol-1775055284951",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd30f16dba3.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960810091-3.jpg",
             "width": 500
           }
         ]
@@ -1906,13 +1906,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775055307547",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd30f0302ed.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960810192-1.jpg",
             "width": 400
           },
           {
             "id": "sol-1775055316809",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd30f2cf63a.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960810192-2.jpg",
             "width": 500
           }
         ]
@@ -1937,7 +1937,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775055330043",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd30f071ad8.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960810282-1.jpg",
             "width": 500
           }
         ]
@@ -1962,13 +1962,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775055476154",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd31faab2e8.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960810400-1.jpg",
             "width": 450
           },
           {
             "id": "sol-1775055493086",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd31fa74c9a.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960810400-2.jpg",
             "width": 450
           }
         ]
@@ -2035,13 +2035,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775055575151",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd31fab1fcd.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960811371-1.jpg",
             "width": 450
           },
           {
             "id": "sol-1775055583455",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd31fa95815.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774960811371-2.jpg",
             "width": 450
           }
         ]
@@ -2066,7 +2066,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775055607351",
             "type": "image",
-            "content": "/images/高中数学精编题库/导数/69cd31fa7c74a.webp",
+            "content": "/images/高中数学精编题库/导数/qb-1774964140406-1.jpg",
             "width": 500
           }
         ]
