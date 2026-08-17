@@ -93,15 +93,60 @@ let savedCount = 0;
 let replacedCount = 0;
 let appendedCount = 0;
 
+const IMG_KINDS = [
+  { key: 'solutionBlocks', field: 'images', idPrefix: 'sol-' },
+  { key: 'blocks', field: 'questionImages', idPrefix: 'blk-' },
+  { key: 'hintBlocks', field: 'hintImages', idPrefix: 'hint-' },
+];
+
+// 把一组新图片应用到指定数组：先按顺序替换缺失引用，多余的追加为新块
+function applyImagesToArray(seg, key, paths, idPrefix) {
+  const keyIdx = seg.indexOf(`"${key}"`);
+  if (keyIdx < 0) {
+    if (!paths.length) return { seg, replaced: 0, appended: 0 };
+    const blocks = paths
+      .map((p, i) => `{ "id": "${idPrefix}${i + 1}", "type": "image", "content": "${p}" }`)
+      .join(', ');
+    return { seg: seg.slice(0, -1) + `, "${key}": [ ${blocks} ] }`, replaced: 0, appended: paths.length };
+  }
+  const arrOpen = seg.indexOf('[', keyIdx);
+  const arrEnd = matchArrayEnd(seg, arrOpen);
+  const arrText = seg.slice(arrOpen, arrEnd + 1);
+  const refs = [...arrText.matchAll(/"type":\s*"image",\s*"content":\s*"([^"]+)"/g)].map((m) => m[1]);
+  const missing = refs.filter((r) => !fileExists(r));
+  let newArr = arrText;
+  let used = 0;
+  let replaced = 0;
+  for (let k = 0; k < missing.length && used < paths.length; k++, used++) {
+    newArr = newArr.replace(`"content": "${missing[k]}"`, `"content": "${paths[used]}"`);
+    replaced++;
+  }
+  const extra = [...new Set(paths.slice(used))].filter((p) => !arrText.includes(`"content": "${p}"`));
+  let appended = 0;
+  if (extra.length) {
+    const blocks = extra
+      .map((p, i) => `{ "id": "${idPrefix}${i + 1}", "type": "image", "content": "${p}" }`)
+      .join(', ');
+    if (/^\s*\[\s*\]\s*$/.test(arrText)) newArr = `[ ${blocks} ]`;
+    else newArr = newArr.replace(/(\]\s*)$/, `, ${blocks}$1`);
+    appended = extra.length;
+  }
+  return { seg: seg.slice(0, arrOpen) + newArr + seg.slice(arrEnd + 1), replaced, appended };
+}
+
 for (const e of edits) {
-  if (!e.images || !e.images.length) {
+  const hasAny = IMG_KINDS.some((k) => Array.isArray(e[k.field]) && e[k.field].length);
+  if (!hasAny) {
     // 编辑被清空：移除之前合并脚本追加的 xN 图片块（保留原有内容）
     const qStart0 = src.indexOf(`"id": "${e.qid}"`);
     if (qStart0 >= 0) {
       const objStart0 = src.lastIndexOf('{', qStart0);
       const objEnd0 = matchBrace(src, objStart0);
       const seg0 = src.slice(objStart0, objEnd0 + 1);
-      const xRe = new RegExp(`,\\s*\\{ "id": "sol-${e.qid}-x\\d+", "type": "image", "content": "[^"]+" \\}`, 'g');
+      const xRe = new RegExp(
+        `,\\s*\\{ "id": "(?:sol|blk|hint)-${e.qid}-x\\d+", "type": "image", "content": "[^"]+" \\}`,
+        'g'
+      );
       const removed0 = seg0.match(xRe);
       if (removed0) {
         src = src.slice(0, objStart0) + seg0.replace(xRe, '') + src.slice(objEnd0 + 1);
@@ -128,8 +173,7 @@ for (const e of edits) {
   const folderAbs = path.join(ROOT, 'public', dir.replace(/^\//, '').replace(/\//g, path.sep));
   fs.mkdirSync(folderAbs, { recursive: true });
 
-  // 1) 保存图片
-  // 去重：已存在于目录中的图片（内容相同）不再重复保存
+  // 保存图片（按内容去重；同一题的文件名统一递增编号）
   const existingFiles = fs.existsSync(folderAbs)
     ? fs.readdirSync(folderAbs).filter((f) => /\.(jpg|jpeg|png|webp)$/i.test(f))
     : [];
@@ -141,68 +185,37 @@ for (const e of edits) {
       // 忽略无法读取的文件
     }
   }
-  const paths = [];
-  for (let i = 0; i < e.images.length; i++) {
-    const img = e.images[i];
-    const b64 = img.dataUrl.slice(img.dataUrl.indexOf(',') + 1);
-    const buf = Buffer.from(b64, 'base64');
-    const h = md5(buf);
-    if (existingMd5.has(h)) {
-      paths.push(`${dir}/${existingMd5.get(h)}`);
-      continue;
-    }
-    const mime = (img.dataUrl.match(/^data:([^;]+);/) || [])[1] || 'image/jpeg';
-    const ext = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
-    const fname = `${e.qid}-${i + 1}.${ext}`;
-    fs.writeFileSync(path.join(folderAbs, fname), buf);
-    existingMd5.set(h, fname);
-    savedCount++;
-    paths.push(`${dir}/${fname}`);
-  }
+  let fileSeq = 0;
+  const saveList = (list) =>
+    list.map((img) => {
+      const b64 = img.dataUrl.slice(img.dataUrl.indexOf(',') + 1);
+      const buf = Buffer.from(b64, 'base64');
+      const h = md5(buf);
+      if (existingMd5.has(h)) return `${dir}/${existingMd5.get(h)}`;
+      const mime = (img.dataUrl.match(/^data:([^;]+);/) || [])[1] || 'image/jpeg';
+      const ext = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
+      const fname = `${e.qid}-${++fileSeq}.${ext}`;
+      fs.writeFileSync(path.join(folderAbs, fname), buf);
+      existingMd5.set(h, fname);
+      savedCount++;
+      return `${dir}/${fname}`;
+    });
 
   if (qStart < 0) {
     console.warn(`[跳过] 未在数据中找到题目 ${e.qid}（图片已保存）`);
     continue;
   }
 
-  const seg = src.slice(objStart, objEnd + 1);
-  const sbIdx = seg.indexOf('"solutionBlocks"');
-  let newSeg;
-  let used = 0;
-
-  if (sbIdx >= 0) {
-    const arrOpen = seg.indexOf('[', sbIdx);
-    const arrEnd = matchArrayEnd(seg, arrOpen);
-    const arrText = seg.slice(arrOpen, arrEnd + 1);
-    const refs = [...arrText.matchAll(/"type":\s*"image",\s*"content":\s*"([^"]+)"/g)].map((m) => m[1]);
-    const missing = refs.filter((r) => !fileExists(r));
-
-    // 2a) 按顺序替换缺失引用
-    let newArr = arrText;
-    for (let k = 0; k < missing.length && used < paths.length; k++, used++) {
-      newArr = newArr.replace(`"content": "${missing[k]}"`, `"content": "${paths[used]}"`);
-      replacedCount++;
-    }
-    // 2b) 多余的追加为新的 image 块（跳过已存在于数组中的路径）
-    const extra = [...new Set(paths.slice(used))].filter((p) => !arrText.includes(`"content": "${p}"`));
-    if (extra.length) {
-      const blocks = extra
-        .map((p, i) => `{ "id": "sol-${e.qid}-x${i + 1}", "type": "image", "content": "${p}" }`)
-        .join(', ');
-      if (/^\s*\[\s*\]\s*$/.test(arrText)) newArr = `[ ${blocks} ]`;
-      else newArr = newArr.replace(/(\]\s*)$/, `, ${blocks}$1`);
-      appendedCount += extra.length;
-    }
-    newSeg = seg.slice(0, arrOpen) + newArr + seg.slice(arrEnd + 1);
-  } else {
-    // 该题没有 solutionBlocks：补一个
-    const blocks = paths
-      .map((p, i) => `{ "id": "sol-${e.qid}-x${i + 1}", "type": "image", "content": "${p}" }`)
-      .join(', ');
-    newSeg = seg.slice(0, -1) + `, "solutionBlocks": [ ${blocks} ] }`;
-    appendedCount += paths.length;
+  let newSeg = src.slice(objStart, objEnd + 1);
+  for (const kind of IMG_KINDS) {
+    const list = Array.isArray(e[kind.field]) ? e[kind.field] : [];
+    if (!list.length) continue;
+    const paths = saveList(list);
+    const r = applyImagesToArray(newSeg, kind.key, paths, kind.idPrefix + e.qid + '-x');
+    newSeg = r.seg;
+    replacedCount += r.replaced;
+    appendedCount += r.appended;
   }
-
   src = src.slice(0, objStart) + newSeg + src.slice(objEnd + 1);
 }
 

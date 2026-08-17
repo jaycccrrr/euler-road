@@ -13,6 +13,8 @@ export interface FillEdit {
   qid: string;
   solutionText: string; // 解析文本（覆盖/补充）
   images: FillImage[];
+  questionImages?: FillImage[]; // 题目配图（blocks 中的图片）
+  hintImages?: FillImage[]; // 提示图（hintBlocks 中的图片）
   updatedAt: number;
 }
 

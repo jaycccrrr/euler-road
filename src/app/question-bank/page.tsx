@@ -57,6 +57,8 @@ interface QuizQuestion {
   choiceType: 'single' | 'multiple';
   explanation: string;
   solutionImageRefs: string[];
+  blockImageRefs: string[];
+  hintImageRefs: string[];
 }
 
 interface ChapterNode {
@@ -159,6 +161,12 @@ function convertStaticQuestion(q: StaticQuestion): QuizQuestion {
     choiceType: q.choiceType || 'single',
     explanation,
     solutionImageRefs: (q.solutionBlocks || [])
+      .filter((b) => b.type === 'image' && !!b.content)
+      .map((b) => b.content as string),
+    blockImageRefs: (q.blocks || [])
+      .filter((b) => b.type === 'image' && !!b.content)
+      .map((b) => b.content as string),
+    hintImageRefs: (q.hintBlocks || [])
       .filter((b) => b.type === 'image' && !!b.content)
       .map((b) => b.content as string),
   };
@@ -527,6 +535,8 @@ function QuestionItem({
   const [showExp, setShowExp] = useState(false);
   const [editText, setEditText] = useState(edit?.solutionText ?? '');
   const [images, setImages] = useState<FillImage[]>(edit?.images ?? []);
+  const [qImages, setQImages] = useState<FillImage[]>(edit?.questionImages ?? []);
+  const [hImages, setHImages] = useState<FillImage[]>(edit?.hintImages ?? []);
   const extraInputRef = useRef<HTMLInputElement>(null);
 
   const isCorrect = useMemo(() => {
@@ -556,6 +566,8 @@ function QuestionItem({
     if (!edit) return;
     setEditText(edit.solutionText ?? '');
     setImages(edit.images ?? []);
+    setQImages(edit.questionImages ?? []);
+    setHImages(edit.hintImages ?? []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [edit?.qid]);
 
@@ -564,6 +576,21 @@ function QuestionItem({
     const dataUrl = await readFileAsDataUrl(file);
     setImages((prev) => [...prev.filter((i) => i.ref !== ref), { ref, dataUrl, name: file.name }]);
   };
+
+  const uploadForBlockRef = async (ref: string, file?: File | null) => {
+    if (!file) return;
+    const dataUrl = await readFileAsDataUrl(file);
+    setQImages((prev) => [...prev.filter((i) => i.ref !== ref), { ref, dataUrl, name: file.name }]);
+  };
+
+  const uploadForHintRef = async (ref: string, file?: File | null) => {
+    if (!file) return;
+    const dataUrl = await readFileAsDataUrl(file);
+    setHImages((prev) => [...prev.filter((i) => i.ref !== ref), { ref, dataUrl, name: file.name }]);
+  };
+
+  const removeQImage = (ref: string) => setQImages((prev) => prev.filter((i) => i.ref !== ref));
+  const removeHImage = (ref: string) => setHImages((prev) => prev.filter((i) => i.ref !== ref));
 
   const addExtraImage = async (file?: File | null) => {
     if (!file) return;
@@ -583,6 +610,8 @@ function QuestionItem({
       qid: question.id,
       solutionText: editText.trim(),
       images,
+      questionImages: qImages,
+      hintImages: hImages,
       updatedAt: Date.now(),
     });
   };
@@ -591,7 +620,58 @@ function QuestionItem({
     onDeleteEdit?.(question.id);
     setEditText('');
     setImages([]);
+    setQImages([]);
+    setHImages([]);
   };
+
+  const renderRefSlots = (
+    refs: string[],
+    list: FillImage[],
+    onUpload: (ref: string, file?: File | null) => void,
+    onRemove: (ref: string) => void
+  ) =>
+    refs.map((ref) => {
+      const img = list.find((i) => i.ref === ref);
+      return (
+        <div key={ref} className="flex items-center gap-2 text-xs">
+          <code className="text-[11px] text-amber-800 bg-amber-100/70 px-1.5 py-0.5 rounded break-all">
+            {ref}
+          </code>
+          <label className="cursor-pointer inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 shrink-0">
+            <Upload className="w-3 h-3" />
+            上传图片
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                void onUpload(ref, e.target.files?.[0]);
+                e.target.value = '';
+              }}
+            />
+          </label>
+          {img ? (
+            <>
+              <img
+                src={img.dataUrl}
+                alt="预览"
+                className="h-10 w-10 object-cover rounded border border-amber-200"
+              />
+              <button
+                type="button"
+                className="text-amber-700 hover:text-rose-600"
+                onClick={() => onRemove(ref)}
+                title="移除该图"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </>
+          ) : (
+            <span className="text-amber-600/70">未上传</span>
+          )}
+        </div>
+      );
+    });
 
   const toggleOption = (idx: number) => {
     if (submitted) return;
@@ -781,6 +861,22 @@ function QuestionItem({
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          )}
+          {question.blockImageRefs.length > 0 && (
+            <div>
+              <div className="text-xs font-medium text-amber-800 mb-1">题目配图（题目中的图）</div>
+              <div className="space-y-1.5">
+                {renderRefSlots(question.blockImageRefs, qImages, uploadForBlockRef, removeQImage)}
+              </div>
+            </div>
+          )}
+          {question.hintImageRefs.length > 0 && (
+            <div>
+              <div className="text-xs font-medium text-amber-800 mb-1">提示图（当前界面不显示，可后补）</div>
+              <div className="space-y-1.5">
+                {renderRefSlots(question.hintImageRefs, hImages, uploadForHintRef, removeHImage)}
               </div>
             </div>
           )}
