@@ -821,15 +821,6 @@ function QuestionItem({
         </div>
       )}
       <div className="mb-3 flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="rounded-lg border-slate-200 text-xs"
-          onClick={() => setShowExp((v) => !v)}
-        >
-          {showExp ? <EyeOff className="w-3.5 h-3.5 mr-1" /> : <Eye className="w-3.5 h-3.5 mr-1" />}
-          {showExp ? '收起解析' : '查看解析'}
-        </Button>
         {question.hint.trim() && (
           <Button
             variant="outline"
@@ -841,16 +832,16 @@ function QuestionItem({
             {showHint ? '收起提示' : '查看提示'}
           </Button>
         )}
+        <Button
+          variant="outline"
+          size="sm"
+          className="rounded-lg border-slate-200 text-xs"
+          onClick={() => setShowExp((v) => !v)}
+        >
+          {showExp ? <EyeOff className="w-3.5 h-3.5 mr-1" /> : <Eye className="w-3.5 h-3.5 mr-1" />}
+          {showExp ? '收起解析' : '查看解析'}
+        </Button>
       </div>
-      {showExp && (
-        <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-100 text-sm md:text-base text-slate-700 leading-relaxed">
-          <div className="flex items-center gap-2 mb-2 text-blue-700 font-medium">
-            <Lightbulb className="w-4 h-4" />
-            解析
-          </div>
-          <MathRenderer>{displayExplanation || '暂无解析'}</MathRenderer>
-        </div>
-      )}
       {showHint && (
         <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-100 text-sm md:text-base text-slate-700 leading-relaxed">
           <div className="flex items-center gap-2 mb-2 text-emerald-700 font-medium">
@@ -858,6 +849,15 @@ function QuestionItem({
             提示
           </div>
           <MathRenderer>{question.hint}</MathRenderer>
+        </div>
+      )}
+      {showExp && (
+        <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-100 text-sm md:text-base text-slate-700 leading-relaxed">
+          <div className="flex items-center gap-2 mb-2 text-blue-700 font-medium">
+            <Lightbulb className="w-4 h-4" />
+            解析
+          </div>
+          <MathRenderer>{displayExplanation || '暂无解析'}</MathRenderer>
         </div>
       )}
       {editMode && (
