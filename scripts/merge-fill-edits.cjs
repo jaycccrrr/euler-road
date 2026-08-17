@@ -62,8 +62,33 @@ function md5(buf) {
   return crypto.createHash('md5').update(buf).digest('hex');
 }
 
+function extractArray(src, marker) {
+  const i = src.indexOf(marker);
+  if (i < 0) return null;
+  const start = i + marker.length - 1;
+  let depth = 0, inStr = false, end = -1;
+  for (let k = start; k < src.length; k++) {
+    const c = src[k];
+    if (inStr) { if (c === '\\') { k++; continue; } if (c === '"') inStr = false; continue; }
+    if (c === '"') { inStr = true; continue; }
+    if (c === '[') depth++;
+    else if (c === ']') { depth--; if (depth === 0) { end = k + 1; break; } }
+  }
+  if (end < 0) return null;
+  try { return JSON.parse(src.slice(start, end)); } catch { return null; }
+}
+
 const edits = JSON.parse(fs.readFileSync(input, 'utf8')).edits;
 let src = fs.readFileSync(DATA, 'utf8');
+
+// 题目 → 章节名映射（文本解析题可能没有 /images/ 引用，需要用它推断目录）
+const qb = extractArray(src, 'staticQuestionBankChapters: StaticQuestionBankChapter[] = [');
+const qidToChapter = new Map();
+if (qb) {
+  for (const ch of qb) {
+    for (const q of ch.questions) qidToChapter.set(q.id, ch.title);
+  }
+}
 let savedCount = 0;
 let replacedCount = 0;
 let appendedCount = 0;
@@ -86,7 +111,7 @@ for (const e of edits) {
     continue;
   }
 
-  // 目录：优先取该题现有缺失图片引用的目录，否则用命令行章节名
+  // 目录：优先取该题现有 /images/ 引用目录，其次题目所属章节，最后命令行章节名
   let dir = `/images/高中数学精编题库/${chapter}`;
   let qStart = src.indexOf(`"id": "${e.qid}"`);
   let objStart = -1;
@@ -97,6 +122,7 @@ for (const e of edits) {
     const seg0 = src.slice(objStart, objEnd + 1);
     const m = seg0.match(/\/images\/高中数学精编题库\/[^/"\s)]+/);
     if (m) dir = m[0];
+    else if (qidToChapter.has(e.qid)) dir = `/images/高中数学精编题库/${qidToChapter.get(e.qid)}`;
   }
 
   const folderAbs = path.join(ROOT, 'public', dir.replace(/^\//, '').replace(/\//g, path.sep));

@@ -415,7 +415,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775012170144",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc88d31c321.webp",
+            "content": "/images/高中数学精编题库/函数/微信图片_20260401105252_348_2.jpg",
             "width": 900
           }
         ]
@@ -594,7 +594,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775017582742",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc9e07ede79.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774948098574-1.jpg",
             "width": 500
           }
         ]
@@ -631,13 +631,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775015693855",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc969b4d097.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774948098842-1.jpg",
             "width": 500
           },
           {
             "id": "sol-1775015697875",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc969bd4e23.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774948098842-2.jpg",
             "width": 500
           }
         ]
@@ -674,7 +674,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775017792503",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc9ee06b79b.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774948099058-1.jpg",
             "width": 500
           }
         ]
@@ -708,7 +708,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775018036073",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc9fd6a14d1.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774948491263-1.jpg",
             "width": 700
           }
         ]
@@ -735,13 +735,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775018065968",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc9fd5ed025.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774948491479-1.jpg",
             "width": 600
           },
           {
             "id": "sol-1775018071772",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc9fd6e020c.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774948491479-2.jpg",
             "width": 600
           }
         ]
@@ -817,7 +817,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775018490790",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cca190e5dd1.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774948492206-1.jpg",
             "width": 500
           }
         ]
@@ -880,7 +880,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775018536423",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cca1910c5eb.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774948494073-1.jpg",
             "width": 600
           }
         ]
@@ -946,7 +946,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
             "type": "text",
             "content": "### 解题过程\n\n已知实数$x,y$满足：\n$$\nx^2 - 4xy + y^2 = 6\n$$\n\n---\n\n#### 分析选项A、B：$|x-y|$的范围\n先计算$(x-y)^2$：\n$$\n(x-y)^2 = x^2 - 2xy + y^2\n$$\n由已知条件变形得：\n$$\nx^2 + y^2 = 6 + 4xy\n$$\n代入$(x-y)^2$：\n$$\n(x-y)^2 = (6 + 4xy) - 2xy = 6 + 2xy\n$$\n\n利用基本不等式$x^2 + y^2 \\ge 2|xy|$，代入$x^2 + y^2 = 6 + 4xy$：\n- 当$xy \\ge 0$时，$6 + 4xy \\ge 2xy \\implies xy \\ge -3$；\n- 当$xy < 0$时，$6 + 4xy \\ge -2xy \\implies xy \\ge -1$。\n\n综合得$xy \\ge -1$，代入$(x-y)^2$：\n$$\n(x-y)^2 \\ge 6 + 2(-1) = 4\n$$\n因此$|x-y| \\ge 2$，**选项A正确，B错误**。\n\n---\n\n#### 分析选项C、D：$x^2+y^2$的范围\n由$x^2 + y^2 = 6 + 4xy$，结合$x^2 + y^2 \\ge -2xy$（由$(x+y)^2 \\ge 0$推导）：\n$$\n6 + 4xy \\ge -2xy \\implies xy \\ge -1\n$$\n\n使用三角换元：令$x = r\\cos\\theta$，$y = r\\sin\\theta$，代入原式：\n$$\nr^2(\\cos^2\\theta - 4\\cos\\theta\\sin\\theta + \\sin^2\\theta) = 6\n$$\n化简得：\n$$\nr^2(1 - 2\\sin2\\theta) = 6 \\implies r^2 = \\frac{6}{1 - 2\\sin2\\theta}\n$$\n\n因为$\\sin2\\theta \\in [-1,1]$，所以$1 - 2\\sin2\\theta \\in (0,3]$，于是：\n$$\nr^2 \\ge \\frac{6}{3} = 2\n$$\n即$x^2 + y^2 \\ge 2$，**选项C正确**。\n\n当$1 - 2\\sin2\\theta \\to 0^+$时，$r^2 \\to +\\infty$，故$x^2 + y^2$无上界，**选项D错误**。\n\n---\n\n✅ **正确选项：A、C**"
           }
-        ]
+        , { "id": "sol-qb-1774937920358-x1", "type": "image", "content": "/images/高中数学精编题库/不等式/qb-1774937920358-1.jpg" }]
       },
       {
         "id": "qb-1774949105888",
@@ -970,7 +970,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775020547767",
             "type": "image",
-            "content": "/images/高中数学精编题库/不等式/69cca79bc9f0f.webp",
+            "content": "/images/高中数学精编题库/不等式/qb-1774949105888-1.jpg",
             "width": 500
           }
         ]
@@ -1038,7 +1038,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775020903181",
             "type": "image",
-            "content": "/images/高中数学精编题库/不等式/69ccaaef14adf.webp",
+            "content": "/images/高中数学精编题库/不等式/qb-1774949346273-1.jpg",
             "width": 500
           }
         ]
@@ -2104,7 +2104,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775055925305",
             "type": "image",
-            "content": "/images/高中数学精编题库/复数/69cd33c391910.webp",
+            "content": "/images/高中数学精编题库/复数/qb-1774964232719-1.jpg",
             "width": 500
           }
         ]
@@ -2148,13 +2148,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775055934382",
             "type": "image",
-            "content": "/images/高中数学精编题库/立体几何/69cd33c35cb8f.webp",
+            "content": "/images/高中数学精编题库/立体几何/qb-1774964291381-1.jpg",
             "width": 500
           },
           {
             "id": "sol-1775055951570",
             "type": "image",
-            "content": "/images/高中数学精编题库/立体几何/69cd33c384761.webp",
+            "content": "/images/高中数学精编题库/立体几何/qb-1774964291381-2.jpg",
             "width": 500
           }
         ]
@@ -2184,7 +2184,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775055968840",
             "type": "image",
-            "content": "/images/高中数学精编题库/立体几何/69cd33c3aafc7.webp",
+            "content": "/images/高中数学精编题库/立体几何/qb-1774964348977-1.jpg",
             "width": 500
           }
         ]
@@ -2221,7 +2221,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775056086942",
             "type": "image",
-            "content": "/images/高中数学精编题库/立体几何/69cd3423e90f9.webp",
+            "content": "/images/高中数学精编题库/立体几何/qb-1774964349341-1.jpg",
             "width": 500
           }
         ]
@@ -2248,13 +2248,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775056102326",
             "type": "image",
-            "content": "/images/高中数学精编题库/立体几何/69cd3423a99eb.webp",
+            "content": "/images/高中数学精编题库/立体几何/qb-1774964349636-1.jpg",
             "width": 600
           },
           {
             "id": "sol-1775056112779",
             "type": "image",
-            "content": "/images/高中数学精编题库/立体几何/69cd342340a61.webp",
+            "content": "/images/高中数学精编题库/立体几何/qb-1774964349636-2.jpg",
             "width": 600
           }
         ]
@@ -2285,7 +2285,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775056122555",
             "type": "image",
-            "content": "/images/高中数学精编题库/立体几何/69cd34238ec1f.webp",
+            "content": "/images/高中数学精编题库/立体几何/qb-1774964349855-1.jpg",
             "width": 500
           }
         ]
@@ -2337,7 +2337,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775056852810",
             "type": "image",
-            "content": "/images/高中数学精编题库/排列组合/69cd376c21a2f.webp",
+            "content": "/images/高中数学精编题库/排列组合/qb-1774964663545-1.jpg",
             "width": 500
           }
         ]
@@ -2356,7 +2356,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775056865396",
             "type": "image",
-            "content": "/images/高中数学精编题库/排列组合/69cd376c82f3b.webp",
+            "content": "/images/高中数学精编题库/排列组合/qb-1774964663863-1.jpg",
             "width": 500
           }
         ]
@@ -2393,13 +2393,13 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775056884102",
             "type": "image",
-            "content": "/images/高中数学精编题库/排列组合/69cd376c428ae.webp",
+            "content": "/images/高中数学精编题库/排列组合/qb-1774964664152-1.jpg",
             "width": 500
           },
           {
             "id": "sol-1775056888231",
             "type": "image",
-            "content": "/images/高中数学精编题库/排列组合/69cd376bafc11.webp",
+            "content": "/images/高中数学精编题库/排列组合/qb-1774964664152-2.jpg",
             "width": 500
           }
         ]
@@ -2429,7 +2429,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
             "width": 500
           }
         ],
-        "solutionBlocks": []
+        "solutionBlocks": [ { "id": "sol-qb-1774964664411-x1", "type": "image", "content": "/images/高中数学精编题库/排列组合/qb-1774964664411-1.jpg" } ]
       }
     ]
   },
@@ -2460,7 +2460,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775057169804",
             "type": "image",
-            "content": "/images/高中数学精编题库/数列/69cd3898e5d92.webp",
+            "content": "/images/高中数学精编题库/数列/qb-1774964963572-1.jpg",
             "width": 500
           }
         ]
@@ -2479,7 +2479,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775057188153",
             "type": "image",
-            "content": "/images/高中数学精编题库/数列/69cd3897f21c4.webp",
+            "content": "/images/高中数学精编题库/数列/qb-1774964963869-1.jpg",
             "width": 450
           }
         ]
@@ -2506,7 +2506,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775057202408",
             "type": "image",
-            "content": "/images/高中数学精编题库/数列/69cd3898aa709.webp",
+            "content": "/images/高中数学精编题库/数列/qb-1774964964170-1.jpg",
             "width": 450
           }
         ]
@@ -2531,19 +2531,19 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775057220615",
             "type": "image",
-            "content": "/images/高中数学精编题库/数列/69cd38995c214.webp",
+            "content": "/images/高中数学精编题库/数列/qb-1774964964494-1.jpg",
             "width": 600
           },
           {
             "id": "sol-1775057226250",
             "type": "image",
-            "content": "/images/高中数学精编题库/数列/69cd3899b6c78.webp",
+            "content": "/images/高中数学精编题库/数列/qb-1774964964494-2.jpg",
             "width": 600
           },
           {
             "id": "sol-1775057256886",
             "type": "image",
-            "content": "/images/高中数学精编题库/数列/69cd39049dc78.webp",
+            "content": "/images/高中数学精编题库/数列/qb-1774964964494-3.jpg",
             "width": 600
           }
         ]
@@ -2576,7 +2576,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775057266723",
             "type": "image",
-            "content": "/images/高中数学精编题库/数列/69cd390461aab.webp",
+            "content": "/images/高中数学精编题库/数列/qb-1774964964743-1.jpg",
             "width": 500
           }
         ]
