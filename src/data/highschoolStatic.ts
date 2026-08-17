@@ -444,7 +444,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "hint-1775014102864",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc90710c671.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774947285358-h1.jpg",
             "width": 400,
             "height": 300
           }
@@ -504,7 +504,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "hint-1775013878761",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc88d396352.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774948097025-h1.jpg",
             "width": 900,
             "height": 300
           }
@@ -585,7 +585,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "hint-1775015075152",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc88d39d662.webp",
+            "content": "/images/高中数学精编题库/函数/微信图片_20260401105256_352_2.jpg",
             "width": 900,
             "height": 300
           }
@@ -700,7 +700,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "hint-1775015109116",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc9439308bb.webp",
+            "content": "/images/高中数学精编题库/函数/微信图片_20260401105302_354_2.jpg",
             "width": 500
           }
         ],
@@ -785,7 +785,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "hint-1775015143742",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc9438991f5.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774948492032-h1.jpg",
             "width": 600
           },
           {
@@ -809,7 +809,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "hint-1775015265743",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cc94382f188.webp",
+            "content": "/images/高中数学精编题库/函数/微信图片_20260401105303_355_2.jpg",
             "width": 600
           }
         ],
@@ -907,7 +907,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "sol-1775018634317",
             "type": "image",
-            "content": "/images/高中数学精编题库/函数/69cca1911e132.webp",
+            "content": "/images/高中数学精编题库/函数/qb-1774948494269-1.jpg",
             "width": 500
           }
         ]
@@ -1520,7 +1520,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "hint-1775052494764",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69cd2621c4829.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949748413-h1.jpg",
             "width": 300
           }
         ],
@@ -2127,7 +2127,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "block-1775055939346",
             "type": "image",
-            "content": "/images/高中数学精编题库/立体几何/69cd33c1d015c.webp",
+            "content": "/images/高中数学精编题库/立体几何/qb-1774964291381-b1.jpg",
             "width": 400
           }
         ],
@@ -2200,7 +2200,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "block-1775056075440",
             "type": "image",
-            "content": "/images/高中数学精编题库/立体几何/69cd3421af35b.webp",
+            "content": "/images/高中数学精编题库/立体几何/qb-1774964349341-b1.jpg",
             "width": 400
           }
         ],
@@ -2277,7 +2277,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "hint-1775056686272",
             "type": "image",
-            "content": "/images/高中数学精编题库/立体几何/69cd36c9a6005.webp",
+            "content": "/images/高中数学精编题库/立体几何/qb-1774964349855-h1.jpg",
             "width": 250
           }
         ],

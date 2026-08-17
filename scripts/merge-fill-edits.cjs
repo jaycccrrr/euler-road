@@ -94,9 +94,9 @@ let replacedCount = 0;
 let appendedCount = 0;
 
 const IMG_KINDS = [
-  { key: 'solutionBlocks', field: 'images', idPrefix: 'sol-' },
-  { key: 'blocks', field: 'questionImages', idPrefix: 'blk-' },
-  { key: 'hintBlocks', field: 'hintImages', idPrefix: 'hint-' },
+  { key: 'solutionBlocks', field: 'images', idPrefix: 'sol-', suffix: '' },
+  { key: 'blocks', field: 'questionImages', idPrefix: 'blk-', suffix: 'b' },
+  { key: 'hintBlocks', field: 'hintImages', idPrefix: 'hint-', suffix: 'h' },
 ];
 
 // 把一组新图片应用到指定数组：先按顺序替换缺失引用，多余的追加为新块
@@ -135,7 +135,11 @@ function applyImagesToArray(seg, key, paths, idPrefix) {
 }
 
 for (const e of edits) {
-  const hasAny = IMG_KINDS.some((k) => Array.isArray(e[k.field]) && e[k.field].length);
+  const hasAny = IMG_KINDS.some((k) =>
+    (Array.isArray(e[k.field]) ? e[k.field] : []).some(
+      (img) => img && img.dataUrl && img.dataUrl.length > 10
+    )
+  );
   if (!hasAny) {
     // 编辑被清空：移除之前合并脚本追加的 xN 图片块（保留原有内容）
     const qStart0 = src.indexOf(`"id": "${e.qid}"`);
@@ -186,7 +190,7 @@ for (const e of edits) {
     }
   }
   let fileSeq = 0;
-  const saveList = (list) =>
+  const saveList = (list, suffix) =>
     list.map((img) => {
       const b64 = img.dataUrl.slice(img.dataUrl.indexOf(',') + 1);
       const buf = Buffer.from(b64, 'base64');
@@ -194,7 +198,7 @@ for (const e of edits) {
       if (existingMd5.has(h)) return `${dir}/${existingMd5.get(h)}`;
       const mime = (img.dataUrl.match(/^data:([^;]+);/) || [])[1] || 'image/jpeg';
       const ext = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
-      const fname = `${e.qid}-${++fileSeq}.${ext}`;
+      const fname = `${e.qid}-${suffix}${++fileSeq}.${ext}`;
       fs.writeFileSync(path.join(folderAbs, fname), buf);
       existingMd5.set(h, fname);
       savedCount++;
@@ -208,9 +212,12 @@ for (const e of edits) {
 
   let newSeg = src.slice(objStart, objEnd + 1);
   for (const kind of IMG_KINDS) {
-    const list = Array.isArray(e[kind.field]) ? e[kind.field] : [];
+    // 过滤编辑区保存的空占位条目（ref/dataUrl 为空）
+    const list = (Array.isArray(e[kind.field]) ? e[kind.field] : []).filter(
+      (img) => img && img.dataUrl && img.dataUrl.length > 10 && img.dataUrl.startsWith('data:')
+    );
     if (!list.length) continue;
-    const paths = saveList(list);
+    const paths = saveList(list, kind.suffix);
     const r = applyImagesToArray(newSeg, kind.key, paths, kind.idPrefix + e.qid + '-x');
     newSeg = r.seg;
     replacedCount += r.replaced;
