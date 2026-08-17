@@ -602,17 +602,19 @@ function QuestionItem({
               回答错误
             </div>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-lg border-slate-200 text-xs"
-            onClick={() => setShowExp((v) => !v)}
-          >
-            {showExp ? <EyeOff className="w-3.5 h-3.5 mr-1" /> : <Eye className="w-3.5 h-3.5 mr-1" />}
-            {showExp ? '收起解析' : '查看解析'}
-          </Button>
         </div>
       )}
+      <div className="mb-3">
+        <Button
+          variant="outline"
+          size="sm"
+          className="rounded-lg border-slate-200 text-xs"
+          onClick={() => setShowExp((v) => !v)}
+        >
+          {showExp ? <EyeOff className="w-3.5 h-3.5 mr-1" /> : <Eye className="w-3.5 h-3.5 mr-1" />}
+          {showExp ? '收起解析' : '查看解析'}
+        </Button>
+      </div>
       {showExp && (
         <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-100 text-sm md:text-base text-slate-700 leading-relaxed">
           <div className="flex items-center gap-2 mb-2 text-blue-700 font-medium">
