@@ -56,6 +56,7 @@ interface QuizQuestion {
   correctOption: number | number[];
   choiceType: 'single' | 'multiple';
   explanation: string;
+  hint: string;
   solutionImageRefs: string[];
   blockImageRefs: string[];
   hintImageRefs: string[];
@@ -160,6 +161,7 @@ function convertStaticQuestion(q: StaticQuestion): QuizQuestion {
     correctOption: correct,
     choiceType: q.choiceType || 'single',
     explanation,
+    hint: blocksToHtml(q.hintBlocks || []),
     solutionImageRefs: (q.solutionBlocks || [])
       .filter((b) => b.type === 'image' && !!b.content)
       .map((b) => b.content as string),
@@ -563,6 +565,7 @@ function QuestionItem({
   const [selected, setSelected] = useState<number[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [showExp, setShowExp] = useState(false);
+  const [showHint, setShowHint] = useState(false);
   const [editText, setEditText] = useState(edit?.solutionText ?? '');
   const [images, setImages] = useState<FillImage[]>(edit?.images ?? []);
   const [qImages, setQImages] = useState<FillImage[]>(edit?.questionImages ?? []);
@@ -817,7 +820,7 @@ function QuestionItem({
           )}
         </div>
       )}
-      <div className="mb-3">
+      <div className="mb-3 flex flex-wrap gap-2">
         <Button
           variant="outline"
           size="sm"
@@ -827,6 +830,17 @@ function QuestionItem({
           {showExp ? <EyeOff className="w-3.5 h-3.5 mr-1" /> : <Eye className="w-3.5 h-3.5 mr-1" />}
           {showExp ? '收起解析' : '查看解析'}
         </Button>
+        {question.hint.trim() && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-lg border-slate-200 text-xs"
+            onClick={() => setShowHint((v) => !v)}
+          >
+            {showHint ? <EyeOff className="w-3.5 h-3.5 mr-1" /> : <Lightbulb className="w-3.5 h-3.5 mr-1" />}
+            {showHint ? '收起提示' : '查看提示'}
+          </Button>
+        )}
       </div>
       {showExp && (
         <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-100 text-sm md:text-base text-slate-700 leading-relaxed">
@@ -835,6 +849,15 @@ function QuestionItem({
             解析
           </div>
           <MathRenderer>{displayExplanation || '暂无解析'}</MathRenderer>
+        </div>
+      )}
+      {showHint && (
+        <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-100 text-sm md:text-base text-slate-700 leading-relaxed">
+          <div className="flex items-center gap-2 mb-2 text-emerald-700 font-medium">
+            <Lightbulb className="w-4 h-4" />
+            提示
+          </div>
+          <MathRenderer>{question.hint}</MathRenderer>
         </div>
       )}
       {editMode && (
