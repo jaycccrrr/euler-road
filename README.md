@@ -41,11 +41,26 @@ npm run build
 
 ## 部署
 
-推送 `main` 分支后，GitHub Actions 会自动构建并部署到 GitHub Pages：
+### 方式一：Vercel（推荐，支持后端 API）
 
-[部署工作流](.github/workflows/deploy.yml)
+1. 在 [Vercel](https://vercel.com) 导入本仓库（Framework 选 Next.js）
+2. 在 Vercel 项目 Settings → Environment Variables 配置：
 
-在线地址：[https://jaycccrrr.github.io/euler-road/](https://jaycccrrr.github.io/euler-road/)
+| 变量 | 说明 |
+|---|---|
+| `DATABASE_URL` | Supabase Postgres 连接串（Project Settings → Database） |
+| `JWT_SECRET` | 至少 32 位随机字符串，用于 API 认证 |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 项目地址（可选，用于客户端直连） |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key（可选） |
+
+3. 数据库初始化：在本地或 Vercel 构建环境中执行 `npx prisma migrate deploy`（首次 `prisma db push`）
+4. 推送 `main` 分支即自动部署
+
+### 方式二：GitHub Pages（纯静态，无后端）
+
+如需回到静态导出，取消 [next.config.ts](next.config.ts) 中 `output: 'export'` 的注释，并恢复 Pages 部署工作流。
+
+> 在线地址（静态版）：[https://jaycccrrr.github.io/euler-road/](https://jaycccrrr.github.io/euler-road/)
 
 ## 数据存储说明
 

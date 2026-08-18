@@ -6,10 +6,10 @@ const isGithubPages = process.env.GITHUB_PAGES === "true";
 const basePath = isGithubPages ? "/euler-road" : "";
 
 const nextConfig: NextConfig = {
-  // 静态导出配置（用于 GitHub Pages 等无服务器环境）
-  // 若要启用 Vercel SSR / 图片优化 / API Routes，请注释掉下面两行
-  output: 'export',
-  distDir: 'dist5',
+  // 后端模式：启用 SSR / API Routes（部署到 Vercel）
+  // 如需回到 GitHub Pages 静态导出，再取消下面两行注释
+  // output: 'export',
+  // distDir: 'dist5',
 
   basePath,
   // 供客户端代码拼接 public 下的静态资源路径（<img src> 等不走 Next 前缀的场景）
