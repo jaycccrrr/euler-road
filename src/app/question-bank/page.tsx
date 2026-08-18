@@ -1,23 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import { useState, useEffect, useMemo, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
 import { MathRenderer } from '@/components/math/MathRenderer';
 import { assetPath } from '@/lib/asset';
-import {
-  loadAllEdits,
-  saveFillEdit,
-  deleteFillEdit,
-  downloadFillEdits,
-  type FillEdit,
-  type FillImage,
-} from '@/lib/fill-edits';
-import { useMissingRefs } from '@/lib/useMissingRefs';
 import { staticQuestionBankChapters } from '@/data/highschoolStatic';
 import { advancedMathExerciseChapters, getGroupedChapters } from '@/data/advancedMathExerciseData';
 import { linearAlgebraExerciseChapters } from '@/data/linearAlgebraExerciseData';
@@ -42,11 +32,6 @@ import {
   List,
   X,
   Sparkles,
-  Pencil,
-  Save,
-  Trash2,
-  Download,
-  Upload,
 } from 'lucide-react';
 
 // ── Unified Question Type ──
@@ -58,9 +43,6 @@ interface QuizQuestion {
   choiceType: 'single' | 'multiple';
   explanation: string;
   hint: string;
-  solutionImageRefs: string[];
-  blockImageRefs: string[];
-  hintImageRefs: string[];
 }
 
 interface ChapterNode {
@@ -163,15 +145,6 @@ function convertStaticQuestion(q: StaticQuestion): QuizQuestion {
     choiceType: q.choiceType || 'single',
     explanation,
     hint: blocksToHtml(q.hintBlocks || []),
-    solutionImageRefs: (q.solutionBlocks || [])
-      .filter((b) => b.type === 'image' && !!b.content)
-      .map((b) => b.content as string),
-    blockImageRefs: (q.blocks || [])
-      .filter((b) => b.type === 'image' && !!b.content)
-      .map((b) => b.content as string),
-    hintImageRefs: (q.hintBlocks || [])
-      .filter((b) => b.type === 'image' && !!b.content)
-      .map((b) => b.content as string),
   };
 }
 
@@ -507,47 +480,19 @@ function BankHome({
 }
 
 // ── Single Question Item ──
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
-
 function QuestionItem({
   question,
   index,
   onAnswered,
-  editMode,
-  edit,
-  onSaveEdit,
-  onDeleteEdit,
 }: {
   question: QuizQuestion;
   index: number;
   onAnswered?: (questionId: string) => void;
-  editMode: boolean;
-  edit?: FillEdit;
-  onSaveEdit?: (edit: FillEdit) => void;
-  onDeleteEdit?: (qid: string) => void;
 }) {
   const [selected, setSelected] = useState<number[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [showExp, setShowExp] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [editText, setEditText] = useState(edit?.solutionText ?? '');
-  const [images, setImages] = useState<FillImage[]>(edit?.images ?? []);
-  const [qImages, setQImages] = useState<FillImage[]>(edit?.questionImages ?? []);
-  const [hImages, setHImages] = useState<FillImage[]>(edit?.hintImages ?? []);
-  const extraInputRef = useRef<HTMLInputElement>(null);
-  const solMissingMap = useMissingRefs(question.solutionImageRefs);
-  const blkMissingMap = useMissingRefs(question.blockImageRefs);
-  const hintMissingMap = useMissingRefs(question.hintImageRefs);
-  const solMissCount = question.solutionImageRefs.filter((r) => solMissingMap[r] === true).length;
-  const blkMissCount = question.blockImageRefs.filter((r) => blkMissingMap[r] === true).length;
-  const hintMissCount = question.hintImageRefs.filter((r) => hintMissingMap[r] === true).length;
 
   const isCorrect = useMemo(() => {
     if (!submitted) return null;
@@ -558,135 +503,6 @@ function QuestionItem({
     const cor = correct.sort((a, b) => a - b);
     return sel.length === cor.length && sel.every((v, i) => v === cor[i]);
   }, [submitted, selected, question.correctOption]);
-
-  // 编辑模式：把已保存的文本/图片合并到解析显示中
-  const displayExplanation = useMemo(() => {
-    if (!editMode || !edit) return question.explanation;
-    const parts: string[] = [];
-    if (question.explanation) parts.push(question.explanation);
-    if (edit.solutionText.trim()) parts.push(edit.solutionText.trim());
-    for (const img of edit.images) {
-      parts.push(`<img src="${img.dataUrl}" alt="编辑图片" class="max-w-full rounded-lg my-2" />`);
-    }
-    return parts.join('\n\n');
-  }, [question.explanation, edit, editMode]);
-
-  // edit 异步加载完成后同步到本地输入框
-  useEffect(() => {
-    if (!edit) return;
-    setEditText(edit.solutionText ?? '');
-    setImages(edit.images ?? []);
-    setQImages(edit.questionImages ?? []);
-    setHImages(edit.hintImages ?? []);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [edit?.qid]);
-
-  const uploadForRef = async (ref: string, file?: File | null) => {
-    if (!file) return;
-    const dataUrl = await readFileAsDataUrl(file);
-    setImages((prev) => [...prev.filter((i) => i.ref !== ref), { ref, dataUrl, name: file.name }]);
-  };
-
-  const uploadForBlockRef = async (ref: string, file?: File | null) => {
-    if (!file) return;
-    const dataUrl = await readFileAsDataUrl(file);
-    setQImages((prev) => [...prev.filter((i) => i.ref !== ref), { ref, dataUrl, name: file.name }]);
-  };
-
-  const uploadForHintRef = async (ref: string, file?: File | null) => {
-    if (!file) return;
-    const dataUrl = await readFileAsDataUrl(file);
-    setHImages((prev) => [...prev.filter((i) => i.ref !== ref), { ref, dataUrl, name: file.name }]);
-  };
-
-  const removeQImage = (ref: string) => setQImages((prev) => prev.filter((i) => i.ref !== ref));
-  const removeHImage = (ref: string) => setHImages((prev) => prev.filter((i) => i.ref !== ref));
-
-  const addExtraImage = async (file?: File | null) => {
-    if (!file) return;
-    const dataUrl = await readFileAsDataUrl(file);
-    setImages((prev) => [
-      ...prev,
-      { ref: `custom-${question.id}-${Date.now()}`, dataUrl, name: file.name },
-    ]);
-  };
-
-  const removeImage = (ref: string) => {
-    setImages((prev) => prev.filter((i) => i.ref !== ref));
-  };
-
-  const handleSaveEdit = () => {
-    onSaveEdit?.({
-      qid: question.id,
-      solutionText: editText.trim(),
-      images,
-      questionImages: qImages,
-      hintImages: hImages,
-      updatedAt: Date.now(),
-    });
-  };
-
-  const handleDeleteEdit = () => {
-    onDeleteEdit?.(question.id);
-    setEditText('');
-    setImages([]);
-    setQImages([]);
-    setHImages([]);
-  };
-
-  const renderRefSlots = (
-    refs: string[],
-    list: FillImage[],
-    missingMap: Record<string, boolean>,
-    onUpload: (ref: string, file?: File | null) => void,
-    onRemove: (ref: string) => void
-  ) =>
-    refs.map((ref) => {
-      const img = list.find((i) => i.ref === ref);
-      return (
-        <div key={ref} className="flex items-center gap-2 text-xs">
-          <code className="text-[11px] text-amber-800 bg-amber-100/70 px-1.5 py-0.5 rounded break-all">
-            {ref}
-          </code>
-          <label className="cursor-pointer inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 shrink-0">
-            <Upload className="w-3 h-3" />
-            上传图片
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                void onUpload(ref, e.target.files?.[0]);
-                e.target.value = '';
-              }}
-            />
-          </label>
-          {img ? (
-            <>
-              <img
-                src={img.dataUrl}
-                alt="预览"
-                className="h-10 w-10 object-cover rounded border border-amber-200"
-              />
-              <button
-                type="button"
-                className="text-amber-700 hover:text-rose-600"
-                onClick={() => onRemove(ref)}
-                title="移除该图"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </>
-          ) : missingMap[ref] === false ? (
-            <span className="text-emerald-600/70">已存在</span>
-          ) : missingMap[ref] === true ? (
-            <span className="text-rose-600/70">缺失，待上传</span>
-          ) : (
-            <span className="text-amber-600/70">检测中…</span>
-          )}
-        </div>
-      );
-    });
 
   const toggleOption = (idx: number) => {
     if (submitted) return;
@@ -828,114 +644,7 @@ function QuestionItem({
             <Lightbulb className="w-4 h-4" />
             解析
           </div>
-          <MathRenderer>{displayExplanation || '暂无解析'}</MathRenderer>
-        </div>
-      )}
-      {editMode && (
-        <div className="mt-4 p-4 rounded-xl bg-amber-50/70 border border-amber-200 space-y-3">
-          <div className="flex items-center gap-2 text-amber-800 font-medium text-sm">
-            <Pencil className="w-4 h-4" />
-            编辑区
-            <span className="font-normal text-amber-700/80">
-              改动保存在本机浏览器，完成后点右上角“导出编辑数据”
-            </span>
-          </div>
-          <div className="text-xs text-amber-800/90">
-            本题目缺失：解析图 {solMissCount} · 题目图 {blkMissCount} · 提示图 {hintMissCount}
-          </div>
-          <div>
-            <div className="text-xs font-medium text-amber-800 mb-1">解析文本（支持 LaTeX / Markdown）</div>
-            <Textarea
-              rows={4}
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-              placeholder="填写或修改解析文本；留空表示不修改"
-              className="bg-white border-amber-200 text-sm"
-            />
-          </div>
-          {question.solutionImageRefs.length > 0 && (
-            <div>
-              <div className="text-xs font-medium text-amber-800 mb-1">解析图片（对应引用路径）</div>
-              <div className="space-y-1.5">
-                {renderRefSlots(question.solutionImageRefs, images, solMissingMap, uploadForRef, removeImage)}
-              </div>
-            </div>
-          )}
-          {question.blockImageRefs.length > 0 && (
-            <div>
-              <div className="text-xs font-medium text-amber-800 mb-1">题目配图（题目中的图）</div>
-              <div className="space-y-1.5">
-                {renderRefSlots(question.blockImageRefs, qImages, blkMissingMap, uploadForBlockRef, removeQImage)}
-              </div>
-            </div>
-          )}
-          {question.hintImageRefs.length > 0 && (
-            <div>
-              <div className="text-xs font-medium text-amber-800 mb-1">提示图（当前界面不显示，可后补）</div>
-              <div className="space-y-1.5">
-                {renderRefSlots(question.hintImageRefs, hImages, hintMissingMap, uploadForHintRef, removeHImage)}
-              </div>
-            </div>
-          )}
-          <div>
-            <div className="text-xs font-medium text-amber-800 mb-1">额外图片（适用于原本没有解析图的题）</div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-amber-300 text-amber-800 hover:bg-amber-100"
-                onClick={() => extraInputRef.current?.click()}
-              >
-                <Upload className="w-3.5 h-3.5 mr-1" />
-                添加图片
-              </Button>
-              <input
-                ref={extraInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={(e) => {
-                  const files = Array.from(e.target.files || []);
-                  for (const f of files) void addExtraImage(f);
-                  e.target.value = '';
-                }}
-              />
-              {images
-                .filter((i) => i.ref.startsWith('custom-'))
-                .map((i) => (
-                  <div key={i.ref} className="flex items-center gap-1">
-                    <img
-                      src={i.dataUrl}
-                      alt="预览"
-                      className="h-10 w-10 object-cover rounded border border-amber-200"
-                    />
-                    <button
-                      type="button"
-                      className="text-amber-700 hover:text-rose-600"
-                      onClick={() => removeImage(i.ref)}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" onClick={handleSaveEdit}>
-              <Save className="w-3.5 h-3.5 mr-1" />
-              保存此题
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="border-amber-300 text-amber-800"
-              onClick={handleDeleteEdit}
-            >
-              <Trash2 className="w-3.5 h-3.5 mr-1" />
-              删除此题编辑
-            </Button>
-          </div>
+          <MathRenderer>{question.explanation || '暂无解析'}</MathRenderer>
         </div>
       )}
     </Card>
@@ -1028,12 +737,6 @@ function QuizView({
   progress,
   onAnswered,
   onBack,
-  editMode,
-  edits,
-  onSaveEdit,
-  onDeleteEdit,
-  onExportAll,
-  onToggleEdit,
 }: {
   subjects: SubjectNode[];
   initialSubject: string;
@@ -1041,12 +744,6 @@ function QuizView({
   progress: QbProgress;
   onAnswered: (questionId: string) => void;
   onBack: () => void;
-  editMode: boolean;
-  edits: Record<string, FillEdit>;
-  onSaveEdit: (edit: FillEdit) => void;
-  onDeleteEdit: (qid: string) => void;
-  onExportAll: () => void;
-  onToggleEdit: () => void;
 }) {
   const [activeSubject, setActiveSubject] = useState(initialSubject || subjects[0].id);
   const [activeChapterId, setActiveChapterId] = useState<string | null>(initialChapter);
@@ -1112,32 +809,6 @@ function QuizView({
                 共 {currentChapter?.count || 0} 道题 · 第 {page} / {Math.max(totalPages, 1)} 页
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant={editMode ? 'default' : 'outline'}
-                className={
-                  editMode
-                    ? 'bg-amber-600 hover:bg-amber-700 text-white'
-                    : 'border-slate-200 text-slate-600'
-                }
-                onClick={onToggleEdit}
-              >
-                <Pencil className="w-3.5 h-3.5 mr-1" />
-                {editMode ? '退出编辑' : '编辑模式'}
-              </Button>
-              {editMode && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-amber-300 text-amber-800 hover:bg-amber-100"
-                  onClick={onExportAll}
-                >
-                  <Download className="w-3.5 h-3.5 mr-1" />
-                  导出编辑数据
-                </Button>
-              )}
-            </div>
           </div>
           {pageQuestions.length > 0 ? (
             <div className="space-y-4">
@@ -1147,10 +818,6 @@ function QuizView({
                   question={q}
                   index={(page - 1) * QUESTIONS_PER_PAGE + i}
                   onAnswered={onAnswered}
-                  editMode={editMode}
-                  edit={edits[q.id]}
-                  onSaveEdit={onSaveEdit}
-                  onDeleteEdit={onDeleteEdit}
                 />
               ))}
             </div>
@@ -1302,38 +969,6 @@ export default function QuestionBankPage() {
   const storedProgress = useSyncExternalStore(subscribeNoop, readProgress, getServerProgress);
   const [answered, setAnswered] = useState<QbProgress>(EMPTY_PROGRESS);
   const progress = useMemo(() => ({ ...storedProgress, ...answered }), [storedProgress, answered]);
-  const [editMode, setEditMode] = useState(false);
-  const [edits, setEdits] = useState<Record<string, FillEdit>>({});
-
-  useEffect(() => {
-    let alive = true;
-    void loadAllEdits().then((m) => {
-      if (alive) setEdits(m);
-    });
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  const handleSaveEdit = (edit: FillEdit) => {
-    void saveFillEdit(edit).then(() => {
-      setEdits((prev) => ({ ...prev, [edit.qid]: edit }));
-    });
-  };
-
-  const handleDeleteEdit = (qid: string) => {
-    void deleteFillEdit(qid).then(() => {
-      setEdits((prev) => {
-        const next = { ...prev };
-        delete next[qid];
-        return next;
-      });
-    });
-  };
-
-  const handleExportAll = () => downloadFillEdits(edits);
-
-  const handleToggleEdit = () => setEditMode((v) => !v);
 
   const markAnswered = (questionId: string) => {
     if (progress[questionId]) return;
@@ -1370,12 +1005,6 @@ export default function QuestionBankPage() {
           progress={progress}
           onAnswered={markAnswered}
           onBack={() => setViewMode('bank')}
-          editMode={editMode}
-          edits={edits}
-          onSaveEdit={handleSaveEdit}
-          onDeleteEdit={handleDeleteEdit}
-          onExportAll={handleExportAll}
-          onToggleEdit={handleToggleEdit}
         />
       )}
     </div>
