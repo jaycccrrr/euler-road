@@ -10,11 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Eye, EyeOff, Loader2, Upload, User, Lock } from 'lucide-react';
-import { createUser, getUserByNickname } from '@/lib/db';
-import { generateId, compressImage, hashPassword, validatePasswordStrength } from '@/lib/utils';
-import { initModuleData, getPrimaryTitle, getPrimaryFrame } from '@/lib/gamification';
+import { compressImage, validatePasswordStrength } from '@/lib/utils';
 import { AuthMathScene } from '@/components/ui/auth-math-scene';
-import type { User as UserType } from '@/types';
 
 const DEFAULT_AVATARS = ['👨‍🎓', '👩‍🎓', '🧑‍🎓', '👨‍💻', '👩‍💻', '🧑‍💻', '👨‍🔬', '👩‍🔬', '🧑‍🔬', '🤓', '🦉', '🚀'];
 
@@ -46,7 +43,7 @@ export function AuthSwitch({
   onRegisterSuccess,
   className,
 }: AuthSwitchProps) {
-  const { login } = useAuth();
+  const { login, register } = useAuth();
 
   const [mode, setMode] = useState<AuthMode>(defaultMode);
 
@@ -124,56 +121,14 @@ export function AuthSwitch({
     setIsRegisterLoading(true);
 
     try {
-      const existingUser = await getUserByNickname(nickname);
-      if (existingUser) {
-        setRegisterError('该昵称已被使用');
-        setIsRegisterLoading(false);
-        return;
+      const success = await register(nickname.trim(), password, customAvatar || selectedAvatar);
+      if (success) {
+        onRegisterSuccess?.();
+      } else {
+        setRegisterError(useAuth.getState().error || '注册失败，请重试');
       }
-
-      const moduleData = initModuleData();
-      const now = new Date();
-      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      const passwordHash = await hashPassword(password);
-
-      const newUser: UserType = {
-        id: generateId(),
-        nickname: nickname.trim(),
-        passwordHash,
-        avatar: customAvatar || selectedAvatar,
-        moduleData,
-        piPower: {
-          currentPi: 0,
-          monthlyPi: 0,
-          totalAnswered: 0,
-          monthlyAnswered: 0,
-          lastAnswerDate: null,
-          currentStreak: 0,
-          monthlyResetDate: nextMonth.toISOString(),
-          dailyAttempts: {},
-        },
-        eulerTitleHistory: [],
-        level: 1,
-        experience: 0,
-        title: getPrimaryTitle(moduleData).title,
-        frame: getPrimaryFrame(moduleData),
-        isAdmin: false,
-        createdAt: now.toISOString(),
-        lastLoginAt: now.toISOString(),
-      };
-
-      await createUser(newUser);
-
-      // 注册成功后自动登录
-      const loginSuccess = await login(nickname.trim(), password);
-      if (!loginSuccess) {
-        setRegisterError('注册成功但自动登录失败，请手动登录');
-        setIsRegisterLoading(false);
-        return;
-      }
-
-      onRegisterSuccess?.();
-    } catch {
+    } catch (error) {
+      console.error('Register error:', error);
       setRegisterError('注册失败，请重试');
     } finally {
       setIsRegisterLoading(false);

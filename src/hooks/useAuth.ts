@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User, ModuleCategory } from '@/types';
-import { getUserByNickname, getUserById, updateUser, initAdminUser, updateUserPostsAvatar, updateUserCommentsAvatar } from '@/lib/db';
+import { getUserByNickname, getUserById, updateUser, createUser, initAdminUser, updateUserPostsAvatar, updateUserCommentsAvatar } from '@/lib/db';
 import { hashPassword, comparePassword, legacyComparePassword, isBcryptHash, generateId, formatLocalDate } from '@/lib/utils';
-import { initModuleData, addExperience, UserModuleData, Province, PROVINCES } from '@/lib/gamification';
+import { initModuleData, addExperience, getPrimaryTitle, getPrimaryFrame, UserModuleData, Province, PROVINCES } from '@/lib/gamification';
+import { authAPI, usersAPI } from '@/lib/api-client';
+import { apiUserToLocalUser, hasApiToken, setApiToken, syncUserToApi, apiErrorMessage } from '@/lib/api-auth';
 
 interface AuthState {
   user: User | null;
@@ -16,6 +18,7 @@ interface AuthState {
 
   // Actions
   login: (nickname: string, password: string) => Promise<boolean>;
+  register: (nickname: string, password: string, avatar?: string) => Promise<boolean>;
   logout: () => void;
   updateUserInfo: (updates: Partial<User>) => Promise<void>;
   addModuleExp: (category: ModuleCategory, exp: number) => Promise<void>;
@@ -122,68 +125,175 @@ export const useAuth = create<AuthState>()(
       login: async (nickname: string, password: string) => {
         set({ isLoading: true, error: null });
 
+        // 1) 优先走后端（Supabase）：账号真实存在、跨设备可用
         try {
-          let user;
+          const res = await authAPI.login(nickname, password);
+          setApiToken(res.token);
+          const backendUser = apiUserToLocalUser(res.user, await hashPassword(password));
           try {
-            user = await getUserByNickname(nickname);
-          } catch (dbError) {
-            console.error('Database error when fetching user:', dbError);
-            set({ error: '数据库连接失败，请刷新页面重试', isLoading: false });
-            return false;
-          }
-
-          if (!user) {
-            set({ error: '用户不存在', isLoading: false });
-            return false;
-          }
-
-          // 使用 bcrypt 比较密码。如果是旧明文或旧弱哈希，则一次性迁移为 bcrypt。
-          let isPasswordValid = await comparePassword(password, user.passwordHash);
-          if (!isPasswordValid && !isBcryptHash(user.passwordHash) && legacyComparePassword(password, user.passwordHash)) {
-            user.passwordHash = await hashPassword(password);
-            await updateUser(user);
-            isPasswordValid = true;
-          }
-          if (!isPasswordValid) {
-            set({ error: '密码错误', isLoading: false });
-            return false;
-          }
-
-          // 迁移旧数据
-          try {
-            user = migrateUserData(user);
-          } catch (migrateError) {
-            console.error('Migration error:', migrateError);
-            // Continue with original user data if migration fails
-          }
-
-          // Update last login time
-          user.lastLoginAt = new Date().toISOString();
-          try {
-            await updateUser(user);
+            await updateUser(backendUser);
           } catch (updateError) {
-            console.error('Failed to update last login time:', updateError);
-            // Continue even if update fails
+            console.error('Failed to cache backend user locally:', updateError);
           }
-
           set({
-            user,
-            currentUserId: user.id,
-            lastLoginAt: user.lastLoginAt,
+            user: backendUser,
+            currentUserId: backendUser.id,
+            lastLoginAt: backendUser.lastLoginAt,
             isAuthenticated: true,
             isLoading: false,
             error: null,
           });
 
           return true;
-        } catch (error) {
-          console.error('Unexpected login error:', error);
-          set({ error: '登录失败，请重试', isLoading: false });
-          return false;
+        } catch (apiError) {
+          console.warn('后端登录失败，尝试本地登录:', apiError);
+
+          // 2) 本地兜底：仅当本地存在同名账号时使用，否则显示后端返回的错误
+          try {
+            const localUser = await getUserByNickname(nickname);
+            if (!localUser) {
+              set({ error: apiErrorMessage(apiError, '登录失败'), isLoading: false });
+              return false;
+            }
+
+            // 使用 bcrypt 比较密码。如果是旧明文或旧弱哈希，则一次性迁移为 bcrypt。
+            let isPasswordValid = await comparePassword(password, localUser.passwordHash);
+            if (!isPasswordValid && !isBcryptHash(localUser.passwordHash) && legacyComparePassword(password, localUser.passwordHash)) {
+              localUser.passwordHash = await hashPassword(password);
+              await updateUser(localUser);
+              isPasswordValid = true;
+            }
+            if (!isPasswordValid) {
+              set({ error: '密码错误', isLoading: false });
+              return false;
+            }
+
+            let user = localUser;
+            // 迁移旧数据
+            try {
+              user = migrateUserData(user);
+            } catch (migrateError) {
+              console.error('Migration error:', migrateError);
+              // Continue with original user data if migration fails
+            }
+
+            // Update last login time
+            user.lastLoginAt = new Date().toISOString();
+            try {
+              await updateUser(user);
+            } catch (updateError) {
+              console.error('Failed to update last login time:', updateError);
+              // Continue even if update fails
+            }
+
+            set({
+              user,
+              currentUserId: user.id,
+              lastLoginAt: user.lastLoginAt,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+            });
+
+            return true;
+          } catch (error) {
+            console.error('Unexpected login error:', error);
+            set({ error: '登录失败，请重试', isLoading: false });
+            return false;
+          }
+        }
+      },
+
+      register: async (nickname: string, password: string, avatar = '👤') => {
+        set({ isLoading: true, error: null });
+
+        // 1) 优先注册到后端（Supabase）
+        try {
+          const res = await authAPI.register(nickname, password, avatar);
+          setApiToken(res.token);
+          const backendUser = apiUserToLocalUser(res.user, await hashPassword(password));
+          try {
+            await createUser(backendUser);
+          } catch (createError) {
+            console.error('Failed to cache backend user locally:', createError);
+          }
+          set({
+            user: backendUser,
+            currentUserId: backendUser.id,
+            lastLoginAt: backendUser.lastLoginAt,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
+          return true;
+        } catch (apiError) {
+          const apiMessage = apiErrorMessage(apiError, '注册失败');
+          if (/已被使用/.test(apiMessage)) {
+            set({ error: apiMessage, isLoading: false });
+            return false;
+          }
+          console.warn('后端注册不可用，回退本地注册:', apiError);
+
+          // 2) 本地注册兜底（原 AuthSwitch 逻辑）
+          try {
+            const existingUser = await getUserByNickname(nickname);
+            if (existingUser) {
+              set({ error: '该昵称已被使用', isLoading: false });
+              return false;
+            }
+
+            const moduleData = initModuleData();
+            const now = new Date();
+            const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            const passwordHash = await hashPassword(password);
+
+            const newUser: User = {
+              id: generateId(),
+              nickname: nickname.trim(),
+              passwordHash,
+              avatar: avatar || '👤',
+              moduleData,
+              piPower: {
+                currentPi: 0,
+                monthlyPi: 0,
+                totalAnswered: 0,
+                monthlyAnswered: 0,
+                lastAnswerDate: null,
+                currentStreak: 0,
+                monthlyResetDate: nextMonth.toISOString(),
+                dailyAttempts: {},
+              },
+              eulerTitleHistory: [],
+              level: 1,
+              experience: 0,
+              title: getPrimaryTitle(moduleData).title,
+              frame: getPrimaryFrame(moduleData),
+              isAdmin: false,
+              createdAt: now.toISOString(),
+              lastLoginAt: now.toISOString(),
+            };
+
+            await createUser(newUser);
+
+            set({
+              user: newUser,
+              currentUserId: newUser.id,
+              lastLoginAt: newUser.lastLoginAt,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+            });
+            return true;
+          } catch (error) {
+            console.error('Unexpected register error:', error);
+            set({ error: '注册失败，请重试', isLoading: false });
+            return false;
+          }
         }
       },
 
       logout: () => {
+        setApiToken(null);
         set({
           user: null,
           currentUserId: null,
@@ -199,6 +309,10 @@ export const useAuth = create<AuthState>()(
 
         const updatedUser = { ...user, ...updates };
         await updateUser(updatedUser);
+        // 同步到后端（头像/展示模块/经验/收藏，最佳努力）
+        void syncUserToApi(updatedUser).catch((syncError) =>
+          console.warn('同步资料到后端失败:', syncError)
+        );
 
         // 如果更新了头像或昵称，同步更新所有帖子和评论
         if (updates.avatar || updates.nickname) {
@@ -237,6 +351,9 @@ export const useAuth = create<AuthState>()(
 
         const updatedUser = { ...user, moduleData: newModuleData };
         await updateUser(updatedUser);
+        void syncUserToApi(updatedUser).catch((syncError) =>
+          console.warn('同步经验到后端失败:', syncError)
+        );
         set({ user: updatedUser });
       },
 
@@ -247,6 +364,9 @@ export const useAuth = create<AuthState>()(
 
         const updatedUser = { ...user, displayCategory: category };
         await updateUser(updatedUser);
+        void syncUserToApi(updatedUser).catch((syncError) =>
+          console.warn('同步展示模块到后端失败:', syncError)
+        );
         set({ user: updatedUser });
       },
 
@@ -260,6 +380,9 @@ export const useAuth = create<AuthState>()(
 
         const updatedUser = { ...user, favoritePosts: [...favorites, postId] };
         await updateUser(updatedUser);
+        void syncUserToApi(updatedUser).catch((syncError) =>
+          console.warn('同步收藏到后端失败:', syncError)
+        );
         set({ user: updatedUser });
       },
 
@@ -271,6 +394,9 @@ export const useAuth = create<AuthState>()(
         const favorites = user.favoritePosts || [];
         const updatedUser = { ...user, favoritePosts: favorites.filter(id => id !== postId) };
         await updateUser(updatedUser);
+        void syncUserToApi(updatedUser).catch((syncError) =>
+          console.warn('同步取消收藏到后端失败:', syncError)
+        );
         set({ user: updatedUser });
       },
 
@@ -317,6 +443,18 @@ export const useAuth = create<AuthState>()(
         const following = user.following || [];
         if (following.includes(userId)) return;
 
+        // 后端会话下优先走后端关注关系（先查询避免重复/反向切换）
+        if (hasApiToken()) {
+          try {
+            const state = await usersAPI.isFollowing(userId);
+            if (!state.following) {
+              await usersAPI.follow(userId);
+            }
+          } catch (error) {
+            console.warn('后端关注失败，回退本地:', error);
+          }
+        }
+
         const updatedUser = { ...user, following: [...following, userId] };
         await updateUser(updatedUser);
         set({ user: updatedUser });
@@ -328,6 +466,20 @@ export const useAuth = create<AuthState>()(
         if (!user) return;
 
         const following = user.following || [];
+        if (!following.includes(userId)) return;
+
+        // 后端会话下优先走后端关注关系
+        if (hasApiToken()) {
+          try {
+            const state = await usersAPI.isFollowing(userId);
+            if (state.following) {
+              await usersAPI.follow(userId);
+            }
+          } catch (error) {
+            console.warn('后端取消关注失败，回退本地:', error);
+          }
+        }
+
         const updatedUser = { ...user, following: following.filter(id => id !== userId) };
         await updateUser(updatedUser);
         set({ user: updatedUser });
@@ -519,8 +671,26 @@ export const useAuth = create<AuthState>()(
       onRehydrateStorage: () => async (state) => {
         if (!state) return;
 
-        // 只持久化非敏感字段；恢复时从 IndexedDB 重新加载完整用户
+        // 只持久化非敏感字段；恢复时优先从后端拉取完整用户，失败再回退本地
         if (state.isAuthenticated && state.currentUserId) {
+          if (hasApiToken()) {
+            try {
+              const res = await authAPI.getMe();
+              const apiUser = apiUserToLocalUser(res.user);
+              useAuth.setState({
+                user: apiUser,
+                currentUserId: apiUser.id,
+                lastLoginAt: apiUser.lastLoginAt,
+                isAuthenticated: true,
+                hasHydrated: true,
+              });
+              return;
+            } catch (error) {
+              console.error('后端会话失效，回退本地:', error);
+              setApiToken(null);
+            }
+          }
+
           try {
             const user = await getUserById(state.currentUserId);
             if (user) {

@@ -59,12 +59,13 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { avatar, displayCategory, moduleData } = await req.json();
+    const { avatar, displayCategory, moduleData, favoritePosts } = await req.json();
 
     const updateData: any = {};
     if (avatar !== undefined) updateData.avatar = avatar;
     if (displayCategory !== undefined) updateData.displayCategory = displayCategory;
     if (moduleData !== undefined) updateData.moduleData = moduleData;
+    if (favoritePosts !== undefined) updateData.favoritePosts = favoritePosts;
 
     const user = await prisma.user.update({
       where: { id: userId },

@@ -17,7 +17,9 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BASE_PATH: basePath,
   },
 
-  trailingSlash: true,
+  // 关闭 trailingSlash：避免 API 路由 308 重定向时丢失 Authorization 头
+  // （GitHub Pages 静态托管时代需要，Vercel 上不需要）
+  trailingSlash: false,
   images: {
     // 静态导出时必须为 true；部署到 Vercel 时设为 false 以启用自动图片优化
     unoptimized: true,

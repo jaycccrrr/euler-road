@@ -24,7 +24,13 @@ async function fetchAPI<T>(
     headers,
   });
 
-  const data = await response.json();
+  const text = await response.text();
+  let data: any = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = {};
+  }
 
   if (!response.ok) {
     throw new Error(data.error || '请求失败');
@@ -87,7 +93,7 @@ export const answersAPI = {
 export const postsAPI = {
   getList: (page = 1, pageSize = 20, moduleId?: string, search?: string) =>
     fetchAPI<{ posts: any[]; pagination: any }>(
-      `/api/posts?page=${page}&pageSize=${pageSize}${moduleId ? `&moduleId=${moduleId}` : ''}${search ? `&search=${search}` : ''}`
+      `/api/posts?page=${page}&limit=${pageSize}${moduleId ? `&moduleId=${moduleId}` : ''}${search ? `&search=${search}` : ''}`
     ),
 
   create: (title: string, content: string, moduleId: string, images: string[]) =>
@@ -95,6 +101,18 @@ export const postsAPI = {
       method: 'POST',
       body: JSON.stringify({ title, content, moduleId, images }),
     }),
+};
+
+// 用户相关（关注等）
+export const usersAPI = {
+  get: (id: string) =>
+    fetchAPI<any>(`/api/users/${id}`),
+  follow: (id: string) =>
+    fetchAPI<{ following: boolean; message?: string }>(`/api/users/${id}/follow`, {
+      method: 'POST',
+    }),
+  isFollowing: (id: string) =>
+    fetchAPI<{ following: boolean }>(`/api/users/${id}/follow`),
 };
 
 // 排行榜

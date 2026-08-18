@@ -5,7 +5,7 @@ import { generateToken } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const { nickname, password } = await request.json();
+    const { nickname, password, avatar } = await request.json();
 
     if (!nickname || !password) {
       return NextResponse.json({ error: '请输入昵称和密码' }, { status: 400 });
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       data: {
         nickname,
         passwordHash,
-        avatar: '👤',
+        avatar: avatar || '👤',
       },
     });
 
