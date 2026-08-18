@@ -66,6 +66,7 @@ import {
 import Link from 'next/link';
 import { Post, Note, User as UserType } from '@/types';
 import { getAllPosts, deletePost, getNotesByUser, deleteNote, getFollowing, getFollowers, getUserById, getAnswerRecordsByUser, areFriends } from '@/lib/db';
+import { syncPostDeleteToBackend } from '@/lib/api-sync';
 import { navigateTo } from '@/lib/asset';
 import { getDailyQuestionsByDate } from '@/lib/daily-question-bank';
 import { formatRelativeTime } from '@/lib/utils';
@@ -299,6 +300,7 @@ export default function ProfilePage() {
     if (!postToDelete) return;
     try {
       await deletePost(postToDelete.id);
+      void syncPostDeleteToBackend(postToDelete.id);
       // 重新加载帖子列表
       await loadPosts();
       setIsDeleteDialogOpen(false);

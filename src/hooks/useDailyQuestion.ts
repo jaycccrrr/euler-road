@@ -25,6 +25,12 @@ import { getDailyQuestionsByDate } from '@/lib/daily-question-bank';
 import { calculateAnswerExp } from '@/lib/gamification';
 import { useAuth } from './useAuth';
 import { KNOWLEDGE_MODULES } from '@/data/modules';
+import {
+  mergeAnswersFromBackend,
+  syncAnswerToBackend,
+  syncAnswerUpdateToBackend,
+  syncAnswerDeleteToBackend,
+} from '@/lib/api-sync';
 
 interface DailyQuestionState {
   todayQuestions: DailyQuestion[]; // 改为数组，存储6道题目
@@ -206,6 +212,9 @@ export const useDailyQuestion = create<DailyQuestionState>()(
         if (!user) return;
 
         try {
+          // 先把后端（其他设备）的答题记录合并进本地
+          await mergeAnswersFromBackend();
+
           const records = await getAnswerRecordsByUser(user.id);
           // 按时间倒序排列
           set({ userAnswerHistory: records.sort((a, b) =>
@@ -302,6 +311,8 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           };
 
           await createAnswerRecord(record);
+          // 同步到后端（最佳努力）
+          void syncAnswerToBackend(record, question);
 
           // Update module experience
           const moduleCategory = 'math' as const;
@@ -383,6 +394,8 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           };
 
           await createAnswerRecord(record);
+          // 同步到后端（最佳努力）
+          void syncAnswerToBackend(record, currentQuestion);
 
           // Reload answers
           await get().loadQuestionAnswers(questionId);
@@ -594,6 +607,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           }
 
           await deleteAnswerRecord(answerId);
+          void syncAnswerDeleteToBackend(answerId);
 
           set({
             userAnswerHistory: userAnswerHistory.filter(a => a.id !== answerId),
@@ -839,6 +853,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
 
           const updated = { ...record, isPublic };
           await updateAnswerRecord(updated);
+          void syncAnswerUpdateToBackend(updated);
 
           set({
             questionMyRecords: questionMyRecords.map(a => a.id === answerId ? updated : a),

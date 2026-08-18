@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '无效的token' }, { status: 401 });
     }
 
-    const { moduleId, title, content, images } = await request.json();
+    const { id, moduleId, title, content, images, postType, topics } = await request.json();
 
     if (!title || !content) {
       return NextResponse.json({ error: '请填写标题和内容' }, { status: 400 });
@@ -72,8 +72,11 @@ export async function POST(request: NextRequest) {
 
     const post = await prisma.post.create({
       data: {
+        ...(id ? { id } : {}),
         userId: payload.userId,
         moduleId: moduleId || 'general',
+        postType: postType || 'general',
+        topics: topics || [],
         title,
         content,
         images: images || [],

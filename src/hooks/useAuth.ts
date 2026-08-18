@@ -6,6 +6,7 @@ import { hashPassword, comparePassword, legacyComparePassword, isBcryptHash, gen
 import { initModuleData, addExperience, getPrimaryTitle, getPrimaryFrame, UserModuleData, Province, PROVINCES } from '@/lib/gamification';
 import { authAPI, usersAPI } from '@/lib/api-client';
 import { apiUserToLocalUser, hasApiToken, setApiToken, syncUserToApi, apiErrorMessage } from '@/lib/api-auth';
+import { mergeAnswersFromBackend } from '@/lib/api-sync';
 
 interface AuthState {
   user: User | null;
@@ -143,6 +144,8 @@ export const useAuth = create<AuthState>()(
             isLoading: false,
             error: null,
           });
+          // 拉取后端答题记录（其他设备提交的），合并进本地
+          void mergeAnswersFromBackend();
 
           return true;
         } catch (apiError) {
@@ -684,6 +687,7 @@ export const useAuth = create<AuthState>()(
                 isAuthenticated: true,
                 hasHydrated: true,
               });
+              void mergeAnswersFromBackend();
               return;
             } catch (error) {
               console.error('后端会话失效，回退本地:', error);

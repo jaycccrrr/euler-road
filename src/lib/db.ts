@@ -352,6 +352,11 @@ export async function getAnswerRecordsByUser(userId: string): Promise<AnswerReco
   return database.getAllFromIndex('answerRecords', 'by-user', userId);
 }
 
+export async function getAnswerRecordById(id: string): Promise<AnswerRecord | undefined> {
+  const database = await initDB();
+  return database.get('answerRecords', id);
+}
+
 export async function getAnswerRecordByUserAndQuestion(
   userId: string,
   questionId: string

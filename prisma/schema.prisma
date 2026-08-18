@@ -98,6 +98,8 @@ model Post {
   id          String   @id @default(uuid())
   userId      String
   moduleId    String   @default("general")
+  postType    String   @default("general")
+  topics      String[] @default([])
   title       String
   content     String
   images      String[] @default([])

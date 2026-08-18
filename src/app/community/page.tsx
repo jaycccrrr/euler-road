@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/hooks/useAuth';
 import { getPostsPaginated, getAllPosts, createPost, updatePost, getUserById, resetDatabase, getFollowing, getFollowers, areFriends, searchUsers } from '@/lib/db';
+import { mergePostsFromBackend, syncPostToBackend, syncPostUpdateToBackend } from '@/lib/api-sync';
 import { navigateTo } from '@/lib/asset';
 import { VirtualList } from '@/components/VirtualList';
 import { getPrimaryFrame, FRAME_STYLES, initModuleData, getModuleTitles } from '@/lib/gamification';
@@ -189,6 +190,9 @@ export default function CommunityPage() {
     if (append) setIsLoadingMore(true);
     else setIsLoading(true);
     try {
+      // 先把后端（其他设备发布的）帖子合并进本地
+      await mergePostsFromBackend();
+
       const { posts: newPosts, nextCursor: newNextCursor } = await getPostsPaginated({
         cursor,
         limit: 20,
@@ -261,6 +265,7 @@ export default function CommunityPage() {
     };
 
     await createPost(newPost);
+    void syncPostToBackend(newPost);
     setDialogOpen(false);
     await loadPosts(undefined, false);
   };
@@ -296,6 +301,7 @@ export default function CommunityPage() {
     setPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     setHotPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     await updatePost(updated);
+    void syncPostUpdateToBackend(updated);
   };
 
   // 帖子卡片渲染（提取复用）
@@ -460,6 +466,7 @@ export default function CommunityPage() {
       likedBy: alreadyLiked ? likedBy.filter(id => id !== user.id) : [...likedBy, user.id],
     };
     await updatePost(updatedPost);
+    void syncPostUpdateToBackend(updatedPost);
     setPosts(prev => prev.map(p => p.id === postId ? updatedPost : p));
   };
 

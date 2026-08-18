@@ -79,14 +79,32 @@ export const questionsAPI = {
 
 // 答题相关
 export const answersAPI = {
-  submit: (questionId: string, content: string, images: string[], isPublic: boolean) =>
+  submit: (payload: {
+    questionId: string;
+    content: string;
+    images: string[];
+    isPublic: boolean;
+    id?: string;
+    question?: any;
+  }) =>
     fetchAPI<{ answer: any; feedback: string; score: number; expGained: number }>('/api/answers', {
       method: 'POST',
-      body: JSON.stringify({ questionId, content, images, isPublic }),
+      body: JSON.stringify(payload),
     }),
 
   getMyAnswers: () =>
     fetchAPI<{ answers: any[] }>('/api/answers'),
+
+  update: (id: string, updates: any) =>
+    fetchAPI<{ answer: any }>(`/api/answers/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    }),
+
+  remove: (id: string) =>
+    fetchAPI<{ message: string }>(`/api/answers/${id}`, {
+      method: 'DELETE',
+    }),
 };
 
 // 社区相关
@@ -96,10 +114,29 @@ export const postsAPI = {
       `/api/posts?page=${page}&limit=${pageSize}${moduleId ? `&moduleId=${moduleId}` : ''}${search ? `&search=${search}` : ''}`
     ),
 
-  create: (title: string, content: string, moduleId: string, images: string[]) =>
+  create: (payload: {
+    title: string;
+    content: string;
+    moduleId: string;
+    images: string[];
+    id?: string;
+    postType?: string;
+    topics?: string[];
+  }) =>
     fetchAPI<{ post: any }>('/api/posts', {
       method: 'POST',
-      body: JSON.stringify({ title, content, moduleId, images }),
+      body: JSON.stringify(payload),
+    }),
+
+  update: (id: string, updates: any) =>
+    fetchAPI<{ post: any }>(`/api/posts/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    }),
+
+  remove: (id: string) =>
+    fetchAPI<{ message: string }>(`/api/posts/${id}`, {
+      method: 'DELETE',
     }),
 };
 
