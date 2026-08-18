@@ -30,6 +30,15 @@ import {
   syncAnswerToBackend,
   syncAnswerUpdateToBackend,
   syncAnswerDeleteToBackend,
+  syncAnswerCommentToBackend,
+  mergeAnswerCommentsFromBackend,
+  syncAnswerLikeToggleToBackend,
+  syncDiscussionToBackend,
+  mergeDiscussionsFromBackend,
+  syncDiscussionDeleteToBackend,
+  syncDiscussionLikeToggleToBackend,
+  syncDiscussionReplyToBackend,
+  syncDiscussionReplyLikeToggleToBackend,
 } from '@/lib/api-sync';
 
 interface DailyQuestionState {
@@ -199,7 +208,8 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           const records = await getAnswerRecordsByQuestion(questionId);
           // 只显示公开且已回答的记录
           const publicRecords = records.filter(r => r.isPublic);
-          set({ questionAnswers: publicRecords.sort((a, b) =>
+          const withComments = await mergeAnswerCommentsFromBackend(publicRecords);
+          set({ questionAnswers: withComments.sort((a, b) =>
             new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
           )});
         } catch (error) {
@@ -502,6 +512,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           };
 
           await updateAnswerRecord(updatedAnswer);
+          void syncAnswerLikeToggleToBackend(answerId);
 
           set({
             questionAnswers: questionAnswers.map(a =>
@@ -536,6 +547,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           };
 
           await updateAnswerRecord(updatedAnswer);
+          void syncAnswerLikeToggleToBackend(answerId);
 
           set({
             questionAnswers: questionAnswers.map(a =>
@@ -577,6 +589,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           };
 
           await updateAnswerRecord(updatedAnswer);
+          void syncAnswerCommentToBackend(comment);
 
           set({
             questionAnswers: questionAnswers.map(a =>
@@ -627,6 +640,8 @@ export const useDailyQuestion = create<DailyQuestionState>()(
 
       loadDiscussionMessages: async (questionId: string) => {
         try {
+          // 先把云端讨论区消息合并进本地
+          await mergeDiscussionsFromBackend(questionId);
           const messages = await getDiscussionMessagesByQuestion(questionId);
           set({ discussionMessages: messages, discussionQuestionId: questionId });
         } catch (error) {
@@ -676,6 +691,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           }
 
           await createDiscussionMessage(message);
+          void syncDiscussionToBackend(message);
           const { discussionMessages, discussionQuestionId } = get();
           if (discussionQuestionId === questionId) {
             set({ discussionMessages: [message, ...discussionMessages] });
@@ -695,6 +711,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           const target = get().discussionMessages.find((m) => m.id === messageId);
           if (!target || target.userId !== user.id) return false;
           await deleteDiscussionMessage(messageId);
+          void syncDiscussionDeleteToBackend(messageId);
           set({ discussionMessages: get().discussionMessages.filter((m) => m.id !== messageId) });
           return true;
         } catch (error) {
@@ -718,6 +735,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
             likes: (target.likes ?? likedBy.length) + (hasLiked ? -1 : 1),
           };
           await updateDiscussionMessage(updated);
+          void syncDiscussionLikeToggleToBackend(messageId);
           set({
             discussionMessages: get().discussionMessages.map((m) => (m.id === messageId ? updated : m)),
           });
@@ -751,6 +769,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
             replies: [...(target.replies || []), reply],
           };
           await updateDiscussionMessage(updated);
+          void syncDiscussionReplyToBackend(messageId, reply);
           set({
             discussionMessages: get().discussionMessages.map((m) => (m.id === messageId ? updated : m)),
           });
@@ -782,6 +801,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
             }),
           };
           await updateDiscussionMessage(updated);
+          void syncDiscussionReplyLikeToggleToBackend(replyId);
           set({
             discussionMessages: get().discussionMessages.map((m) => (m.id === messageId ? updated : m)),
           });

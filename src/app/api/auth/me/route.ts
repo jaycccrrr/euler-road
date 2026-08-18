@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
         moduleData: user.moduleData,
         displayCategory: user.displayCategory,
         favoritePosts: user.favoritePosts,
+        favoriteQuestions: user.favoriteQuestions,
       },
     });
   } catch (error) {
@@ -59,13 +60,14 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { avatar, displayCategory, moduleData, favoritePosts } = await req.json();
+    const { avatar, displayCategory, moduleData, favoritePosts, favoriteQuestions } = await req.json();
 
     const updateData: any = {};
     if (avatar !== undefined) updateData.avatar = avatar;
     if (displayCategory !== undefined) updateData.displayCategory = displayCategory;
     if (moduleData !== undefined) updateData.moduleData = moduleData;
     if (favoritePosts !== undefined) updateData.favoritePosts = favoritePosts;
+    if (favoriteQuestions !== undefined) updateData.favoriteQuestions = favoriteQuestions;
 
     const user = await prisma.user.update({
       where: { id: userId },
@@ -81,6 +83,7 @@ export async function PATCH(req: NextRequest) {
         moduleData: user.moduleData,
         displayCategory: user.displayCategory,
         favoritePosts: user.favoritePosts,
+        favoriteQuestions: user.favoriteQuestions,
       },
     });
   } catch (error) {

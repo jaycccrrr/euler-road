@@ -6,6 +6,9 @@ import Header from '@/components/layout/Header';
 import { useAuth } from '@/hooks/useAuth';
 import { getPostsPaginated, getAllPosts, createPost, updatePost, getUserById, resetDatabase, getFollowing, getFollowers, areFriends, searchUsers } from '@/lib/db';
 import { mergePostsFromBackend, syncPostToBackend, syncPostUpdateToBackend } from '@/lib/api-sync';
+import { likesAPI, usersAPI } from '@/lib/api-client';
+import { hasApiToken } from '@/lib/api-auth';
+import { apiUserToLocalUser } from '@/lib/api-auth';
 import { navigateTo } from '@/lib/asset';
 import { VirtualList } from '@/components/VirtualList';
 import { getPrimaryFrame, FRAME_STYLES, initModuleData, getModuleTitles } from '@/lib/gamification';
@@ -460,11 +463,25 @@ export default function CommunityPage() {
 
     const likedBy = post.likedBy || [];
     const alreadyLiked = likedBy.includes(user.id);
-    const updatedPost = {
-      ...post,
-      likes: alreadyLiked ? post.likes - 1 : post.likes + 1,
-      likedBy: alreadyLiked ? likedBy.filter(id => id !== user.id) : [...likedBy, user.id],
-    };
+
+    let nextLikes = post.likes;
+    let nextLikedBy = likedBy;
+    if (hasApiToken()) {
+      try {
+        const res = await likesAPI.togglePost(postId);
+        nextLikes = res.likes;
+        nextLikedBy = res.likedBy;
+      } catch (error) {
+        console.warn('后端点赞失败，本地切换:', error);
+        nextLikes = alreadyLiked ? post.likes - 1 : post.likes + 1;
+        nextLikedBy = alreadyLiked ? likedBy.filter(id => id !== user.id) : [...likedBy, user.id];
+      }
+    } else {
+      nextLikes = alreadyLiked ? post.likes - 1 : post.likes + 1;
+      nextLikedBy = alreadyLiked ? likedBy.filter(id => id !== user.id) : [...likedBy, user.id];
+    }
+
+    const updatedPost = { ...post, likes: nextLikes, likedBy: nextLikedBy };
     await updatePost(updatedPost);
     void syncPostUpdateToBackend(updatedPost);
     setPosts(prev => prev.map(p => p.id === postId ? updatedPost : p));
@@ -522,8 +539,17 @@ export default function CommunityPage() {
 
     try {
       // 搜索用户
-      const userResults = await searchUsers(searchQuery);
-      setUserSearchResults(userResults.filter(u => u.id !== user?.id));
+      const [localUserResults, apiUserResults] = await Promise.all([
+        searchUsers(searchQuery),
+        usersAPI.search(searchQuery)
+          .then((r) => (r.users || []).map((u: any) => apiUserToLocalUser(u)))
+          .catch(() => []),
+      ]);
+      const byId = new Map<string, any>();
+      for (const u of [...localUserResults, ...apiUserResults]) {
+        byId.set(u.id, u);
+      }
+      setUserSearchResults(Array.from(byId.values()).filter(u => u.id !== user?.id));
 
       // 搜索帖子
       const query = searchQuery.toLowerCase();

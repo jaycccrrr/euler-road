@@ -2,6 +2,59 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
+// AI 判卷（DeepSeek）：失败时返回 null，调用方降级到本地算法
+async function gradeWithAI(
+  question: { title: string; content: string; answer?: string | null },
+  content: string
+): Promise<{ score: number; feedback: string; isCorrect: boolean } | null> {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) return null;
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 25000);
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        temperature: 0.3,
+        response_format: { type: 'json_object' },
+        messages: [
+          {
+            role: 'system',
+            content:
+              '你是数学作业批改助手。请根据题目、参考答案和学生答案，严格返回 JSON：{"score": 0到100的整数, "isCorrect": 是否判对, "feedback": "简短中文评语"}。不要返回其他内容。',
+          },
+          {
+            role: 'user',
+            content: `【题目】${question.title}\n${question.content}\n【参考答案】${question.answer || '无'}\n【学生答案】${content}`,
+          },
+        ],
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    const text = data?.choices?.[0]?.message?.content || '';
+    const parsed = JSON.parse(text);
+    const score = Math.max(0, Math.min(100, Number(parsed.score) || 60));
+    return {
+      score,
+      feedback: String(parsed.feedback || '已批改完成'),
+      isCorrect: typeof parsed.isCorrect === 'boolean' ? parsed.isCorrect : score >= 80,
+    };
+  } catch (error) {
+    console.warn('AI 判卷失败，使用本地降级:', error);
+    return null;
+  }
+}
+
 // 提交答案
 export async function POST(request: NextRequest) {
   try {
@@ -48,10 +101,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // AI判卷（简化版，实际应调用AI服务）
-    const aiScore = Math.floor(Math.random() * 40) + 60; // 模拟60-100分
-    const isCorrect = aiScore >= 80;
-    const experienceGained = isCorrect ? 20 : aiScore >= 60 ? 10 : 5;
+    // AI 判卷（DeepSeek），失败时本地降级
+    let grading = await gradeWithAI(
+      { title: question?.title || '每日一题', content: question?.content || '', answer: question?.answer },
+      content
+    );
+    if (!grading) {
+      const aiScore = Math.floor(Math.random() * 40) + 60; // 模拟60-100分
+      grading = {
+        score: aiScore,
+        isCorrect: aiScore >= 80,
+        feedback: aiScore >= 80 ? '回答正确，思路清晰！' : '回答基本正确，但还有改进空间。',
+      };
+    }
+
+    const experienceGained = grading.isCorrect ? 20 : grading.score >= 60 ? 10 : 5;
 
     // 创建答题记录
     const answer = await prisma.answerRecord.create({
@@ -61,9 +125,9 @@ export async function POST(request: NextRequest) {
         questionId,
         content,
         images: images || [],
-        aiScore,
-        aiFeedback: isCorrect ? '回答正确，思路清晰！' : '回答基本正确，但还有改进空间。',
-        isCorrect,
+        aiScore: grading.score,
+        aiFeedback: grading.feedback,
+        isCorrect: grading.isCorrect,
         experienceGained,
         isPublic: !!isPublic,
       },

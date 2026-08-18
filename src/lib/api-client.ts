@@ -144,12 +144,89 @@ export const postsAPI = {
 export const usersAPI = {
   get: (id: string) =>
     fetchAPI<any>(`/api/users/${id}`),
+  search: (q: string, limit = 20) =>
+    fetchAPI<{ users: any[] }>(`/api/users/search?q=${encodeURIComponent(q)}&limit=${limit}`),
   follow: (id: string) =>
     fetchAPI<{ following: boolean; message?: string }>(`/api/users/${id}/follow`, {
       method: 'POST',
     }),
   isFollowing: (id: string) =>
     fetchAPI<{ following: boolean }>(`/api/users/${id}/follow`),
+};
+
+// 评论相关
+export const commentsAPI = {
+  getForPost: (postId: string) =>
+    fetchAPI<{ comments: any[] }>(`/api/posts/${postId}/comments`),
+  createForPost: (postId: string, payload: { id?: string; content: string }) =>
+    fetchAPI<{ comment: any }>(`/api/posts/${postId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  remove: (id: string) =>
+    fetchAPI<{ message: string }>(`/api/comments/${id}`, { method: 'DELETE' }),
+  getForAnswer: (answerId: string) =>
+    fetchAPI<{ comments: any[] }>(`/api/answers/${answerId}/comments`),
+  createForAnswer: (answerId: string, payload: { id?: string; content: string }) =>
+    fetchAPI<{ comment: any }>(`/api/answers/${answerId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  removeAnswerComment: (id: string) =>
+    fetchAPI<{ message: string }>(`/api/answer-comments/${id}`, { method: 'DELETE' }),
+};
+
+// 点赞相关
+export const likesAPI = {
+  togglePost: (postId: string) =>
+    fetchAPI<{ liked: boolean; likes: number; likedBy: string[] }>(`/api/posts/${postId}/like`, {
+      method: 'POST',
+    }),
+  toggleAnswer: (answerId: string) =>
+    fetchAPI<{ liked: boolean; likes: number; likedBy: string[] }>(`/api/answers/${answerId}/like`, {
+      method: 'POST',
+    }),
+};
+
+// 私信相关
+export const messagesAPI = {
+  getWith: (userId: string, limit = 100) =>
+    fetchAPI<{ messages: any[] }>(`/api/messages?with=${encodeURIComponent(userId)}&limit=${limit}`),
+  conversations: () =>
+    fetchAPI<{ conversations: any[] }>('/api/messages/conversations'),
+  send: (payload: any) =>
+    fetchAPI<{ message: any }>('/api/messages', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+};
+
+// 讨论区消息相关
+export const discussionsAPI = {
+  getForQuestion: (questionId: string) =>
+    fetchAPI<{ messages: any[] }>(`/api/questions/${questionId}/discussions`),
+  create: (questionId: string, payload: any) =>
+    fetchAPI<{ message: any }>(`/api/questions/${questionId}/discussions`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  remove: (id: string) =>
+    fetchAPI<{ message: string }>(`/api/discussions/${id}`, { method: 'DELETE' }),
+  toggleLike: (id: string) =>
+    fetchAPI<{ liked: boolean; likes: number; likedBy: string[] }>(`/api/discussions/${id}/like`, {
+      method: 'POST',
+    }),
+  addReply: (messageId: string, payload: { id?: string; content: string; replyToNickname?: string }) =>
+    fetchAPI<{ reply: any }>(`/api/discussions/${messageId}/replies`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  removeReply: (replyId: string) =>
+    fetchAPI<{ message: string }>(`/api/discussion-replies/${replyId}`, { method: 'DELETE' }),
+  toggleReplyLike: (replyId: string) =>
+    fetchAPI<{ liked: boolean; likes: number; likedBy: string[] }>(`/api/discussion-replies/${replyId}/like`, {
+      method: 'POST',
+    }),
 };
 
 // 排行榜

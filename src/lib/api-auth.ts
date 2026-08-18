@@ -35,7 +35,7 @@ export function apiUserToLocalUser(apiUser: any, passwordHash = ''): User {
     moduleData,
     displayCategory: apiUser.displayCategory || 'math',
     favoritePosts: apiUser.favoritePosts || [],
-    favoriteQuestions: [],
+    favoriteQuestions: apiUser.favoriteQuestions || [],
     following: [],
     privacy: { showFollowing: true, showFollowers: true, showBio: true },
     piPower: {
@@ -67,6 +67,7 @@ export async function syncUserToApi(user: User): Promise<void> {
     displayCategory: user.displayCategory,
     moduleData: user.moduleData,
     favoritePosts: user.favoritePosts || [],
+    favoriteQuestions: user.favoriteQuestions || [],
   });
 }
 

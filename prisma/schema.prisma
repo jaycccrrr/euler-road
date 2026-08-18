@@ -22,6 +22,8 @@ model User {
 
   // 收藏的帖子
   favoritePosts String[] @default([])
+  // 收藏的每日一题
+  favoriteQuestions String[] @default([])
 
   // 关注统计
   followingCount Int      @default(0)
@@ -34,6 +36,10 @@ model User {
   answerComments AnswerComment[]
   following     Follow[] @relation("UserFollowing")
   followers     Follow[] @relation("UserFollowers")
+  sentMessages  Message[] @relation("UserSentMessages")
+  receivedMessages Message[] @relation("UserReceivedMessages")
+  discussionMessages DiscussionMessage[]
+  discussionReplies  DiscussionReply[]
 }
 
 model DailyQuestion {
@@ -144,4 +150,66 @@ model Follow {
   @@unique([followerId, followingId]) // 防止重复关注
   @@index([followerId])
   @@index([followingId])
+}
+
+// 私信消息
+model Message {
+  id          String   @id @default(uuid())
+  senderId    String
+  receiverId  String
+  content     String
+  images      String[] @default([])
+  messageType String   @default("text")
+  cardPayload Json?
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  sender   User @relation("UserSentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("UserReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+}
+
+// 每日挑战讨论区消息
+model DiscussionMessage {
+  id                  String   @id @default(uuid())
+  questionId          String
+  userId              String
+  content             String
+  refQuestionId       String?
+  refQuestionTitle    String?
+  refQuestionModuleId String?
+  refQuestionDate     String?
+  refAnswerId         String?
+  refAnswerExcerpt    String?
+  refAnswerScore      Int?
+  refAnswerIsCorrect  Boolean?
+  likes               Int      @default(0)
+  likedBy             String[] @default([])
+  createdAt           DateTime @default(now())
+
+  user    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replies DiscussionReply[]
+
+  @@index([questionId])
+  @@index([createdAt])
+}
+
+// 讨论区消息的回复
+model DiscussionReply {
+  id              String   @id @default(uuid())
+  messageId       String
+  userId          String
+  content         String
+  replyToNickname String?
+  likes           Int      @default(0)
+  likedBy         String[] @default([])
+  createdAt       DateTime @default(now())
+
+  message DiscussionMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
 }

@@ -418,6 +418,9 @@ export const useAuth = create<AuthState>()(
         if (favorites.includes(questionId)) return;
         const updatedUser = { ...user, favoriteQuestions: [...favorites, questionId] };
         await updateUser(updatedUser);
+        void syncUserToApi(updatedUser).catch((syncError) =>
+          console.warn('同步题目收藏到后端失败:', syncError)
+        );
         set({ user: updatedUser });
       },
 
@@ -428,6 +431,9 @@ export const useAuth = create<AuthState>()(
         const favorites = user.favoriteQuestions || [];
         const updatedUser = { ...user, favoriteQuestions: favorites.filter(id => id !== questionId) };
         await updateUser(updatedUser);
+        void syncUserToApi(updatedUser).catch((syncError) =>
+          console.warn('同步取消题目收藏到后端失败:', syncError)
+        );
         set({ user: updatedUser });
       },
 

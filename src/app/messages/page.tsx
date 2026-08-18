@@ -17,6 +17,7 @@ import {
   areFriends,
 } from '@/lib/db';
 import { subscribeToTable } from '@/lib/cloud-sync';
+import { mergeMessagesFromBackend, mergeConversationsFromBackend, syncMessageToBackend } from '@/lib/api-sync';
 import { useAuth } from '@/hooks/useAuth';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { User, Message, QuestionCardPayload, PostCardPayload } from '@/types';
@@ -123,6 +124,7 @@ export default function MessagesPage() {
   const loadSessions = useCallback(async () => {
     if (!currentUser) return;
     try {
+      await mergeConversationsFromBackend();
       setSessions(await getChatSessions(currentUser.id));
     } catch (error) {
       console.error('Failed to load chat sessions:', error);
@@ -152,6 +154,7 @@ export default function MessagesPage() {
   const loadMessages = useCallback(async () => {
     if (!currentUser || !activeFriend) return;
     try {
+      await mergeMessagesFromBackend(currentUser.id, activeFriend.id);
       const msgs = await getMessagesBetweenUsers(currentUser.id, activeFriend.id);
       setMessages(msgs);
       await markMessagesAsRead(currentUser.id, activeFriend.id);
@@ -207,7 +210,7 @@ export default function MessagesPage() {
 
     setSending(true);
     try {
-      await createMessage({
+      const newMsg: Message = {
         id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
         senderId: currentUser.id,
         receiverId: activeFriend.id,
@@ -216,7 +219,9 @@ export default function MessagesPage() {
         createdAt: new Date().toISOString(),
         isRead: false,
         messageType: 'text',
-      });
+      };
+      await createMessage(newMsg);
+      void syncMessageToBackend(newMsg);
       setInput('');
       setSelectedImage(null);
       await loadMessages();
@@ -230,7 +235,7 @@ export default function MessagesPage() {
 
   const sendCardMessage = async (payload: QuestionCardPayload | PostCardPayload) => {
     if (!currentUser || !activeFriend) return;
-    await createMessage({
+    const newMsg: Message = {
       id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       senderId: currentUser.id,
       receiverId: activeFriend.id,
@@ -240,7 +245,9 @@ export default function MessagesPage() {
       isRead: false,
       messageType: payload.kind,
       cardPayload: payload,
-    });
+    };
+    await createMessage(newMsg);
+    void syncMessageToBackend(newMsg);
     await loadMessages();
     await loadSessions();
   };

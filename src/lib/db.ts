@@ -534,6 +534,11 @@ export async function createComment(comment: Comment): Promise<void> {
   syncUpsert('comments', comment);
 }
 
+export async function getCommentById(id: string): Promise<Comment | undefined> {
+  const database = await initDB();
+  return database.get('comments', id);
+}
+
 export async function getCommentsByPost(postId: string): Promise<Comment[]> {
   const database = await initDB();
   return database.getAllFromIndex('comments', 'by-post', postId);
@@ -613,6 +618,11 @@ export async function createMessage(message: Message): Promise<void> {
   const database = await initDB();
   await database.add('messages', message);
   syncUpsert('messages', message);
+}
+
+export async function getMessageById(id: string): Promise<Message | undefined> {
+  const database = await initDB();
+  return database.get('messages', id);
 }
 
 export async function getMessagesBetweenUsers(userId1: string, userId2: string): Promise<Message[]> {
