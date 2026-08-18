@@ -1251,7 +1251,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "hint-1775029378667",
             "type": "image",
-            "content": "/images/高中数学精编题库/三角函数/69cccbd17a5a7.webp",
+            "content": "/images/高中数学精编题库/三角函数/qb-1774949746727-1.jpg",
             "width": 200
           }
         ],
@@ -2425,7 +2425,7 @@ export const staticQuestionBankChapters: StaticQuestionBankChapter[] = [
           {
             "id": "hint-1775056918190",
             "type": "image",
-            "content": "/images/高中数学精编题库/排列组合/69cd376cf020a.webp",
+            "content": "/images/高中数学精编题库/排列组合/qb-1774964664411-1.jpg",
             "width": 500
           }
         ],
