@@ -2,6 +2,69 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
+// 识图判卷（视觉模型，默认通义千问 Qwen3-VL-Plus；未配置 Key 或无图片时返回 null）
+async function gradeWithVision(
+  question: { title: string; content: string; answer?: string | null },
+  content: string,
+  images: string[]
+): Promise<{ score: number; feedback: string; isCorrect: boolean } | null> {
+  const apiKey = process.env.VISION_API_KEY;
+  if (!apiKey || !images?.length) return null;
+
+  try {
+    const model = process.env.VISION_MODEL || 'qwen-vl-plus';
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+    const res = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.3,
+        messages: [
+          {
+            role: 'system',
+            content:
+              '你是数学作业批改助手。请根据题目、参考答案和学生作答（可能包含手写图片），严格返回 JSON：{"score": 0到100的整数, "isCorrect": 是否判对, "feedback": "简短中文评语"}。请仔细识别图片中的手写内容与公式。不要返回其他内容。',
+          },
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: `【题目】${question.title}\n${question.content}\n【参考答案】${question.answer || '无'}\n【学生文字作答】${content || '（仅图片作答）'}`,
+              },
+              ...images.map((src) => ({
+                type: 'image_url',
+                image_url: { url: src },
+              })),
+            ],
+          },
+        ],
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    const text = data?.choices?.[0]?.message?.content || '';
+    const parsed = JSON.parse(text);
+    const score = Math.max(0, Math.min(100, Number(parsed.score) || 60));
+    return {
+      score,
+      feedback: String(parsed.feedback || '已批改完成'),
+      isCorrect: typeof parsed.isCorrect === 'boolean' ? parsed.isCorrect : score >= 80,
+    };
+  } catch (error) {
+    console.warn('识图判卷失败，降级到文本判卷:', error);
+    return null;
+  }
+}
+
 // AI 判卷（DeepSeek）：失败时返回 null，调用方降级到本地算法
 async function gradeWithAI(
   question: { title: string; content: string; answer?: string | null },
@@ -101,11 +164,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // AI 判卷（DeepSeek），失败时本地降级
-    let grading = await gradeWithAI(
-      { title: question?.title || '每日一题', content: question?.content || '', answer: question?.answer },
-      content
-    );
+    const questionForGrading = {
+      title: question?.title || '每日一题',
+      content: question?.content || '',
+      answer: question?.answer,
+    };
+
+    // 判卷链路：识图判卷（有图且有 Key）→ 文本 AI 判卷（DeepSeek）→ 本地降级
+    let grading =
+      (await gradeWithVision(questionForGrading, content, images || [])) ||
+      (await gradeWithAI(questionForGrading, content));
     if (!grading) {
       const aiScore = Math.floor(Math.random() * 40) + 60; // 模拟60-100分
       grading = {

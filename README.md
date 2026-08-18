@@ -44,6 +44,8 @@ npm run dev
 | `DATABASE_URL` | 是 | Supabase Postgres 连接串（建议使用会话连接池，见下方说明） |
 | `JWT_SECRET` | 是 | 至少 32 位随机字符串，用于 API 认证签名 |
 | `DEEPSEEK_API_KEY` | 否 | DeepSeek API Key，用于 AI 判卷（缺失时自动降级本地判分） |
+| `VISION_API_KEY` | 否 | 阿里云百炼 API Key，用于识图判卷（识别手写图片作答；为空则自动降级为文本判卷） |
+| `VISION_MODEL` | 否 | 识图判卷模型，默认 `qwen-vl-plus`（Qwen3-VL-Plus） |
 | `NEXT_PUBLIC_SUPABASE_URL` | 否 | Supabase 项目地址（客户端直连/云同步用） |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 否 | Supabase anon key（客户端直连/云同步用） |
 
