@@ -3,12 +3,51 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ContentBlockView } from './ContentBlockView';
 import { StaticTopic } from '@/data/highschoolStatic';
+import type { ContentBlock } from '@/data/highschoolMath';
 import { NotePanel } from '@/components/note/NotePanel';
 import { StickyNoteManager, StickyNoteManagerRef } from '@/components/note/StickyNoteManager';
 import { Note } from '@/types';
-import { BookOpen, ChevronRight } from 'lucide-react';
+import { BookOpen, ChevronRight, Download, Pencil, Save, Trash2, Upload } from 'lucide-react';
+import {
+  loadKbEdits,
+  saveKbEdit,
+  deleteKbEdit,
+  downloadKbFillEdits,
+  type KbFillEdit,
+  type KbFillImage,
+} from '@/lib/kb-fill-edits';
+import { useMissingRefs } from '@/lib/useMissingRefs';
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+// 收集课时内容里的本地图片引用（图片块 + 文本中的 <img>/![...]）
+function collectImageRefs(blocks: ContentBlock[]): string[] {
+  const out: string[] = [];
+  const re = /<img[^>]+src\s*=\s*["']([^"']+)["']|!\[[^\]]*\]\(([^)]+)\)/gi;
+  for (const b of blocks) {
+    if (b.type === 'image') {
+      if (b.content && !out.includes(b.content)) out.push(b.content);
+    } else {
+      let m;
+      re.lastIndex = 0;
+      while ((m = re.exec(b.content))) {
+        const u = (m[1] || m[2] || '').trim();
+        if (u && u.startsWith('/') && !out.includes(u)) out.push(u);
+      }
+    }
+  }
+  return out;
+}
 
 interface ReadonlyAdvancedTopicsProps {
   topics: StaticTopic[];
@@ -74,6 +113,10 @@ function TopicDetail({
   focusNote,
   onCreateNote,
   onEditNote,
+  editMode,
+  kbEdits,
+  onSaveEdit,
+  onDeleteEdit,
 }: {
   topic: StaticTopic;
   initialSubTopicTitle?: string;
@@ -85,6 +128,10 @@ function TopicDetail({
   focusNote?: { id: string; ts: number } | null;
   onCreateNote?: (chapterTitle: string) => void;
   onEditNote?: (note: Note) => void;
+  editMode: boolean;
+  kbEdits: Record<string, KbFillEdit>;
+  onSaveEdit: (edit: KbFillEdit) => void;
+  onDeleteEdit: (key: string) => void;
 }) {
   const [selectedSubTopicId, setSelectedSubTopicId] = useState<string>(() => {
     if (initialSubTopicTitle) {
@@ -99,6 +146,40 @@ function TopicDetail({
   );
 
   const chapterTitle = selectedSubTopic?.title || topic.title;
+  const subKey = selectedSubTopic ? `${topic.id}:${selectedSubTopic.id}` : '';
+  const subRefs = selectedSubTopic ? collectImageRefs(selectedSubTopic.blocks) : [];
+  const missingMap = useMissingRefs(subRefs);
+  const [images, setImages] = useState<KbFillImage[]>([]);
+  useEffect(() => {
+    setImages(kbEdits[subKey]?.images ?? []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subKey]);
+  const missCount = subRefs.filter((r) => missingMap[r] === true).length;
+
+  const uploadForRef = async (ref: string, file?: File | null) => {
+    if (!file) return;
+    const dataUrl = await readFileAsDataUrl(file);
+    setImages((prev) => [...prev.filter((i) => i.ref !== ref), { ref, dataUrl, name: file.name }]);
+  };
+
+  const removeImage = (ref: string) => setImages((prev) => prev.filter((i) => i.ref !== ref));
+
+  const handleSave = () => {
+    if (!selectedSubTopic || !subKey) return;
+    onSaveEdit({
+      key: subKey,
+      topicId: topic.id,
+      subId: selectedSubTopic.id,
+      images,
+      updatedAt: Date.now(),
+    });
+  };
+
+  const handleDelete = () => {
+    if (!subKey) return;
+    onDeleteEdit(subKey);
+    setImages([]);
+  };
 
   return (
     <div className="flex gap-4">
@@ -184,6 +265,84 @@ function TopicDetail({
                   ))}
                 </div>
               )}
+              {editMode && (
+                <div className="mt-6 max-w-3xl mx-auto p-4 rounded-xl bg-amber-50/70 border border-amber-200 space-y-3">
+                  <div className="flex items-center gap-2 text-amber-800 font-medium text-sm">
+                    <Pencil className="w-4 h-4" />
+                    编辑区
+                    <span className="font-normal text-amber-700/80">
+                      本课时缺失图片 {missCount} 张 · 改动保存在本机，完成后点右上角“导出编辑数据”
+                    </span>
+                  </div>
+                  {subRefs.length === 0 ? (
+                    <p className="text-xs text-amber-700/80">本课时没有图片引用</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {subRefs.map((ref) => {
+                        const img = images.find((i) => i.ref === ref);
+                        return (
+                          <div key={ref} className="flex items-center gap-2 text-xs">
+                            <code className="text-[11px] text-amber-800 bg-amber-100/70 px-1.5 py-0.5 rounded break-all">
+                              {ref}
+                            </code>
+                            <label className="cursor-pointer inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 shrink-0">
+                              <Upload className="w-3 h-3" />
+                              上传图片
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  void uploadForRef(ref, e.target.files?.[0]);
+                                  e.target.value = '';
+                                }}
+                              />
+                            </label>
+                            {img ? (
+                              <>
+                                <img
+                                  src={img.dataUrl}
+                                  alt="预览"
+                                  className="h-10 w-10 object-cover rounded border border-amber-200"
+                                />
+                                <button
+                                  type="button"
+                                  className="text-amber-700 hover:text-rose-600"
+                                  onClick={() => removeImage(ref)}
+                                  title="移除该图"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </>
+                            ) : missingMap[ref] === false ? (
+                              <span className="text-emerald-600/70">已存在</span>
+                            ) : missingMap[ref] === true ? (
+                              <span className="text-rose-600/70">缺失，待上传</span>
+                            ) : (
+                              <span className="text-amber-600/70">检测中…</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" onClick={handleSave}>
+                      <Save className="w-3.5 h-3.5 mr-1" />
+                      保存本课时
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-amber-300 text-amber-800"
+                      onClick={handleDelete}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-1" />
+                      删除本课时编辑
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -213,6 +372,36 @@ export function ReadonlyAdvancedTopics({ topics, moduleId, moduleName, userId, s
   const [initialChapter, setInitialChapter] = useState<string | undefined>(undefined);
   // 「前往原文」要定位的笔记（ts 区分对同一笔记的重复点击）
   const [focusNote, setFocusNote] = useState<{ id: string; ts: number } | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [kbEdits, setKbEdits] = useState<Record<string, KbFillEdit>>({});
+
+  useEffect(() => {
+    let alive = true;
+    void loadKbEdits().then((m) => {
+      if (alive) setKbEdits(m);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const handleSaveEdit = (edit: KbFillEdit) => {
+    void saveKbEdit(edit).then(() => {
+      setKbEdits((prev) => ({ ...prev, [edit.key]: edit }));
+    });
+  };
+
+  const handleDeleteEdit = (key: string) => {
+    void deleteKbEdit(key).then(() => {
+      setKbEdits((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    });
+  };
+
+  const handleExport = () => downloadKbFillEdits(kbEdits);
 
   // 支持 hash 深度定位：搜索结果（#topic=）与笔记"前往原文"（#chapter=&note=）
   useEffect(() => {
@@ -245,26 +434,59 @@ export function ReadonlyAdvancedTopics({ topics, moduleId, moduleName, userId, s
 
   const selectedTopic = topics.find((t) => t.id === selectedTopicId);
 
+  const editToolbar = (
+    <div className="flex items-center justify-end gap-2">
+      <Button
+        size="sm"
+        variant={editMode ? 'default' : 'outline'}
+        className={editMode ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'border-slate-200 text-slate-600'}
+        onClick={() => setEditMode((v) => !v)}
+      >
+        <Pencil className="w-3.5 h-3.5 mr-1" />
+        {editMode ? '退出编辑' : '编辑模式'}
+      </Button>
+      {editMode && (
+        <Button
+          size="sm"
+          variant="outline"
+          className="border-amber-300 text-amber-800 hover:bg-amber-100"
+          onClick={handleExport}
+        >
+          <Download className="w-3.5 h-3.5 mr-1" />
+          导出编辑数据
+        </Button>
+      )}
+    </div>
+  );
+
   if (selectedTopic) {
     return (
-      <TopicDetail
-        key={`${selectedTopic.id}:${initialChapter || ''}`}
-        topic={selectedTopic}
-        initialSubTopicTitle={initialChapter}
-        onBack={() => setSelectedTopicId(null)}
-        moduleId={moduleId}
-        moduleName={moduleName}
-        userId={userId}
-        stickyNoteRef={stickyNoteRef}
-        focusNote={focusNote}
-        onCreateNote={onCreateNote}
-        onEditNote={onEditNote}
-      />
+      <div className="space-y-6">
+        {editToolbar}
+        <TopicDetail
+          key={`${selectedTopic.id}:${initialChapter || ''}`}
+          topic={selectedTopic}
+          initialSubTopicTitle={initialChapter}
+          onBack={() => setSelectedTopicId(null)}
+          moduleId={moduleId}
+          moduleName={moduleName}
+          userId={userId}
+          stickyNoteRef={stickyNoteRef}
+          focusNote={focusNote}
+          onCreateNote={onCreateNote}
+          onEditNote={onEditNote}
+          editMode={editMode}
+          kbEdits={kbEdits}
+          onSaveEdit={handleSaveEdit}
+          onDeleteEdit={handleDeleteEdit}
+        />
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      {editToolbar}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {topics.map((topic) => (
           <TopicCard

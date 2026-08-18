@@ -17,6 +17,7 @@ import {
   type FillEdit,
   type FillImage,
 } from '@/lib/fill-edits';
+import { useMissingRefs } from '@/lib/useMissingRefs';
 import { staticQuestionBankChapters } from '@/data/highschoolStatic';
 import { advancedMathExerciseChapters, getGroupedChapters } from '@/data/advancedMathExerciseData';
 import { linearAlgebraExerciseChapters } from '@/data/linearAlgebraExerciseData';
@@ -513,36 +514,6 @@ function readFileAsDataUrl(file: File): Promise<string> {
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
   });
-}
-
-// 缓存图片引用是否缺失（HEAD 探测，结果跨题目复用）
-const refStatusCache: Record<string, boolean> = {};
-
-function useMissingRefs(refs: string[]) {
-  const [missing, setMissing] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(refs.filter((r) => r in refStatusCache).map((r) => [r, refStatusCache[r]]))
-  );
-  const key = refs.join('|');
-  useEffect(() => {
-    let alive = true;
-    for (const ref of refs) {
-      if (ref in refStatusCache) continue;
-      fetch(assetPath(ref), { method: 'HEAD' })
-        .then((r) => {
-          refStatusCache[ref] = !r.ok;
-          if (alive) setMissing((prev) => ({ ...prev, [ref]: !r.ok }));
-        })
-        .catch(() => {
-          refStatusCache[ref] = true;
-          if (alive) setMissing((prev) => ({ ...prev, [ref]: true }));
-        });
-    }
-    return () => {
-      alive = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
-  return missing;
 }
 
 function QuestionItem({

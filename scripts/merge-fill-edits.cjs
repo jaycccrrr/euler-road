@@ -78,7 +78,62 @@ function extractArray(src, marker) {
   try { return JSON.parse(src.slice(start, end)); } catch { return null; }
 }
 
-const edits = JSON.parse(fs.readFileSync(input, 'utf8')).edits;
+const payload = JSON.parse(fs.readFileSync(input, 'utf8'));
+
+// ============ 知识库模式 ============
+// 知识库导出只包含 { ref, dataUrl }，目标就是让 public/<ref> 存在；
+// 若上传图片格式与引用扩展名不一致（如 webp 引用 + jpg 上传），
+// 则按实际格式落盘并同步更新数据文件里的引用。
+if (payload.source === 'euler-road-kb-fill-edits') {
+  let saved = 0;
+  let skipped = 0;
+  let dataChanged = false;
+  let src2 = fs.readFileSync(DATA, 'utf8');
+  for (const e of payload.edits) {
+    for (const img of e.images || []) {
+      if (
+        !img ||
+        !img.dataUrl ||
+        !img.dataUrl.startsWith('data:') ||
+        !img.ref ||
+        !img.ref.startsWith('/images/')
+      ) {
+        skipped++;
+        continue;
+      }
+      const mime = (img.dataUrl.match(/^data:([^;]+);/) || [])[1] || 'image/jpeg';
+      const ext = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
+      const dir = path.posix.dirname(img.ref);
+      const base = path.posix.basename(img.ref, path.posix.extname(img.ref));
+      const refExt = path.posix.extname(img.ref).replace('.', '');
+      const targetRef = refExt === ext ? img.ref : `${dir}/${base}.${ext}`;
+
+      const folderAbs = path.join(ROOT, 'public', dir.replace(/^\//, '').replace(/\//g, path.sep));
+      fs.mkdirSync(folderAbs, { recursive: true });
+      const fpath = path.join(folderAbs, path.posix.basename(targetRef));
+      const buf = Buffer.from(img.dataUrl.slice(img.dataUrl.indexOf(',') + 1), 'base64');
+      const h = md5(buf);
+      if (fs.existsSync(fpath) && md5(fs.readFileSync(fpath)) === h) {
+        skipped++;
+        continue;
+      }
+      fs.writeFileSync(fpath, buf);
+      saved++;
+      if (targetRef !== img.ref) {
+        const occurrences = src2.split(img.ref).length - 1;
+        src2 = src2.split(img.ref).join(targetRef);
+        if (occurrences > 0) dataChanged = true;
+      }
+    }
+  }
+  if (dataChanged) fs.writeFileSync(DATA, src2);
+  console.log(
+    `知识库模式完成: 写入 ${saved} 张，跳过 ${skipped} 张${dataChanged ? '，已同步更新数据引用' : ''}`
+  );
+  process.exit(0);
+}
+
+const edits = payload.edits;
 let src = fs.readFileSync(DATA, 'utf8');
 
 // 题目 → 章节名映射（文本解析题可能没有 /images/ 引用，需要用它推断目录）
