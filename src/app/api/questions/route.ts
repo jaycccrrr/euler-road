@@ -9,13 +9,28 @@ export async function GET(request: NextRequest) {
 
     const where = moduleId ? { moduleId } : {};
 
-    const questions = await prisma.dailyQuestion.findMany({
-      where,
-      orderBy: { date: 'desc' },
-      take: 30,
-    });
+    const page = parseInt(searchParams.get('page') || '1');
+    const pageSize = parseInt(searchParams.get('pageSize') || '20');
 
-    return NextResponse.json(questions);
+    const [questions, total] = await Promise.all([
+      prisma.dailyQuestion.findMany({
+        where,
+        orderBy: { date: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.dailyQuestion.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      questions,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    });
   } catch (error) {
     console.error('获取题目失败:', error);
     return NextResponse.json({ error: '获取题目失败' }, { status: 500 });

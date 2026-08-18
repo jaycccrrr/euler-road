@@ -64,7 +64,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       answer,
-      experienceGained,
+      feedback: answer.aiFeedback,
+      score: answer.aiScore,
+      expGained: experienceGained,
     });
   } catch (error) {
     console.error('提交答案失败:', error);
@@ -100,7 +102,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(answers);
+    return NextResponse.json({ answers });
   } catch (error) {
     console.error('获取答题记录失败:', error);
     return NextResponse.json({ error: '获取答题记录失败' }, { status: 500 });

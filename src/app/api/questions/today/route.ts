@@ -40,7 +40,10 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ question });
+    return NextResponse.json({
+      question,
+      questions: question ? [question] : [],
+    });
   } catch (error) {
     console.error('Get today question error:', error);
     return NextResponse.json(

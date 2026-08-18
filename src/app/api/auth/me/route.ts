@@ -45,6 +45,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+  return PATCH(req);
+}
+
+export async function PATCH(req: NextRequest) {
   try {
     const userId = getAuthUserId(req);
 

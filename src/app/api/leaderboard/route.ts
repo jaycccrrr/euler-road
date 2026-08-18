@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json(leaderboard);
+    return NextResponse.json({ users: leaderboard });
   } catch (error) {
     console.error('获取排行榜失败:', error);
     return NextResponse.json({ error: '获取排行榜失败' }, { status: 500 });

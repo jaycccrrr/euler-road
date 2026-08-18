@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(post);
+    return NextResponse.json({ post });
   } catch (error) {
     console.error('创建帖子失败:', error);
     return NextResponse.json({ error: '创建帖子失败' }, { status: 500 });
