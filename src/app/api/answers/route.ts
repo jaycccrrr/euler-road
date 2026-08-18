@@ -2,6 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
+// 从 AI 返回文本中提取 JSON（兼容 markdown 代码块包裹）
+function extractJson(text: string): any {
+  const cleaned = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    // 尝试截取第一个 { 到最后一个 } 之间的内容
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+      try {
+        return JSON.parse(cleaned.slice(start, end + 1));
+      } catch {
+        // ignore
+      }
+    }
+  }
+  throw new Error('无法解析 AI 返回内容');
+}
+
 // 识图判卷（视觉模型，默认通义千问 Qwen3-VL-Plus；未配置 Key 或无图片时返回 null）
 async function gradeWithVision(
   question: { title: string; content: string; answer?: string | null },
@@ -52,7 +72,7 @@ async function gradeWithVision(
     if (!res.ok) return null;
     const data = await res.json();
     const text = data?.choices?.[0]?.message?.content || '';
-    const parsed = JSON.parse(text);
+    const parsed = extractJson(text);
     const score = Math.max(0, Math.min(100, Number(parsed.score) || 60));
     return {
       score,
@@ -105,7 +125,7 @@ async function gradeWithAI(
     if (!res.ok) return null;
     const data = await res.json();
     const text = data?.choices?.[0]?.message?.content || '';
-    const parsed = JSON.parse(text);
+    const parsed = extractJson(text);
     const score = Math.max(0, Math.min(100, Number(parsed.score) || 60));
     return {
       score,
