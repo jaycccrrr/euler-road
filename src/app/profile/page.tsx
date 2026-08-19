@@ -67,6 +67,7 @@ import Link from 'next/link';
 import { Post, Note, User as UserType } from '@/types';
 import { getAllPosts, deletePost, getNotesByUser, deleteNote, getFollowing, getFollowers, getUserById, getAnswerRecordsByUser, areFriends } from '@/lib/db';
 import { syncPostDeleteToBackend } from '@/lib/api-sync';
+import CubeLoader from '@/components/ui/cube-loader';
 import { navigateTo } from '@/lib/asset';
 import { getDailyQuestionsByDate } from '@/lib/daily-question-bank';
 import { formatRelativeTime } from '@/lib/utils';
@@ -251,9 +252,8 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen bg-slate-50">
         <Header />
-        <main className="container mx-auto px-4 py-12 text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-slate-400 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-slate-500">加载中...</p>
+        <main className="container mx-auto px-4 py-12">
+          <CubeLoader compact text="加载中" subtext="正在准备你的主页…" />
         </main>
       </div>
     );
@@ -960,7 +960,7 @@ export default function ProfilePage() {
         {activeTab === 'notes' && (
           <div className="space-y-4">
             {notesLoading ? (
-              <div className="text-center py-12 text-slate-500">加载中...</div>
+              <CubeLoader compact text="加载中" subtext="正在加载笔记…" />
             ) : notes.length === 0 ? (
               <Card className="p-12 text-center bg-white border-slate-200 shadow-sm">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center">
@@ -1126,7 +1126,7 @@ export default function ProfilePage() {
               </div>
 
               {socialLoading ? (
-                <div className="text-center py-12 text-slate-500">加载中...</div>
+                <CubeLoader compact text="加载中" subtext="正在加载社交数据…" />
               ) : displayList.length === 0 ? (
                 <Card className="p-12 text-center bg-white border-slate-200 shadow-sm">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center">

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import { getPostById, getUserById, getAllPosts, createComment, updatePost, getFollowing, getFollowers, areFriends } from '@/lib/db';
 import { mergePostCommentsFromBackend, syncPostCommentToBackend, fetchAndCacheUser } from '@/lib/api-sync';
+import CubeLoader from '@/components/ui/cube-loader';
 import { navigateTo } from '@/lib/asset';
 import { Textarea } from '@/components/ui/textarea';
 import { generateId } from '@/lib/utils';
@@ -329,9 +330,7 @@ function PostDetailContent() {
       <div className="min-h-screen">
         <Header />
         <main className="container mx-auto px-4 py-8">
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          </div>
+          <CubeLoader text="加载中" subtext="正在加载帖子…" />
         </main>
       </div>
     );
@@ -719,7 +718,7 @@ function PostDetailContent() {
                   </Button>
                 </div>
               ) : (
-                <div className="text-center py-4 text-gray-500">作者信息加载中...</div>
+                <CubeLoader compact text="加载中" subtext="正在加载作者信息…" />
               )}
             </Card>
 
@@ -886,9 +885,7 @@ export default function PostPage() {
       <div className="min-h-screen">
         <Header />
         <main className="container mx-auto px-4 py-8">
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          </div>
+          <CubeLoader text="加载中" subtext="正在准备页面…" />
         </main>
       </div>
     }>

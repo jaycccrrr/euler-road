@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import CubeLoader from '@/components/ui/cube-loader';
 import { getAnswerRecordsByUser, getDailyQuestionById } from '@/lib/db';
 import { User, DailyQuestion, AnswerRecord, QuestionCardPayload } from '@/types';
 import { Flame, CheckCircle2, XCircle } from 'lucide-react';
@@ -106,7 +107,7 @@ export function ShareQuestionPicker({ isOpen, onClose, currentUser, onSelect }: 
         <ScrollArea className="flex-1">
           <div className="p-3 space-y-2">
             {isLoading ? (
-              <div className="text-center py-10 text-sm text-gray-400">加载中...</div>
+              <CubeLoader compact text="加载中" subtext="正在加载答题记录…" />
             ) : items.length === 0 ? (
               <div className="text-center py-10 text-gray-400">
                 <div className="text-3xl mb-2">📝</div>

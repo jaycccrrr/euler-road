@@ -15,6 +15,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { getCustomLessonsByModule } from '@/lib/db';
 import { StickyNoteManagerRef } from '@/components/note/StickyNoteManager';
+import CubeLoader from '@/components/ui/cube-loader';
 
 interface AdvancedModuleContentProps {
   module: KnowledgeModule | undefined;
@@ -157,7 +158,7 @@ export default function AdvancedModuleContent({ module: initialModule, moduleId 
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 flex items-center justify-center">
-          <div className="flex items-center gap-3 text-slate-500"><Loader2 className="w-6 h-6 animate-spin" /><span>加载中...</span></div>
+          <CubeLoader compact text="加载中" subtext="正在加载课程内容…" />
         </main>
       </div>
     );

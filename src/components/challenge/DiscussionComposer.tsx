@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import CubeLoader from '@/components/ui/cube-loader';
 import { getAnswerRecordsByUserAndQuestionAll } from '@/lib/db';
 import { useDailyQuestion } from '@/hooks/useDailyQuestion';
 import { User, AnswerRecord } from '@/types';
@@ -172,7 +173,7 @@ function MyAnswerRefPicker({
         <ScrollArea className="flex-1">
           <div className="p-3 space-y-2">
             {loading ? (
-              <div className="text-center py-10 text-sm text-gray-400">加载中...</div>
+              <CubeLoader compact text="加载中" subtext="正在加载解答记录…" />
             ) : records.length === 0 ? (
               <div className="text-center py-10 text-gray-400">
                 <div className="text-3xl mb-2">📝</div>

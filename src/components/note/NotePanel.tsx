@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import CubeLoader from '@/components/ui/cube-loader';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { PenLine, Trash2, Calendar, BookOpen, X, ExternalLink, StickyNote } from 'lucide-react';
 import { MathRenderer } from '@/components/math/MathRenderer';
@@ -126,7 +127,7 @@ export function NotePanel({
           </div>
 
           {loading ? (
-            <div className="text-center py-8 text-slate-500">加载中...</div>
+            <CubeLoader compact text="加载中" subtext="正在加载笔记…" />
           ) : notes.length === 0 ? (
             <div className="text-center py-12 text-slate-400">
               <StickyNote className="w-12 h-12 mx-auto mb-3 opacity-50" />

@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShieldCheck, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
+import CubeLoader from '@/components/ui/cube-loader';
 import { getAllAnswerRecords, updateAnswerRecord, getUserById } from '@/lib/db';
 import { getDailyQuestionByIdFallback } from '@/lib/ai-question-generator';
 import { MathRenderer } from '@/components/math/MathRenderer';
@@ -92,7 +93,9 @@ export default function AdminReviewPage() {
     return (
       <div className="min-h-screen bg-slate-50">
         <Header />
-        <main className="container mx-auto px-4 py-12 text-center text-slate-500">加载中...</main>
+        <main className="container mx-auto px-4 py-12">
+          <CubeLoader compact text="加载中" subtext="正在加载待审内容…" />
+        </main>
       </div>
     );
   }
@@ -123,10 +126,7 @@ export default function AdminReviewPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-slate-500">
-            <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-            加载中...
-          </div>
+          <CubeLoader compact text="加载中" subtext="正在加载复核队列…" />
         ) : items.length === 0 ? (
           <Card className="p-12 text-center bg-white border-slate-200 shadow-sm">
             <CheckCircle2 className="w-12 h-12 mx-auto mb-3 text-emerald-500" />

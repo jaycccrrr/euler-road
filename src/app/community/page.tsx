@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import { useAuth } from '@/hooks/useAuth';
 import { getPostsPaginated, getAllPosts, createPost, updatePost, getUserById, resetDatabase, getFollowing, getFollowers, areFriends, searchUsers } from '@/lib/db';
 import { mergePostsFromBackend, syncPostToBackend, syncPostUpdateToBackend, fetchAndCacheUser } from '@/lib/api-sync';
+import CubeLoader from '@/components/ui/cube-loader';
 import { likesAPI, usersAPI } from '@/lib/api-client';
 import { hasApiToken } from '@/lib/api-auth';
 import { apiUserToLocalUser } from '@/lib/api-auth';
@@ -766,7 +767,7 @@ export default function CommunityPage() {
               {/* 关注用户的帖子 */}
               <div>
                 {isLoading ? (
-                  <div className="text-center py-12">加载中...</div>
+                  <CubeLoader compact text="加载中" subtext="正在获取关注动态…" />
                 ) : posts.filter(p => followingUsers.some(u => u.id === p.userId)).length === 0 ? (
                   <div className="text-center py-12 text-gray-500">
                     <UserCheck className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -921,7 +922,7 @@ export default function CommunityPage() {
             <TabsContent key={tabValue} value={tabValue}>
               <div>
                 {isLoading ? (
-                  <div className="text-center py-12">加载中...</div>
+                  <CubeLoader compact text="加载中" subtext="正在获取社区帖子…" />
                 ) : filterPostsByModule(tabValue).length === 0 ? (
                   <div className="text-center py-12 text-gray-500">暂无帖子</div>
                 ) : (
@@ -940,7 +941,7 @@ export default function CommunityPage() {
           <TabsContent value="hot">
             <div>
               {isHotLoading ? (
-                <div className="text-center py-12">加载中...</div>
+                <CubeLoader compact text="加载中" subtext="正在生成热榜…" />
               ) : hotPosts.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                   <Flame className="w-12 h-12 mx-auto mb-3 opacity-30" />

@@ -18,6 +18,7 @@ import {
 } from '@/lib/db';
 import { subscribeToTable } from '@/lib/cloud-sync';
 import { mergeMessagesFromBackend, mergeConversationsFromBackend, syncMessageToBackend, fetchAndCacheUser } from '@/lib/api-sync';
+import CubeLoader from '@/components/ui/cube-loader';
 import { useAuth } from '@/hooks/useAuth';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { User, Message, QuestionCardPayload, PostCardPayload } from '@/types';
@@ -264,6 +265,9 @@ export default function MessagesPage() {
     return (
       <div className="min-h-screen bg-slate-50">
         <Header />
+        <main className="container mx-auto px-4 py-12">
+          <CubeLoader compact text="加载中" subtext="正在准备消息中心…" />
+        </main>
       </div>
     );
   }

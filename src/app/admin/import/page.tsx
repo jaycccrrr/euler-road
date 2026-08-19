@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import CubeLoader from '@/components/ui/cube-loader';
 import {
   Upload,
   FileText,
@@ -176,7 +177,9 @@ export default function AdminImportPage() {
     return (
       <div className="min-h-screen bg-slate-50">
         <Header />
-        <main className="container mx-auto px-4 py-12 text-center text-slate-500">加载中...</main>
+        <main className="container mx-auto px-4 py-12">
+          <CubeLoader compact text="加载中" subtext="正在加载导入工具…" />
+        </main>
       </div>
     );
   }

@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState, useCallback } from 'react';
+import CubeLoader from '@/components/ui/cube-loader';
 
 interface VirtualListProps<T> {
   items: T[];
@@ -76,7 +77,7 @@ export function VirtualList<T>({
         </div>
       </div>
       {isLoadingMore && (
-        <div className="py-4 text-center text-sm text-slate-400">加载中...</div>
+        <CubeLoader compact text="加载中" />
       )}
     </div>
   );
