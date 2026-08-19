@@ -24,7 +24,7 @@ export default async function ModulePage({ params }: PageProps) {
   }
 
   // 高等数学和线性代数使用新的高级布局
-  const useAdvancedLayout = ['advanced-math', 'linear-algebra'].includes(id);
+  const useAdvancedLayout = ['advanced-math', 'linear-algebra', 'probability'].includes(id);
 
   if (useAdvancedLayout) {
     return <AdvancedModuleContent module={module} moduleId={id} />;

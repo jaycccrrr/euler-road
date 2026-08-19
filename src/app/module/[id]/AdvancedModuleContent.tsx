@@ -113,6 +113,16 @@ function useCourseChapters(moduleId: string) {
           return;
         }
 
+        if (moduleId === 'probability') {
+          if (!mounted) return;
+          const { probabilityChapters } = await import('@/data/mathmaster/probability');
+          setData({
+            chapters: customChapter ? [...probabilityChapters, customChapter] : probabilityChapters,
+            loading: false,
+            error: null,
+          });
+          return;
+        }
         // 高等数学
         const { basicChapters } = await import('@/data/advancedMathBlocks');
         if (!mounted) return;

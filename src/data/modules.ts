@@ -1064,6 +1064,120 @@ dim(V₁+V₂) = dim(V₁) + dim(V₂) - dim(V₁∩V₂)
       },
     ],
   },
+  {
+    id: 'probability',
+    name: '概率论与数理统计',
+    category: 'math',
+    icon: '🎲',
+    color: 'from-pink-400 to-rose-500',
+    description: '概率论与数理统计知识体系（开源教材 LaTeX 精讲），涵盖随机事件、随机变量、数字特征、大数定律与数理统计',
+    topics: [
+      {
+        id: 'prob-1',
+        title: '随机事件与概率',
+        difficulty: 3,
+        content: `## 随机事件与概率
+
+### 随机试验与样本空间
+满足三个条件的试验称为**随机试验**，其每一个不可再分的可能结果称为**样本点** $\omega$，样本点的全体组成**样本空间** $\Omega$。
+
+### 事件的关系与运算
+- **包含**：$A\subset B$；**相等**：$A=B$
+- **积（交）**：$A\cap B$；**和（并）**：$A\cup B$
+- **差**：$A-B$；**对立事件**：$\overline{A}$
+- **互斥**：$AB=\varnothing$
+
+### 概率的公理化定义
+- $0\leq P(A)\leq 1$
+- $P(\Omega)=1$
+- 可列可加性：互不相容事件 $P(\bigcup A_i)=\sum P(A_i)$
+
+### 古典概型与几何概型
+$P(A)=\frac{A所含基本事件数}{基本事件总数}$；几何概型按长度/面积/体积之比计算。
+
+### 条件概率与独立性
+- $P(B|A)=\frac{P(AB)}{P(A)}$
+- 乘法公式：$P(AB)=P(A)P(B|A)$
+- 全概率公式、贝叶斯公式
+- 独立：$P(AB)=P(A)P(B)$`,
+      },
+      {
+        id: 'prob-2',
+        title: '随机变量及其分布',
+        difficulty: 3,
+        content: `## 随机变量及其分布
+
+### 分布函数
+$F(x)=P\{X\leq x\}$，单调不减、右连续、$F(-\infty)=0,F(+\infty)=1$。
+
+### 离散型随机变量
+- 分布律：$P\{X=x_k\}=p_k$
+- 0-1 分布、二项分布 $B(n,p)$、泊松分布 $P(\lambda)$
+
+### 连续型随机变量
+- 概率密度 $f(x)\geq 0$，$\int_{-\infty}^{+\infty}f(x)dx=1$
+- 均匀分布 $U(a,b)$、指数分布 $E(\lambda)$
+- 正态分布 $N(\mu,\sigma^2)$：$f(x)=\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(x-\mu)^2}{2\sigma^2}}$
+
+### 随机变量函数的分布
+利用分布函数法或公式法求 $Y=g(X)$ 的分布。`,
+      },
+      {
+        id: 'prob-3',
+        title: '随机变量的数字特征',
+        difficulty: 3,
+        content: `## 随机变量的数字特征
+
+### 数学期望
+- 离散：$E(X)=\sum x_kp_k$；连续：$E(X)=\int_{-\infty}^{+\infty}xf(x)dx$
+- 性质：线性性 $E(aX+bY)=aE(X)+bE(Y)$
+
+### 方差
+$D(X)=E(X^2)-[E(X)]^2$
+- 性质：$D(aX+b)=a^2D(X)$
+- 常见分布：$B(n,p)$ 方差 $npq$；$P(\lambda)$ 方差 $\lambda$；$U(a,b)$ 方差 $\frac{(b-a)^2}{12}$；$N(\mu,\sigma^2)$ 方差 $\sigma^2$
+
+### 协方差与相关系数
+- $\mathrm{Cov}(X,Y)=E(XY)-E(X)E(Y)$
+- 相关系数 $\rho_{XY}=\frac{\mathrm{Cov}(X,Y)}{\sqrt{D(X)D(Y)}}$，$|\rho|\leq 1$`,
+      },
+      {
+        id: 'prob-4',
+        title: '大数定律与中心极限定理',
+        difficulty: 4,
+        content: `## 大数定律与中心极限定理
+
+### 切比雪夫不等式
+$P\{|X-E(X)|\geq\varepsilon\}\leq\frac{D(X)}{\varepsilon^2}$
+
+### 大数定律
+- 切比雪夫大数定律、辛钦大数定律、伯努利大数定律
+- 频率依概率收敛于概率
+
+### 中心极限定理
+独立同分布时，$\frac{\sum X_i-n\mu}{\sqrt{n}\sigma}$ 近似服从 $N(0,1)$；德莫佛-拉普拉斯定理（二项分布近似正态）。`,
+      },
+      {
+        id: 'prob-5',
+        title: '数理统计',
+        difficulty: 4,
+        content: `## 数理统计
+
+### 抽样与统计量
+- 简单随机样本、样本均值 $\bar{X}$、样本方差 $S^2$
+- 三大分布：$\chi^2$ 分布、$t$ 分布、$F$ 分布
+
+### 参数估计
+- 矩估计法、最大似然估计法
+- 无偏性、有效性、相合性
+- 区间估计与置信区间
+
+### 假设检验
+- 原假设与备择假设、显著性水平、两类错误
+- $Z$ 检验、$t$ 检验、$\chi^2$ 检验`,
+      },
+    ],
+  },
 ];
 
 export function getModuleById(id: string): KnowledgeModule | undefined {
