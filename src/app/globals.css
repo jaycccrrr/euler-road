@@ -1114,9 +1114,9 @@
 /* Question bank option click pop */
 @keyframes optionPop {
   0% { transform: scale(1); }
-  50% { transform: scale(1.06); }
+  50% { transform: scale(1.03); }
   100% { transform: scale(1); }
 }
 .animate-option-pop {
-  animation: optionPop 0.3s ease-out;
+  animation: optionPop 0.25s ease-out;
 }

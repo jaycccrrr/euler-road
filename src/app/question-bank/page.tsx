@@ -25,9 +25,7 @@ import {
   Ruler,
   Sigma,
   Grid3X3,
-  CheckCircle2,
-  XCircle,
-  Eye,
+    Eye,
   EyeOff,
   ArrowRight,
   ArrowLeft,
@@ -512,16 +510,6 @@ function QuestionItem({
     }
   };
 
-  const isCorrect = useMemo(() => {
-    if (!submitted) return null;
-    const correct = Array.isArray(question.correctOption)
-      ? question.correctOption
-      : [question.correctOption];
-    const sel = selected.sort((a, b) => a - b);
-    const cor = correct.sort((a, b) => a - b);
-    return sel.length === cor.length && sel.every((v, i) => v === cor[i]);
-  }, [submitted, selected, question.correctOption]);
-
   const toggleOption = (idx: number) => {
     if (submitted) return;
     if (question.choiceType === 'single') {
@@ -581,7 +569,7 @@ function QuestionItem({
             }
           } else {
             btnClass += isSelected
-              ? 'bg-blue-50 border-blue-300 text-blue-800 shadow-sm animate-option-pop'
+              ? 'bg-blue-50 border-blue-300 text-blue-800 shadow-sm'
               : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300 hover:bg-blue-50/50';
           }
 
@@ -591,9 +579,9 @@ function QuestionItem({
                 className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
                   submitted
                     ? isCorrectOpt
-                      ? 'bg-emerald-500 text-white animate-option-pop'
+                      ? 'bg-emerald-500 text-white'
                       : isSelected
-                      ? 'bg-rose-500 text-white animate-option-pop'
+                      ? 'bg-rose-500 text-white'
                       : 'bg-slate-200 text-slate-500'
                     : isSelected
                     ? 'bg-blue-500 text-white'
@@ -617,21 +605,6 @@ function QuestionItem({
         >
           提交答案
         </Button>
-      )}
-      {submitted && (
-        <div className="flex items-center gap-3 mb-3">
-          {isCorrect ? (
-            <div className="flex items-center gap-2 text-emerald-700 font-medium">
-              <CheckCircle2 className="w-5 h-5 animate-option-pop" />
-              回答正确
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 text-rose-700 font-medium">
-              <XCircle className="w-5 h-5 animate-option-pop" />
-              回答错误
-            </div>
-          )}
-        </div>
       )}
       <div className="mb-3 flex flex-wrap gap-2">
         {question.hint.trim() && (
