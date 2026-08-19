@@ -111,6 +111,9 @@ function extractEnvironment(s, name) {
   };
 }
 
+function normalizeMathInside(s) {
+  return s.replace(/\$\$[\s\S]*?\$\$|\$[^$]*?\$/g, (m) => m.replace(/\\textbf\{/g, '\\text{'));
+}
 function texToMarkdown(raw) {
   let s = raw;
   // strip comments (keep \%)
@@ -197,6 +200,9 @@ function texToMarkdown(raw) {
     t = replaceCommand(t, 'emph', (inner) => `*${inner}*`);
     return t;
   });
+
+  // 数学环境内统一 \\textbf -> \\text（更稳的 KaTeX 渲染）
+  s = normalizeMathInside(s);
 
   // cleanup (outside math): spacing macros + text escapes
   s = mapOutsideMath(s, (t) => t.replace(/\\quad|\\qquad|\\,|\\;|\\!/g, ' ').replace(/\\%/g, '%').replace(/\\&/g, '&').replace(/\\_/g, '_').replace(/\\#/g, '#'));

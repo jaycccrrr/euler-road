@@ -45,18 +45,10 @@ export async function gradeAnswerDual(
 ): Promise<DualGradingResult> {
   const local = await gradeAnswer(question, userAnswer, userImages);
 
-  // 未配置 AI Key：直接使用本地结果
-  if (!AI_PROVIDER) {
-    return {
-      score: local.score,
-      feedback: local.feedback,
-      isCorrect: local.isCorrect,
-      meta: { localScore: local.score, needsReview: false },
-    };
-  }
-
-  // 始终调用 AI，生成具体评解
-  const ai = await gradeWithAI(question, userAnswer, userImages);
+  // 优先走后端 AI 判卷（识图 + DeepSeek，服务端密钥），浏览器直连作为兜底
+  const ai =
+    (await gradeViaBackend(question, userAnswer, userImages)) ||
+    (AI_PROVIDER ? await gradeWithAI(question, userAnswer, userImages) : null);
 
   if (!ai) {
     // AI 不可用，回退本地结果（明确标注，避免本地模板文案冒充 AI 评解）
@@ -96,6 +88,37 @@ export async function gradeAnswerDual(
   };
 }
 
+async function gradeViaBackend(
+  question: DailyQuestion,
+  userAnswer: string,
+  userImages: string[]
+): Promise<AIGradingResponse | null> {
+  try {
+    const res = await fetch('/api/grade', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: question.title,
+        content: question.content,
+        answer: question.answer,
+        studentContent: userAnswer,
+        images: userImages,
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.aiAvailable) return null;
+    return {
+      score: data.score,
+      isCorrect: data.isCorrect,
+      breakdown: Array.isArray(data.breakdown) ? data.breakdown : undefined,
+      feedback: data.feedback || 'AI 批改完成。',
+    };
+  } catch (error) {
+    console.warn('[Dual Grader] Backend grading unavailable:', error);
+    return null;
+  }
+}
 async function gradeWithAI(
   question: DailyQuestion,
   userAnswer: string,
