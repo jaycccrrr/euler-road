@@ -6,6 +6,13 @@ const path = require('path');
 const SRC_ROOT = 'D:/学习/欧拉之路/Math-master/Math-master';
 const DATA_OUT = path.join(__dirname, '..', 'src', 'data', 'mathmaster');
 
+const CHAPTER_TITLES = {
+  'random-events-and-probability': '随机事件与概率',
+  'random-variables-and-distribution': '随机变量及其分布',
+  'digital-features': '随机变量数字特征',
+  'law-of-large-numbers-and-central-limit-theorem': '大数定律与中心极限定理',
+  'mathematical-statistics': '数理统计',
+};
 const SUBJECTS = [
   {
     id: 'probability',
@@ -112,7 +119,7 @@ function extractEnvironment(s, name) {
 }
 
 function normalizeMathInside(s) {
-  return s.replace(/\$\$[\s\S]*?\$\$|\$[^$]*?\$/g, (m) => m.replace(/\\textbf\{/g, '\\text{'));
+  return s.replace(/\$\$[\s\S]*?\$\$|\$[^$]*?\$/g, (m) => m.replace(/\\textbf\{/g, '\\text{').replace(/，/g, ','));
 }
 function texToMarkdown(raw) {
   let s = raw;
@@ -245,7 +252,7 @@ function main() {
       const texPath = path.join(knowledgeDir, dir, `${folderSlug}.tex`);
       if (!fs.existsSync(texPath)) return;
       const raw = fs.readFileSync(texPath, 'utf8');
-      const title = getTitle(raw) || folderSlug;
+      let title = getTitle(raw); if (!title || title === '标题' || title === 'title') title = CHAPTER_TITLES[folderSlug] || folderSlug;
       const markdown = texToMarkdown(raw);
 
       // split by \section into lessons
