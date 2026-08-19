@@ -17,7 +17,7 @@ import {
   areFriends,
 } from '@/lib/db';
 import { subscribeToTable } from '@/lib/cloud-sync';
-import { mergeMessagesFromBackend, mergeConversationsFromBackend, syncMessageToBackend } from '@/lib/api-sync';
+import { mergeMessagesFromBackend, mergeConversationsFromBackend, syncMessageToBackend, fetchAndCacheUser } from '@/lib/api-sync';
 import { useAuth } from '@/hooks/useAuth';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { User, Message, QuestionCardPayload, PostCardPayload } from '@/types';
@@ -139,7 +139,7 @@ export default function MessagesPage() {
 
     let cancelled = false;
     const open = async () => {
-      const friend = await getUserById(hashUserId);
+      const friend = await fetchAndCacheUser(hashUserId);
       if (!friend || cancelled) return;
       setActiveFriend(friend);
       setActiveIsFriend(await areFriends(currentUser.id, friend.id));

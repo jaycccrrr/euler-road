@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import { getPostById, getUserById, getAllPosts, createComment, updatePost, getFollowing, getFollowers, areFriends } from '@/lib/db';
-import { mergePostCommentsFromBackend, syncPostCommentToBackend } from '@/lib/api-sync';
+import { mergePostCommentsFromBackend, syncPostCommentToBackend, fetchAndCacheUser } from '@/lib/api-sync';
 import { navigateTo } from '@/lib/asset';
 import { Textarea } from '@/components/ui/textarea';
 import { generateId } from '@/lib/utils';
@@ -150,7 +150,7 @@ function PostDetailContent() {
         if (currentUser) {
           setIsLiked(mergedPost.likedBy.includes(currentUser.id));
         }
-        const authorData = await getUserById(mergedPost.userId);
+        const authorData = await fetchAndCacheUser(mergedPost.userId);
         if (authorData) {
           setAuthor(authorData);
           // 获取作者的所有帖子
@@ -168,7 +168,7 @@ function PostDetailContent() {
         await Promise.all(
           commentUserIds.map(async (userId) => {
             try {
-              const userData = await getUserById(userId);
+              const userData = await fetchAndCacheUser(userId);
               if (userData) {
                 const moduleData = userData.moduleData || initModuleData();
                 const frame = getPrimaryFrame(moduleData, userData.displayCategory);
@@ -258,7 +258,7 @@ function PostDetailContent() {
 
   // 打开用户详情弹窗
   const handleOpenUserDialog = async (userId: string) => {
-    const userData = await getUserById(userId);
+    const userData = await fetchAndCacheUser(userId);
     if (userData) {
       setSelectedUser(userData);
       const allPosts = await getAllPosts();

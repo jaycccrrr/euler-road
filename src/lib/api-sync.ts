@@ -5,13 +5,16 @@ import {
   likesAPI,
   messagesAPI,
   discussionsAPI,
+  usersAPI,
 } from '@/lib/api-client';
-import { hasApiToken } from '@/lib/api-auth';
+import { hasApiToken, apiUserToLocalUser } from '@/lib/api-auth';
 import {
   createAnswerRecord,
   getAnswerRecordById,
   createPost,
   getPostById,
+  getUserById,
+  createUser,
   getCommentById,
   createComment,
   getMessageById,
@@ -24,6 +27,43 @@ import type { AnswerRecord, AnswerComment, Comment, DiscussionMessage, Discussio
 let lastPostsMergeAt = 0;
 let lastAnswersMergeAt = 0;
 const MERGE_INTERVAL = 30 * 1000;
+
+/** 把后端用户信息缓存到本地（已存在则跳过） */
+export async function cacheApiUser(apiUser: any): Promise<void> {
+  if (!apiUser?.id) return;
+  try {
+    const existing = await getUserById(apiUser.id);
+    if (existing) return;
+    await createUser(apiUserToLocalUser(apiUser));
+  } catch (error) {
+    console.warn('缓存后端用户失败:', error);
+  }
+}
+
+/** 获取用户：优先本地，未命中则从后端拉取并缓存（点击他人头像/作者卡片时使用） */
+export async function fetchAndCacheUser(userId: string) {
+  try {
+    const local = await getUserById(userId);
+    if (local) return local;
+  } catch {
+    // 本地读取失败继续走后端
+  }
+  try {
+    const res = await usersAPI.get(userId);
+    if (res?.id) {
+      const user = apiUserToLocalUser(res);
+      try {
+        await createUser(user);
+      } catch {
+        // 已存在或缓存失败不影响返回
+      }
+      return user;
+    }
+  } catch (error) {
+    console.warn('从后端拉取用户失败:', error);
+  }
+  return undefined;
+}
 
 /** 后端答题记录 → 前端 AnswerRecord（缺少的本地字段用默认值） */
 export function mapApiAnswerToLocal(a: any): AnswerRecord {
@@ -282,6 +322,8 @@ export async function mergePostsFromBackend(): Promise<void> {
     const res = await postsAPI.getList(1, 100);
     for (const apiPost of res.posts || []) {
       try {
+        // 缓存帖子作者，便于社区点击头像查看主页
+        await cacheApiUser(apiPost.user);
         const existing = await getPostById(apiPost.id);
         if (!existing) {
           await createPost(mapApiPostToLocal(apiPost));

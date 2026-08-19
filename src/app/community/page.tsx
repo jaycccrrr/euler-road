@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/hooks/useAuth';
 import { getPostsPaginated, getAllPosts, createPost, updatePost, getUserById, resetDatabase, getFollowing, getFollowers, areFriends, searchUsers } from '@/lib/db';
-import { mergePostsFromBackend, syncPostToBackend, syncPostUpdateToBackend } from '@/lib/api-sync';
+import { mergePostsFromBackend, syncPostToBackend, syncPostUpdateToBackend, fetchAndCacheUser } from '@/lib/api-sync';
 import { likesAPI, usersAPI } from '@/lib/api-client';
 import { hasApiToken } from '@/lib/api-auth';
 import { apiUserToLocalUser } from '@/lib/api-auth';
@@ -228,7 +228,7 @@ export default function CommunityPage() {
       await Promise.all(
         userIds.map(async (userId) => {
           try {
-            const userData = await getUserById(userId);
+            const userData = await fetchAndCacheUser(userId);
             if (userData) {
               const moduleData = userData.moduleData || initModuleData();
               const frame = getPrimaryFrame(moduleData, userData.displayCategory);
@@ -489,7 +489,7 @@ export default function CommunityPage() {
 
   // 打开用户详情弹窗
   const handleOpenUserDialog = async (userId: string) => {
-    const userData = await getUserById(userId);
+    const userData = await fetchAndCacheUser(userId);
     if (userData) {
       setSelectedUser(userData);
       const filteredPosts = posts.filter(p => p.userId === userId);
