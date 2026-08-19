@@ -1110,3 +1110,13 @@
     animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 }
+
+/* Question bank option click pop */
+@keyframes optionPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.animate-option-pop {
+  animation: optionPop 0.3s ease-out;
+}

@@ -4,6 +4,8 @@ import { useState, useEffect, useMemo, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MathRenderer } from '@/components/math/MathRenderer';
@@ -32,6 +34,8 @@ import {
   List,
   X,
   Sparkles,
+  Bookmark,
+  BookmarkCheck,
 } from 'lucide-react';
 
 // ── Unified Question Type ──
@@ -493,6 +497,20 @@ function QuestionItem({
   const [submitted, setSubmitted] = useState(false);
   const [showExp, setShowExp] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const { user, isAuthenticated, isFavoriteQuestion, addFavoriteQuestion, removeFavoriteQuestion } = useAuth();
+  const router = useRouter();
+  const isFav = isFavoriteQuestion(question.id);
+  const handleToggleFavorite = () => {
+    if (!isAuthenticated || !user) {
+      router.push('/login/');
+      return;
+    }
+    if (isFav) {
+      void removeFavoriteQuestion(question.id);
+    } else {
+      void addFavoriteQuestion(question.id);
+    }
+  };
 
   const isCorrect = useMemo(() => {
     if (!submitted) return null;
@@ -527,10 +545,18 @@ function QuestionItem({
 
   return (
     <Card className="p-5 md:p-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center justify-between mb-3">
         <Badge variant="secondary" className="text-xs font-mono">
           {index + 1}
         </Badge>
+        <button
+          onClick={handleToggleFavorite}
+          aria-label="收藏本题"
+          title={isFav ? '取消收藏' : '收藏本题'}
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-amber-500 hover:bg-amber-50 motion-safe:transition-all motion-safe:duration-200 motion-safe:active:scale-90"
+        >
+          {isFav ? <BookmarkCheck className="w-5 h-5 text-amber-500 fill-amber-400 animate-option-pop" /> : <Bookmark className="w-5 h-5" />}
+        </button>
       </div>
       <div className="mb-4 text-slate-800 leading-relaxed text-base md:text-lg">
         <MathRenderer>{question.content}</MathRenderer>
@@ -544,7 +570,7 @@ function QuestionItem({
           const isCorrectOpt = correctArr.includes(i);
 
           let btnClass =
-            'w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 flex items-center gap-3 ';
+            'w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 flex items-center gap-3 motion-safe:active:scale-[0.98] motion-safe:active:duration-75 ';
           if (submitted) {
             if (isCorrectOpt) {
               btnClass += 'bg-emerald-50 border-emerald-300 text-emerald-800';
@@ -555,7 +581,7 @@ function QuestionItem({
             }
           } else {
             btnClass += isSelected
-              ? 'bg-blue-50 border-blue-300 text-blue-800 shadow-sm'
+              ? 'bg-blue-50 border-blue-300 text-blue-800 shadow-sm animate-option-pop'
               : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300 hover:bg-blue-50/50';
           }
 
@@ -565,9 +591,9 @@ function QuestionItem({
                 className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
                   submitted
                     ? isCorrectOpt
-                      ? 'bg-emerald-500 text-white'
+                      ? 'bg-emerald-500 text-white animate-option-pop'
                       : isSelected
-                      ? 'bg-rose-500 text-white'
+                      ? 'bg-rose-500 text-white animate-option-pop'
                       : 'bg-slate-200 text-slate-500'
                     : isSelected
                     ? 'bg-blue-500 text-white'
@@ -596,12 +622,12 @@ function QuestionItem({
         <div className="flex items-center gap-3 mb-3">
           {isCorrect ? (
             <div className="flex items-center gap-2 text-emerald-700 font-medium">
-              <CheckCircle2 className="w-5 h-5" />
+              <CheckCircle2 className="w-5 h-5 animate-option-pop" />
               回答正确
             </div>
           ) : (
             <div className="flex items-center gap-2 text-rose-700 font-medium">
-              <XCircle className="w-5 h-5" />
+              <XCircle className="w-5 h-5 animate-option-pop" />
               回答错误
             </div>
           )}
