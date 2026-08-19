@@ -606,27 +606,25 @@ function QuestionItem({
           提交答案
         </Button>
       )}
-      <div className="mb-3 flex flex-wrap gap-2">
+            <div className="mb-3 flex items-center gap-2">
         {question.hint.trim() && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-lg border-slate-200 text-xs"
+          <button
             onClick={() => setShowHint((v) => !v)}
+            aria-label={showHint ? '收起提示' : '查看提示'}
+            title={showHint ? '收起提示' : '查看提示'}
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 motion-safe:transition-all motion-safe:duration-200 motion-safe:active:scale-90"
           >
-            {showHint ? <EyeOff className="w-3.5 h-3.5 mr-1" /> : <Lightbulb className="w-3.5 h-3.5 mr-1" />}
-            {showHint ? '收起提示' : '查看提示'}
-          </Button>
+            {showHint ? <EyeOff className="w-5 h-5" /> : <Lightbulb className="w-5 h-5" />}
+          </button>
         )}
-        <Button
-          variant="outline"
-          size="sm"
-          className="rounded-lg border-slate-200 text-xs"
+        <button
           onClick={() => setShowExp((v) => !v)}
+          aria-label={showExp ? '收起解析' : '查看解析'}
+          title={showExp ? '收起解析' : '查看解析'}
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-blue-50 motion-safe:transition-all motion-safe:duration-200 motion-safe:active:scale-90"
         >
-          {showExp ? <EyeOff className="w-3.5 h-3.5 mr-1" /> : <Eye className="w-3.5 h-3.5 mr-1" />}
-          {showExp ? '收起解析' : '查看解析'}
-        </Button>
+          {showExp ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+        </button>
       </div>
       {showHint && (
         <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-100 text-sm md:text-base text-slate-700 leading-relaxed">
