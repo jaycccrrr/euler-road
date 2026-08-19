@@ -12,7 +12,7 @@ interface CubeLoaderProps {
   subtext?: string;
   /** 紧凑模式：用于页面局部区域加载（减小留白） */
   compact?: boolean;
-  /** 整屏居中：占据视口剩余高度，让动画出现在屏幕中央 */
+  /** 整屏居中：固定悬浮在视口正中央（不随页面滚动偏移） */
   screen?: boolean;
 }
 
@@ -26,7 +26,7 @@ export default function CubeLoader({
   const sizeClass = compact
     ? 'min-h-[180px] p-6'
     : screen
-      ? 'min-h-[calc(100vh-4rem)] p-12'
+      ? 'fixed inset-0 z-[100] p-12 pointer-events-none'
       : 'min-h-[400px] p-12';
 
   return (
