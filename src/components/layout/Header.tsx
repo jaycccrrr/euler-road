@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { BookOpen, Users, Calendar, LogOut, User as UserIcon, GraduationCap, Library } from 'lucide-react';
+import { BookOpen, Users, Calendar, LogOut, User as UserIcon, GraduationCap } from 'lucide-react';
 import { getPrimaryFrame, initModuleData, FRAME_COLORS } from '@/lib/gamification';
 import { navigateTo } from '@/lib/asset';
 import { MessageCenter } from './MessageCenter';
@@ -57,7 +57,6 @@ export default function Header() {
         {/* Navigation - Class Central 风格：更精致的悬停效果 */}
         <nav className="hidden md:flex items-center gap-1">
           <NavLink href="/courses/" icon={<BookOpen className="w-4 h-4" />} label="知识库" />
-          <NavLink href="/textbooks/" icon={<Library className="w-4 h-4" />} label="教材库" />
           <NavLink href="/question-bank/" icon={<Calendar className="w-4 h-4" />} label="题库" />
           <NavLink href="/community/" icon={<Users className="w-4 h-4" />} label="社区" />
         </nav>
@@ -166,7 +165,6 @@ export default function Header() {
       {/* Mobile Navigation - 更现代的样式 */}
       <nav className="md:hidden flex items-center justify-around py-2 border-t bg-slate-50/80 backdrop-blur-sm">
         <MobileNavLink href="/courses/" icon={<BookOpen className="w-5 h-5" />} label="知识库" />
-        <MobileNavLink href="/textbooks/" icon={<Library className="w-5 h-5" />} label="教材库" />
         <MobileNavLink href="/question-bank/" icon={<Calendar className="w-5 h-5" />} label="题库" />
         <MobileNavLink href="/community/" icon={<Users className="w-5 h-5" />} label="社区" />
       </nav>

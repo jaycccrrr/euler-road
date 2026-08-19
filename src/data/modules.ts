@@ -1070,7 +1070,7 @@ dim(V₁+V₂) = dim(V₁) + dim(V₂) - dim(V₁∩V₂)
     category: 'math',
     icon: '🎲',
     color: 'from-pink-400 to-rose-500',
-    description: '概率论与数理统计知识体系（开源教材 LaTeX 精讲），涵盖随机事件、随机变量、数字特征、大数定律与数理统计',
+    description: '概率论与数理统计知识体系，涵盖随机事件、随机变量、数字特征、大数定律与数理统计',
     topics: [
       {
         id: 'prob-1',
