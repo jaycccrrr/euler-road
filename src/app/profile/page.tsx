@@ -253,7 +253,7 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-slate-50">
         <Header />
         <main className="container mx-auto px-4 py-12">
-          <CubeLoader compact text="加载中" subtext="正在准备你的主页…" />
+          <CubeLoader screen text="加载中" subtext="正在准备你的主页…" />
         </main>
       </div>
     );

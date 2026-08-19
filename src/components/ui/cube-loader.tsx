@@ -12,6 +12,8 @@ interface CubeLoaderProps {
   subtext?: string;
   /** 紧凑模式：用于页面局部区域加载（减小留白） */
   compact?: boolean;
+  /** 整屏居中：占据视口剩余高度，让动画出现在屏幕中央 */
+  screen?: boolean;
 }
 
 export default function CubeLoader({
@@ -19,12 +21,19 @@ export default function CubeLoader({
   text = 'Loading',
   subtext = 'Preparing your experience, please wait…',
   compact = false,
+  screen = false,
 }: CubeLoaderProps) {
+  const sizeClass = compact
+    ? 'min-h-[180px] p-6'
+    : screen
+      ? 'min-h-[calc(100vh-4rem)] p-12'
+      : 'min-h-[400px] p-12';
+
   return (
     <div
       className={cn(
         'flex flex-col items-center justify-center gap-8 bg-slate-950/0 perspective-container',
-        compact ? 'min-h-[180px] p-6' : 'min-h-[400px] p-12',
+        sizeClass,
         className
       )}
     >

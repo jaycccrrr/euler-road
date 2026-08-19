@@ -158,7 +158,7 @@ export default function AdvancedModuleContent({ module: initialModule, moduleId 
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 flex items-center justify-center">
-          <CubeLoader compact text="加载中" subtext="正在加载课程内容…" />
+          <CubeLoader screen text="加载中" subtext="正在加载课程内容…" />
         </main>
       </div>
     );

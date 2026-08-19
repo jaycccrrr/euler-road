@@ -94,7 +94,7 @@ export default function AdminReviewPage() {
       <div className="min-h-screen bg-slate-50">
         <Header />
         <main className="container mx-auto px-4 py-12">
-          <CubeLoader compact text="加载中" subtext="正在加载待审内容…" />
+          <CubeLoader screen text="加载中" subtext="正在加载待审内容…" />
         </main>
       </div>
     );

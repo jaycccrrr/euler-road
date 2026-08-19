@@ -330,7 +330,7 @@ function PostDetailContent() {
       <div className="min-h-screen">
         <Header />
         <main className="container mx-auto px-4 py-8">
-          <CubeLoader text="加载中" subtext="正在加载帖子…" />
+          <CubeLoader screen text="加载中" subtext="正在加载帖子…" />
         </main>
       </div>
     );
@@ -885,7 +885,7 @@ export default function PostPage() {
       <div className="min-h-screen">
         <Header />
         <main className="container mx-auto px-4 py-8">
-          <CubeLoader text="加载中" subtext="正在准备页面…" />
+          <CubeLoader screen text="加载中" subtext="正在准备页面…" />
         </main>
       </div>
     }>
