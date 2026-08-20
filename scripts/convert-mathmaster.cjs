@@ -73,6 +73,27 @@ function replaceTextColor(s) {
 }
 
 // Apply fn only to text outside math segments ($...$, $$...$$)
+// 通用双花括号组命令：\cmd{A}{B} → pick(A)
+function replaceTwoGroupCommand(s, cmd, pick) {
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const re = new RegExp('\\\\' + cmd + '\\{', 'g');
+    let m;
+    while ((m = re.exec(s))) {
+      const idx = m.index;
+      const g1 = readBraceGroup(s, idx + cmd.length + 1);
+      if (g1.end >= s.length) break;
+      const g2 = readBraceGroup(s, g1.end);
+      if (g2.end >= s.length) break;
+      s = s.slice(0, idx) + pick(g1.inner) + s.slice(g2.end);
+      changed = true;
+      re.lastIndex = idx;
+      break;
+    }
+  }
+  return s;
+}
 function mapOutsideMath(s, fn) {
   let out = '';
   let last = 0;
@@ -133,9 +154,12 @@ function texToMarkdown(raw) {
 
   // drop structural commands
   s = s.replace(
-    /\\maketitle|\\tableofcontents|\\newpage|\\clearpage|\\pagestyle\{[^}]*\}|\\thispagestyle\{[^}]*\}|\\setcounter\{[^}]*\}\{[^}]*\}|\\renewcommand\{[^}]*\}|\\addcontentsline\{[^}]*\}|\\label\{[^}]*\}|\\ref\{[^}]*\}|\\pageref\{[^}]*\}|\\cite\{[^}]*\}|\\footnote\{[^}]*\}|\\par|\\noindent|\\hfill|\\centering|\\rule\{[^}]*\}\{[^}]*\}|\\vspace\{[^}]*\}|\\hspace\{[^}]*\}|\\smallskip|\\medskip|\\bigskip|\\indent/g,
+    /\\maketitle|\\tableofcontents|\\newpage|\\clearpage|\\pagestyle\{[^}]*\}|\\thispagestyle\{[^}]*\}|\\setcounter\{[^}]*\}\{[^}]*\}|\\renewcommand\{[^}]*\}|\\addcontentsline\{[^}]*\}|\\label\{[^}]*\}|\\ref\{[^}]*\}|\\pageref\{[^}]*\}|\\cite\{[^}]*\}|\\footnote\{[^}]*\}|\\par|\\noindent|\\hfill|\\centering|\\rule\{[^}]*\}\{[^}]*\}|\\vspace\{[^}]*\}|\\hspace\{[^}]*\}|\\smallskip|\\medskip|\\bigskip|\\indent|\\leavevmode/g,
     ''
   );
+
+  // hyperref 辅助命令：\texorpdfstring{TeX}{PDF} 只保留 TeX 部分
+  s = replaceTwoGroupCommand(s, 'texorpdfstring', (a) => a);
 
   // drop graphics environments
   s = removeEnvironments(s, ['tikzpicture', 'figure', 'wrapfigure', 'center', 'abstract'], '');
@@ -202,6 +226,7 @@ function texToMarkdown(raw) {
   // text styling: only outside math (math commands like \mathbf, \text stay untouched)
   s = mapOutsideMath(s, (t) => {
     t = replaceTextColor(t);
+    t = t.replace(/\\\\textcolor\\{[^}]*\\}(?!\\{)/g, '');
     t = replaceCommand(t, 'textbf', (inner) => `**${inner}**`);
     t = replaceCommand(t, 'textit', (inner) => `*${inner}*`);
     t = replaceCommand(t, 'emph', (inner) => `*${inner}*`);
