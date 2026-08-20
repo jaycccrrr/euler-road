@@ -81,7 +81,7 @@ export default function CoursesPage() {
             <p className="text-sm text-slate-500 mb-8">经典教材 PDF，可直接在线阅读或下载。</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {TEXTBOOKS.map((book) => {
-                const url = `https://bwnbrbfcgynkojlaicpd.supabase.co/storage/v1/object/public/textbooks/${encodeURIComponent(book.file)}`;
+                const url = `https://github.com/jaycccrrr/euler-road/releases/download/textbooks/${encodeURIComponent(book.file)}`;
                 return (
                   <Card key={book.id} className="p-5 flex flex-col gap-3 rounded-2xl border-slate-200">
                     <div className="flex items-start gap-3">
