@@ -4,7 +4,7 @@ import { KNOWLEDGE_MODULES } from '@/data/modules';
 import { staticAdvancedTopics } from '@/data/highschoolStatic';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowRight, BookOpen, Download, ExternalLink, Library } from 'lucide-react';
+import { ArrowRight, BookOpen, Download, Library } from 'lucide-react';
 import { TEXTBOOKS } from '@/data/textbooks';
 import { assetPath } from '@/lib/asset';
 import { Card } from '@/components/ui/card';
@@ -99,9 +99,9 @@ export default function CoursesPage() {
                     </div>
                     <p className="text-xs text-slate-400">{book.note}</p>
                     <div className="flex gap-2 mt-auto">
-                      <a href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
+                      <a href={`/textbook/?file=${encodeURIComponent(book.file)}`} className="flex-1">
                         <Button variant="outline" size="sm" className="w-full rounded-lg">
-                          <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> 在线阅读
+                          <BookOpen className="w-3.5 h-3.5 mr-1.5" /> 在线阅读
                         </Button>
                       </a>
                       <a href={url} download className="flex-1">

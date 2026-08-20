@@ -218,6 +218,17 @@ model DiscussionReply {
   @@index([messageId])
 }
 
+// 用户反馈
+model Feedback {
+  id        String   @id @default(uuid())
+  userId    String?
+  content   String
+  page      String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 // 通知中心：点赞 / 评论 / 关注 / 讨论回复等互动通知
 model Notification {
   id            String   @id @default(uuid())

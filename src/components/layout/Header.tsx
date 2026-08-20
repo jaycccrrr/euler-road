@@ -17,6 +17,7 @@ import { BookOpen, Users, Calendar, LogOut, User as UserIcon, GraduationCap } fr
 import { getPrimaryFrame, initModuleData, FRAME_COLORS } from '@/lib/gamification';
 import { navigateTo } from '@/lib/asset';
 import { MessageCenter } from './MessageCenter';
+import { FeedbackButton } from './FeedbackButton';
 import { NotificationCenter } from './NotificationCenter';
 
 export default function Header() {
@@ -64,6 +65,7 @@ export default function Header() {
 
         {/* User Menu - 更精致的交互 */}
         <div className="flex items-center gap-2">
+          <FeedbackButton />
           {isAuthenticated && user ? (
             <>
               <NotificationCenter />
@@ -149,6 +151,7 @@ export default function Header() {
             </>
           ) : (
             <div className="flex items-center gap-2">
+          <FeedbackButton />
               <Link href="/login/">
                 <Button variant="ghost" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
                   登录

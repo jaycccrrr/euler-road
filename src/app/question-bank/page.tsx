@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { StarFavoriteButton } from '@/components/ui/star-favorite-button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MathRenderer } from '@/components/math/MathRenderer';
@@ -623,14 +624,7 @@ function QuestionItem({
         <Badge variant="secondary" className="text-xs font-mono">
           {index + 1}
         </Badge>
-        <button
-          onClick={handleToggleFavorite}
-          aria-label="收藏本题"
-          title={isFav ? '取消收藏' : '收藏本题'}
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-amber-500 hover:bg-amber-50 motion-safe:transition-all motion-safe:duration-200 motion-safe:active:scale-90"
-        >
-          {isFav ? <BookmarkCheck className="w-5 h-5 text-amber-500 fill-amber-400 animate-option-pop" /> : <Bookmark className="w-5 h-5" />}
-        </button>
+        <StarFavoriteButton active={isFav} onToggle={handleToggleFavorite} iconOnly />
       </div>
       <div className="mb-4 text-slate-800 leading-relaxed text-base md:text-lg">
         <MathRenderer>{question.content}</MathRenderer>
@@ -1112,9 +1106,9 @@ export default function QuestionBankPage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#f8fafc] relative overflow-hidden">
       {/* 淡蓝粉光晕背景 */}
-      <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 w-[26rem] h-[26rem] rounded-full bg-sky-300/30 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute top-1/4 -right-28 w-[30rem] h-[30rem] rounded-full bg-pink-300/30 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute bottom-0 left-1/3 w-[24rem] h-[24rem] rounded-full bg-indigo-200/25 blur-3xl" />
+      <div aria-hidden className="pointer-events-none fixed -bottom-28 -left-24 w-[26rem] h-[26rem] rounded-full bg-sky-300/30 blur-3xl" />
+      <div aria-hidden className="pointer-events-none fixed -bottom-24 -right-24 w-[30rem] h-[30rem] rounded-full bg-pink-300/30 blur-3xl" />
+      <div aria-hidden className="pointer-events-none fixed bottom-0 left-1/2 -translate-x-1/2 w-[24rem] h-[24rem] rounded-full bg-indigo-200/25 blur-3xl" />
       <div className="relative z-10 flex flex-col flex-1">
         <Header />
 

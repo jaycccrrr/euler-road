@@ -1120,3 +1120,12 @@
 .animate-option-pop {
   animation: optionPop 0.25s ease-out;
 }
+
+/* Favorite star particle burst */
+@keyframes particleBurst {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+}
+.animate-particle {
+  animation: particleBurst 0.6s ease-out forwards;
+}

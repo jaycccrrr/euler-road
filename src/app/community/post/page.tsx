@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import { getPostById, getUserById, getAllPosts, createComment, updatePost, getFollowing, getFollowers, areFriends } from '@/lib/db';
 import { mergePostCommentsFromBackend, syncPostCommentToBackend, fetchAndCacheUser } from '@/lib/api-sync';
+import { StarFavoriteButton } from '@/components/ui/star-favorite-button';
 import CubeLoader from '@/components/ui/cube-loader';
 import { navigateTo } from '@/lib/asset';
 import { Textarea } from '@/components/ui/textarea';
@@ -507,15 +508,20 @@ function PostDetailContent() {
                     <span className="font-medium">{post.comments.length}</span>
                   </Button>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`gap-2 ${isFavorite(post.id) ? 'text-yellow-500' : 'text-gray-500 hover:text-yellow-500'}`}
-                    onClick={handleFavorite}
-                  >
-                    <Bookmark className={`w-5 h-5 ${isFavorite(post.id) ? 'fill-current' : ''}`} />
-                    <span className="font-medium">{isFavorite(post.id) ? '已收藏' : '收藏'}</span>
-                  </Button>
+                  <StarFavoriteButton
+                    active={isFavorite(post.id)}
+                    onToggle={() => {
+                      if (!isAuthenticated) {
+                        router.push('/login/');
+                        return;
+                      }
+                      if (isFavorite(post.id)) {
+                        void removeFromFavorites(post.id);
+                      } else {
+                        void addToFavorites(post.id);
+                      }
+                    }}
+                  />
                 </div>
 
                 <Button

@@ -34,6 +34,7 @@ import { DiscussionComposer } from '@/components/challenge/DiscussionComposer';
 import { ShareCardDialog } from '@/components/share/ShareCardDialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { PiPowerAnimation } from '@/components/pipower/PiPowerAnimation';
+import { StarFavoriteButton } from '@/components/ui/star-favorite-button';
 import { PiPowerCalendarDialog } from '@/components/pipower/PiPowerOrb';
 import { useAuth } from '@/hooks/useAuth';
 import { useDailyQuestion } from '@/hooks/useDailyQuestion';
@@ -717,9 +718,9 @@ export function DailyChallenge() {
                   <Card className="p-5 md:p-6 rounded-2xl border border-slate-200 bg-white shadow-sm min-h-[460px] flex flex-col">
                     <div className="flex items-center justify-between mb-2">
                       {isAuthenticated ? (
-                        <button
-                          type="button"
-                          onClick={() => {
+                        <StarFavoriteButton
+                          active={!!selectedQuestion && isFavoriteQuestion(selectedQuestion.id)}
+                          onToggle={() => {
                             if (!selectedQuestion) return;
                             if (isFavoriteQuestion(selectedQuestion.id)) {
                               void removeFavoriteQuestion(selectedQuestion.id);
@@ -727,18 +728,8 @@ export function DailyChallenge() {
                               void addFavoriteQuestion(selectedQuestion.id);
                             }
                           }}
-                          title={isFavoriteQuestion(selectedQuestion.id) ? '取消收藏' : '收藏本题'}
-                          className={`flex items-center gap-1 text-xs rounded-lg px-2 py-1 transition-colors ${
-                            isFavoriteQuestion(selectedQuestion.id)
-                              ? 'text-amber-500 bg-amber-50 hover:bg-amber-100'
-                              : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50'
-                          }`}
-                        >
-                          <Bookmark
-                            className={`w-3.5 h-3.5 ${isFavoriteQuestion(selectedQuestion.id) ? 'fill-current' : ''}`}
-                          />
-                          {isFavoriteQuestion(selectedQuestion.id) ? '已收藏' : '收藏'}
-                        </button>
+                          className="text-xs rounded-lg px-2 py-1"
+                        />
                       ) : (
                         <span />
                       )}

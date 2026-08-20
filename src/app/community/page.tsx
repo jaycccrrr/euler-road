@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import { useAuth } from '@/hooks/useAuth';
 import { getPostsPaginated, getAllPosts, createPost, updatePost, getUserById, resetDatabase, getFollowing, getFollowers, areFriends, searchUsers } from '@/lib/db';
 import { mergePostsFromBackend, syncPostToBackend, syncPostUpdateToBackend, fetchAndCacheUser } from '@/lib/api-sync';
+import { StarFavoriteButton } from '@/components/ui/star-favorite-button';
 import CubeLoader from '@/components/ui/cube-loader';
 import { likesAPI, usersAPI } from '@/lib/api-client';
 import { hasApiToken } from '@/lib/api-auth';
@@ -422,20 +423,20 @@ export default function CommunityPage() {
                 <MessageSquare className="w-4 h-4" />
                 {post.comments.length} 评论
               </span>
-              <button
-                onClick={(e) => handleToggleFavorite(e, post.id)}
-                className={`flex items-center gap-1 transition-colors ${
-                  isFavorite(post.id) ? 'text-yellow-500' : 'hover:text-yellow-500'
-                }`}
-                title={isFavorite(post.id) ? '取消收藏' : '收藏帖子'}
-              >
-                {isFavorite(post.id) ? (
-                  <BookmarkCheck className="w-4 h-4 fill-current" />
-                ) : (
-                  <Bookmark className="w-4 h-4" />
-                )}
-                {isFavorite(post.id) ? '已收藏' : '收藏'}
-              </button>
+              <StarFavoriteButton
+                active={isFavorite(post.id)}
+                onToggle={() => {
+                  if (!isAuthenticated) {
+                    router.push('/login/');
+                    return;
+                  }
+                  if (isFavorite(post.id)) {
+                    void removeFromFavorites(post.id);
+                  } else {
+                    void addToFavorites(post.id);
+                  }
+                }}
+              />
             </div>
           </div>
         </div>
