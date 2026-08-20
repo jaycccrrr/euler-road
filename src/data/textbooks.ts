@@ -1,10 +1,11 @@
-// 常用教材清单（PDF 托管于 GitHub Releases tag: textbooks，文件名为 ASCII）
+// 常用教材清单（PDF 托管于 GitHub Releases tag: textbooks；封面图位于 /textbooks-covers）
 export interface TextbookItem {
   id: string;
   name: string;
   author: string;
   note: string;
   file: string; // GitHub Releases 资产文件名
+  cover: string; // 封面图片路径
 }
 
 export const TEXTBOOKS: TextbookItem[] = [
@@ -14,6 +15,7 @@ export const TEXTBOOKS: TextbookItem[] = [
     author: '王萼芬、石生明、王立中',
     note: '北京大学经典教材',
     file: 'gaodai-6.pdf',
+    cover: '/textbooks-covers/gaodai-6.jpg',
   },
   {
     id: 'kongjian-jiexi',
@@ -21,6 +23,7 @@ export const TEXTBOOKS: TextbookItem[] = [
     author: '耿薇（南开大学数学科学学院）',
     note: '南开大学课程讲义',
     file: 'kongjian-jiexi.pdf',
+    cover: '/textbooks-covers/kongjian-jiexi.jpg',
   },
   {
     id: 'contest-1',
@@ -28,6 +31,7 @@ export const TEXTBOOKS: TextbookItem[] = [
     author: '数学专业类',
     note: '竞赛备考经典',
     file: 'contest-1.pdf',
+    cover: '/textbooks-covers/contest-1.jpg',
   },
   {
     id: 'contest-2',
@@ -35,6 +39,7 @@ export const TEXTBOOKS: TextbookItem[] = [
     author: '数学专业类',
     note: '竞赛备考经典',
     file: 'contest-2.pdf',
+    cover: '/textbooks-covers/contest-2.jpg',
   },
   {
     id: 'fenxi-2',
@@ -42,6 +47,7 @@ export const TEXTBOOKS: TextbookItem[] = [
     author: '刘春根、朱少红、李军、丁龙云',
     note: '南开大学教材',
     file: 'fenxi-2.pdf',
+    cover: '/textbooks-covers/fenxi-2.jpg',
   },
   {
     id: 'fenxi-1',
@@ -49,6 +55,7 @@ export const TEXTBOOKS: TextbookItem[] = [
     author: '南开大学',
     note: '南开大学教材',
     file: 'fenxi-1.pdf',
+    cover: '/textbooks-covers/fenxi-1.jpg',
   },
   {
     id: 'fenxi-ex',
@@ -56,5 +63,6 @@ export const TEXTBOOKS: TextbookItem[] = [
     author: '谢惠民、恽自求、易法槐、钱定边',
     note: '习题精讲经典',
     file: 'fenxi-ex.pdf',
+    cover: '/textbooks-covers/fenxi-ex.jpg',
   },
 ];

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowRight, BookOpen, Download, ExternalLink, Library } from 'lucide-react';
 import { TEXTBOOKS } from '@/data/textbooks';
+import { assetPath } from '@/lib/asset';
 import { Card } from '@/components/ui/card';
 
 // 搜索索引：高中数学页实际渲染的是提高篇 staticAdvancedTopics，
@@ -85,9 +86,12 @@ export default function CoursesPage() {
                 return (
                   <Card key={book.id} className="p-5 flex flex-col gap-3 rounded-2xl border-slate-200">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-                        <BookOpen className="w-5 h-5 text-red-500" />
-                      </div>
+                      <img
+                        src={assetPath(book.cover)}
+                        alt={book.name}
+                        className="w-16 h-[88px] object-cover rounded-lg shadow-sm border border-slate-200 shrink-0"
+                        loading="lazy"
+                      />
                       <div className="min-w-0">
                         <h3 className="font-semibold text-slate-900 leading-snug">{book.name}</h3>
                         <p className="text-xs text-slate-500 mt-1">{book.author}</p>

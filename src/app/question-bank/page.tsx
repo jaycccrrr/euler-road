@@ -1110,8 +1110,13 @@ export default function QuestionBankPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f8fafc]">
-      <Header />
+    <div className="min-h-screen flex flex-col bg-[#f8fafc] relative overflow-hidden">
+      {/* 淡蓝粉光晕背景 */}
+      <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 w-[26rem] h-[26rem] rounded-full bg-sky-300/30 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute top-1/4 -right-28 w-[30rem] h-[30rem] rounded-full bg-pink-300/30 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute bottom-0 left-1/3 w-[24rem] h-[24rem] rounded-full bg-indigo-200/25 blur-3xl" />
+      <div className="relative z-10 flex flex-col flex-1">
+        <Header />
 
       {viewMode === 'bank' ? (
         <BankHome
@@ -1137,6 +1142,7 @@ export default function QuestionBankPage() {
           onBack={() => setViewMode('bank')}
         />
       )}
+      </div>
     </div>
   );
 }
