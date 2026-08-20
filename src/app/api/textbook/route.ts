@@ -5,6 +5,24 @@ export const dynamic = 'force-dynamic';
 
 // 教材同源代理：服务器拉取 GitHub Release 教材并流式转发
 // 支持 Range 请求，pdf.js 可按需按页拉取，无需整本下载
+// GitHub 偶发连接中断，此处做有限次数自动重试
+async function fetchUpstream(url: string, headers: HeadersInit): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await fetch(url, {
+        redirect: 'follow',
+        headers,
+        signal: AbortSignal.timeout(20000),
+      });
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 600 * (attempt + 1)));
+    }
+  }
+  throw lastError;
+}
+
 export async function GET(request: NextRequest) {
   const file = request.nextUrl.searchParams.get('file');
   const book = TEXTBOOKS.find((b) => b.file === file);
@@ -15,10 +33,7 @@ export async function GET(request: NextRequest) {
   const url = `https://github.com/jaycccrrr/euler-road/releases/download/textbooks/${encodeURIComponent(book.file)}`;
   try {
     const range = request.headers.get('range');
-    const upstream = await fetch(url, {
-      redirect: 'follow',
-      headers: range ? { Range: range } : undefined,
-    });
+    const upstream = await fetchUpstream(url, range ? { Range: range } : {});
     if ((!upstream.ok && upstream.status !== 206) || !upstream.body) {
       return NextResponse.json({ error: '上游获取失败' }, { status: 502 });
     }

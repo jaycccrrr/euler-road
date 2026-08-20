@@ -38,6 +38,10 @@ export interface CoverflowCarouselProps {
   showNavigation?: boolean;
   /** Names the carousel for assistive tech. */
   label?: string;
+  /** 选中项变化时的回调（用于联动外部按钮） */
+  onSelectedChange?: (index: number) => void;
+  /** 点击某张卡片时的回调 */
+  onSlideClick?: (index: number) => void;
   className?: string;
   cardClassName?: string;
 }
@@ -56,6 +60,8 @@ export function CoverflowCarousel({
   showPagination = false,
   showNavigation = false,
   label = "Cover carousel",
+  onSelectedChange,
+  onSlideClick,
   className,
   cardClassName,
 }: CoverflowCarouselProps) {
@@ -77,8 +83,23 @@ export function CoverflowCarousel({
     v: number;
     t: number;
   } | null>(null);
+  const emittedRef = React.useRef(-1);
+  const onSelectedChangeRef = React.useRef(onSelectedChange);
+  const onSlideClickRef = React.useRef(onSlideClick);
+
+  React.useEffect(() => {
+    onSelectedChangeRef.current = onSelectedChange;
+    onSlideClickRef.current = onSlideClick;
+  });
 
   const [selected, setSelected] = React.useState(0);
+
+  const emitSelected = React.useCallback((index: number) => {
+    if (emittedRef.current !== index) {
+      emittedRef.current = index;
+      onSelectedChangeRef.current?.(index);
+    }
+  }, []);
 
   /** Nearest whole card, folded back into 0..count-1. */
   const indexAt = React.useCallback(
@@ -129,7 +150,9 @@ export function CoverflowCarousel({
     (target: number) => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       targetRef.current = target;
-      setSelected(indexAt(target));
+      const nearest = indexAt(target);
+      setSelected(nearest);
+      emitSelected(nearest);
 
       const step = () => {
         const remaining = target - posRef.current;
@@ -147,7 +170,7 @@ export function CoverflowCarousel({
       };
       rafRef.current = requestAnimationFrame(step);
     },
-    [indexAt, paint],
+    [emitSelected, indexAt, paint],
   );
 
   const clamp = React.useCallback(
@@ -202,7 +225,10 @@ export function CoverflowCarousel({
     drag.t = now;
 
     const index = indexAt(posRef.current);
-    if (index !== selected) setSelected(index);
+    if (index !== selected) {
+      setSelected(index);
+      emitSelected(index);
+    }
     paint();
   };
 
@@ -292,8 +318,10 @@ export function CoverflowCarousel({
                 role="group"
                 aria-roledescription="slide"
                 aria-label={`${index + 1} of ${count}`}
+                onClick={() => onSlideClickRef.current?.(index)}
                 className={cn(
                   "absolute left-1/2 top-0 aspect-square overflow-hidden rounded-2xl bg-muted shadow-xl will-change-transform",
+                  onSlideClick && "cursor-pointer",
                   cardClassName,
                 )}
                 style={{ width: "var(--cf-card)" }}

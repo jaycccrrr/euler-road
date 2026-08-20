@@ -18,6 +18,7 @@ async function loadPdfJs() {
 }
 
 const BASE_SCALE = 1.15;
+const MAX_DPR = 2;
 
 function ReaderContent() {
   const searchParams = useSearchParams();
@@ -25,14 +26,56 @@ function ReaderContent() {
   const book = TEXTBOOKS.find((b) => b.file === file);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const viewerRef = useRef<HTMLDivElement>(null);
   const pdfRef = useRef<PDFDocumentProxy | null>(null);
   const loadingTaskRef = useRef<PDFDocumentLoadingTask | null>(null);
+  const sliderTimerRef = useRef<number | null>(null);
   const [numPages, setNumPages] = useState(0);
   const [page, setPage] = useState(1);
+  const [sliderPage, setSliderPage] = useState(1);
   const [scale, setScale] = useState(BASE_SCALE);
   const [loading, setLoading] = useState(true);
   const [rendering, setRendering] = useState(false);
   const [error, setError] = useState('');
+
+  // 拖动滑块时防抖跳页，松手/键盘确认时立即跳页
+  const queueSlider = useCallback((v: number) => {
+    setSliderPage(v);
+    if (sliderTimerRef.current !== null) window.clearTimeout(sliderTimerRef.current);
+    sliderTimerRef.current = window.setTimeout(() => setPage(v), 180);
+  }, []);
+
+  const commitSlider = useCallback((v: number) => {
+    if (sliderTimerRef.current !== null) {
+      window.clearTimeout(sliderTimerRef.current);
+      sliderTimerRef.current = null;
+    }
+    setSliderPage(v);
+    setPage(v);
+  }, []);
+
+  useEffect(() => {
+    setSliderPage(page);
+  }, [page]);
+
+  useEffect(
+    () => () => {
+      if (sliderTimerRef.current !== null) window.clearTimeout(sliderTimerRef.current);
+    },
+    []
+  );
+
+  // 首次打开时按阅读区宽度自动缩放，避免大页面渲染过慢
+  const fittedScale = useCallback(async (pdf: PDFDocumentProxy) => {
+    try {
+      const first = await pdf.getPage(1);
+      const base = first.getViewport({ scale: 1 });
+      const avail = (viewerRef.current?.clientWidth || Math.min(window.innerWidth, 896)) - 48;
+      return Math.max(0.6, Math.min(BASE_SCALE, avail / base.width));
+    } catch {
+      return BASE_SCALE;
+    }
+  }, []);
 
   const renderPage = useCallback(
     async (pageNumber: number, pdf: PDFDocumentProxy, s: number) => {
@@ -40,7 +83,7 @@ function ReaderContent() {
       if (!canvas) return;
       const pageObj = await pdf.getPage(pageNumber);
       const viewport = pageObj.getViewport({ scale: s });
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
       canvas.width = Math.floor(viewport.width * dpr);
       canvas.height = Math.floor(viewport.height * dpr);
       canvas.style.width = `${Math.floor(viewport.width)}px`;
@@ -55,7 +98,7 @@ function ReaderContent() {
     []
   );
 
-  // 首次加载 PDF 元数据
+  // 首次加载 PDF 元数据（按需分块，不整本预下载）
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -68,6 +111,8 @@ function ReaderContent() {
         const pdfjsLib = await loadPdfJs();
         const task = pdfjsLib.getDocument({
           url: `/api/textbook?file=${encodeURIComponent(book.file)}`,
+          disableStream: true,
+          disableAutoFetch: true,
         });
         loadingTaskRef.current = task;
         const pdf = await task.promise;
@@ -78,6 +123,8 @@ function ReaderContent() {
         }
         pdfRef.current = pdf;
         setNumPages(pdf.numPages);
+        const s = await fittedScale(pdf);
+        setScale(+s.toFixed(3));
         setPage(1);
         setError('');
         setLoading(false);
@@ -95,9 +142,9 @@ function ReaderContent() {
       loadingTaskRef.current = null;
       pdfRef.current = null;
     };
-  }, [book]);
+  }, [book, fittedScale]);
 
-  // 页码 / 缩放变化时渲染当前页
+  // 页码 / 缩放变化时渲染当前页，并预取后两页数据
   useEffect(() => {
     const pdf = pdfRef.current;
     if (!pdf || loading) return;
@@ -105,7 +152,12 @@ function ReaderContent() {
     setRendering(true);
     renderPage(page, pdf, scale)
       .then(() => {
-        if (!cancelled) setRendering(false);
+        if (!cancelled) {
+          setRendering(false);
+          for (const p of [page + 1, page + 2]) {
+            if (p >= 1 && p <= pdf.numPages) pdf.getPage(p).catch(() => {});
+          }
+        }
       })
       .catch(() => {
         if (!cancelled) {
@@ -118,9 +170,11 @@ function ReaderContent() {
     };
   }, [page, scale, loading, renderPage]);
 
-  // 键盘翻页
+  // 键盘翻页（输入框聚焦时不抢键）
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
       if (e.key === 'ArrowLeft') setPage((p) => Math.max(1, p - 1));
       if (e.key === 'ArrowRight') setPage((p) => Math.min(numPages, p + 1));
     };
@@ -188,13 +242,17 @@ function ReaderContent() {
                   const pdfjsLib = await loadPdfJs();
                   const task = pdfjsLib.getDocument({
                     url: `/api/textbook?file=${encodeURIComponent(book.file)}`,
+                    disableStream: true,
+                    disableAutoFetch: true,
                   });
                   loadingTaskRef.current?.destroy();
                   loadingTaskRef.current = task;
                   task.promise
-                    .then((pdf) => {
+                    .then(async (pdf) => {
                       pdfRef.current = pdf;
                       setNumPages(pdf.numPages);
+                      const s = await fittedScale(pdf);
+                      setScale(+s.toFixed(3));
                       setPage(1);
                       setLoading(false);
                     })
@@ -208,7 +266,7 @@ function ReaderContent() {
               </Button>
             </div>
           ) : (
-            <div className="relative w-full flex items-center justify-center py-6 px-4">
+            <div ref={viewerRef} className="relative w-full flex items-center justify-center py-6 px-4">
               {rendering && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 pointer-events-none">
                   <p className="text-xs text-slate-400 bg-white/80 px-3 py-1 rounded-full shadow-sm">
@@ -223,53 +281,68 @@ function ReaderContent() {
 
         {/* 底部控制栏 */}
         {!loading && !error && numPages > 0 && (
-          <div className="w-full max-w-4xl flex flex-wrap items-center justify-between gap-3 mt-4 bg-white rounded-2xl border border-slate-200 px-4 py-3 shadow-sm">
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-lg"
-                disabled={page <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="text-sm text-slate-600 tabular-nums min-w-[88px] text-center">
-                第 {page} / {numPages} 页
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-lg"
-                disabled={page >= numPages}
-                onClick={() => setPage((p) => Math.min(numPages, p + 1))}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+          <div className="w-full max-w-4xl flex flex-col gap-3 mt-4 bg-white rounded-2xl border border-slate-200 px-4 py-3 shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-lg"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="text-sm text-slate-600 tabular-nums min-w-[96px] text-center">
+                  第 {page} / {numPages} 页
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-lg"
+                  disabled={page >= numPages}
+                  onClick={() => setPage((p) => Math.min(numPages, p + 1))}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-lg"
+                  disabled={scale <= 0.6}
+                  onClick={() => setScale((s) => Math.max(0.6, +(s - 0.15).toFixed(2)))}
+                >
+                  <ZoomOut className="w-4 h-4" />
+                </Button>
+                <span className="text-xs text-slate-500 tabular-nums w-10 text-center">
+                  {Math.round(scale * 100)}%
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-lg"
+                  disabled={scale >= 2.5}
+                  onClick={() => setScale((s) => Math.min(2.5, +(s + 0.15).toFixed(2)))}
+                >
+                  <ZoomIn className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-lg"
-                disabled={scale <= 0.6}
-                onClick={() => setScale((s) => Math.max(0.6, +(s - 0.15).toFixed(2)))}
-              >
-                <ZoomOut className="w-4 h-4" />
-              </Button>
-              <span className="text-xs text-slate-500 tabular-nums w-10 text-center">
-                {Math.round(scale * 100)}%
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-lg"
-                disabled={scale >= 2.5}
-                onClick={() => setScale((s) => Math.min(2.5, +(s + 0.15).toFixed(2)))}
-              >
-                <ZoomIn className="w-4 h-4" />
-              </Button>
-            </div>
+            <input
+              type="range"
+              min={1}
+              max={numPages}
+              step={1}
+              value={sliderPage}
+              onChange={(e) => queueSlider(Number(e.target.value))}
+              onPointerUp={(e) => commitSlider(Number((e.target as HTMLInputElement).value))}
+              onMouseUp={(e) => commitSlider(Number((e.currentTarget as HTMLInputElement).value))}
+              onKeyUp={(e) => commitSlider(Number((e.target as HTMLInputElement).value))}
+              aria-label="拖动跳转页码"
+              className="w-full h-2 accent-blue-600 cursor-pointer"
+            />
           </div>
         )}
       </main>
