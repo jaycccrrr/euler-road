@@ -1184,7 +1184,7 @@ $P\{|X-E(X)|\geq\varepsilon\}\leq\frac{D(X)}{\varepsilon^2}$
     name: '离散数学',
     category: 'math',
     icon: '🧩',
-    color: 'from-emerald-500 to-emerald-600',
+    color: 'from-emerald-400 to-emerald-600',
     description: '离散数学知识体系，涵盖数理逻辑、集合论、数论、计数、图论、树、布尔代数与形式语言',
     topics: discreteMathChapters.map((ch, i) => ({
       id: `dm-topic-${i + 1}`,

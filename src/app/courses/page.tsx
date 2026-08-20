@@ -91,6 +91,7 @@ function ModuleCard({ module, index }: { module: typeof KNOWLEDGE_MODULES[0]; in
     'from-blue-500 to-blue-600': 'bg-blue-500',
     'from-purple-500 to-purple-600': 'bg-purple-500',
     'from-emerald-500 to-emerald-600': 'bg-emerald-500',
+    'from-emerald-400 to-emerald-600': 'bg-emerald-500',
     'from-rose-500 to-rose-600': 'bg-rose-500',
     'from-amber-500 to-amber-600': 'bg-amber-500',
     'from-cyan-500 to-cyan-600': 'bg-cyan-500',

@@ -320,15 +320,7 @@ function ReaderContent() {
           ref={viewerRef}
           className="relative flex-1 min-h-0 bg-slate-100 flex items-center justify-center overflow-hidden"
         >
-          {/* 首页加载进度条 */}
-          {loading && (
-            <div className="absolute top-0 inset-x-0 z-20 h-1.5 bg-slate-200/70 overflow-hidden">
-              <div
-                className={progressWidth ? 'h-full bg-blue-500 transition-all duration-200' : 'h-full w-1/3 bg-blue-500 animate-pulse'}
-                style={progressWidth ? { width: progressWidth } : undefined}
-              />
-            </div>
-          )}
+
 
           {loading ? (
             <div className="flex flex-col items-center gap-3 py-16 px-6">
@@ -397,18 +389,18 @@ function ReaderContent() {
                 aria-label="上一页"
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/85 shadow-md border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-blue-50 hover:text-blue-600 motion-safe:transition-colors disabled:opacity-35 disabled:pointer-events-none"
+                className="absolute left-10 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/55 backdrop-blur-sm shadow-md border border-white/70 flex items-center justify-center text-slate-700 hover:bg-white/85 hover:text-blue-600 motion-safe:transition-colors disabled:opacity-30 disabled:pointer-events-none"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-6 h-6" />
               </button>
               <button
                 type="button"
                 aria-label="下一页"
                 disabled={page >= numPages}
                 onClick={() => setPage((p) => Math.min(numPages, p + 1))}
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/85 shadow-md border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-blue-50 hover:text-blue-600 motion-safe:transition-colors disabled:opacity-35 disabled:pointer-events-none"
+                className="absolute right-10 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/55 backdrop-blur-sm shadow-md border border-white/70 flex items-center justify-center text-slate-700 hover:bg-white/85 hover:text-blue-600 motion-safe:transition-colors disabled:opacity-30 disabled:pointer-events-none"
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-6 h-6" />
               </button>
             </>
           )}
@@ -442,15 +434,29 @@ function ReaderContent() {
             </Button>
           </div>
 
-          <div className="text-xs text-slate-500 tabular-nums text-center leading-relaxed">
-            第
-            <br />
-            {page}
-            <br />/
-            <br />
-            {numPages}
-            <br />
-            页
+          {(loading || cacheStatus === 'caching') && (
+            <div className="flex flex-col items-center gap-1.5">
+              <div className="w-1.5 h-24 rounded-full bg-slate-200 overflow-hidden relative">
+                <div
+                  className={
+                    progressWidth
+                      ? 'absolute bottom-0 inset-x-0 bg-blue-500 transition-all duration-200'
+                      : 'absolute bottom-0 inset-x-0 h-1/3 bg-blue-500 animate-pulse'
+                  }
+                  style={progressWidth ? { height: progressWidth } : undefined}
+                />
+              </div>
+              {cacheProgress !== null && (
+                <span className="text-[10px] text-slate-400 tabular-nums">{cacheProgress}%</span>
+              )}
+            </div>
+          )}
+
+          <div
+            className="text-xs text-slate-600 tabular-nums whitespace-nowrap"
+            style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+          >
+            第 {page} / {numPages} 页
           </div>
 
           <div className="h-60 w-8 flex items-center justify-center">
