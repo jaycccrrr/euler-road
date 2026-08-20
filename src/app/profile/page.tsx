@@ -78,11 +78,13 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { LocationSettingDialog } from '@/components/location/LocationSettingDialog';
 import { UserProfileCard } from '@/components/user/UserProfileCard';
 import { PiPowerCalendarDialog } from '@/components/pipower/PiPowerOrb';
+import { useDailyQuestion } from '@/hooks/useDailyQuestion';
 import { LazyImage } from '@/components/LazyImage';
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, isAuthenticated, hasHydrated, logout, updateUserInfo, updatePrivacy, followUser, unfollowUser, isFollowing } = useAuth();
+  const loadUserAnswerHistory = useDailyQuestion((s) => s.loadUserAnswerHistory);
   const [selectedModule, setSelectedModule] = useState<ModuleCategory | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -123,6 +125,8 @@ export default function ProfilePage() {
     if (user) {
       loadPosts();
       loadAnswerStats();
+      // 刷新答题历史，保证 π力日历与每日挑战同步
+      void loadUserAnswerHistory();
     }
   }, [user]);
 

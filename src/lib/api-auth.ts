@@ -38,16 +38,7 @@ export function apiUserToLocalUser(apiUser: any, passwordHash = ''): User {
     favoriteQuestions: apiUser.favoriteQuestions || [],
     following: [],
     privacy: { showFollowing: true, showFollowers: true, showBio: true },
-    piPower: {
-      currentPi: 0,
-      monthlyPi: 0,
-      totalAnswered: 0,
-      monthlyAnswered: 0,
-      lastAnswerDate: null,
-      currentStreak: 0,
-      monthlyResetDate: nextMonth.toISOString(),
-      dailyAttempts: {},
-    },
+    piPower: parsePiPower(apiUser?.piPower, nextMonth.toISOString()),
     eulerTitleHistory: [],
     level: moduleData.math?.level ?? 1,
     experience: moduleData.math?.exp ?? 0,
@@ -68,6 +59,7 @@ export async function syncUserToApi(user: User): Promise<void> {
     moduleData: user.moduleData,
     favoritePosts: user.favoritePosts || [],
     favoriteQuestions: user.favoriteQuestions || [],
+    piPower: user.piPower,
   });
 }
 
@@ -80,6 +72,56 @@ export function apiErrorMessage(err: unknown, fallback: string): string {
   return msg || fallback;
 }
 
+/** 解析后端 π力数据（可能为 JSON 字符串或对象），缺失时用默认值 */
+function parsePiPower(raw: unknown, monthlyResetDate: string): User['piPower'] {
+  let obj: any = raw;
+  if (typeof raw === 'string') {
+    try {
+      obj = JSON.parse(raw);
+    } catch {
+      obj = null;
+    }
+  }
+  if (!obj || typeof obj !== 'object') {
+    return {
+      currentPi: 0,
+      monthlyPi: 0,
+      totalAnswered: 0,
+      monthlyAnswered: 0,
+      lastAnswerDate: null,
+      currentStreak: 0,
+      monthlyResetDate,
+      dailyAttempts: {},
+    };
+  }
+  return {
+    currentPi: Number(obj.currentPi) || 0,
+    monthlyPi: Number(obj.monthlyPi) || 0,
+    totalAnswered: Number(obj.totalAnswered) || 0,
+    monthlyAnswered: Number(obj.monthlyAnswered) || 0,
+    lastAnswerDate: obj.lastAnswerDate ?? null,
+    currentStreak: Number(obj.currentStreak) || 0,
+    monthlyResetDate: obj.monthlyResetDate || monthlyResetDate,
+    dailyAttempts: obj.dailyAttempts || {},
+    questionPi: obj.questionPi || {},
+  };
+}
+
+/** 合并后端用户与本地用户：本地特有的进度字段（π力、称号、关注等）优先保留 */
+export function mergeBackendAndLocal(backend: User, local: User): User {
+  return {
+    ...backend,
+    piPower: local.piPower || backend.piPower,
+    eulerTitleHistory: local.eulerTitleHistory || backend.eulerTitleHistory || [],
+    currentEulerTitle: local.currentEulerTitle || backend.currentEulerTitle,
+    following: local.following || backend.following || [],
+    location: local.location || backend.location,
+    privacy: local.privacy || backend.privacy,
+    bio: local.bio ?? backend.bio,
+    coverImage: local.coverImage ?? backend.coverImage,
+    favoriteQuestions: (backend.favoriteQuestions?.length ?? 0) > 0 ? backend.favoriteQuestions || [] : local.favoriteQuestions || [],
+  };
+}
 function parseModuleData(raw: unknown): any {
   if (typeof raw === 'string') {
     try {

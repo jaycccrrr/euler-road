@@ -5,7 +5,7 @@ import { getUserByNickname, getUserById, updateUser, createUser, initAdminUser, 
 import { hashPassword, comparePassword, legacyComparePassword, isBcryptHash, generateId, formatLocalDate } from '@/lib/utils';
 import { initModuleData, addExperience, getPrimaryTitle, getPrimaryFrame, UserModuleData, Province, PROVINCES } from '@/lib/gamification';
 import { authAPI, usersAPI } from '@/lib/api-client';
-import { apiUserToLocalUser, hasApiToken, setApiToken, syncUserToApi, apiErrorMessage } from '@/lib/api-auth';
+import { apiUserToLocalUser, hasApiToken, setApiToken, syncUserToApi, apiErrorMessage, mergeBackendAndLocal } from '@/lib/api-auth';
 import { mergeAnswersFromBackend } from '@/lib/api-sync';
 
 interface AuthState {
@@ -131,15 +131,18 @@ export const useAuth = create<AuthState>()(
           const res = await authAPI.login(nickname, password);
           setApiToken(res.token);
           const backendUser = apiUserToLocalUser(res.user, await hashPassword(password));
+          // 合并本地进度（π力、称号、关注等），避免后端覆盖
+          const localUser = await getUserById(backendUser.id).catch(() => undefined);
+          const finalUser = localUser ? mergeBackendAndLocal(backendUser, localUser) : backendUser;
           try {
-            await updateUser(backendUser);
+            await updateUser(finalUser);
           } catch (updateError) {
             console.error('Failed to cache backend user locally:', updateError);
           }
           set({
-            user: backendUser,
-            currentUserId: backendUser.id,
-            lastLoginAt: backendUser.lastLoginAt,
+            user: finalUser,
+            currentUserId: finalUser.id,
+            lastLoginAt: finalUser.lastLoginAt,
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -215,15 +218,18 @@ export const useAuth = create<AuthState>()(
           const res = await authAPI.register(nickname, password, avatar);
           setApiToken(res.token);
           const backendUser = apiUserToLocalUser(res.user, await hashPassword(password));
+          // 合并本地进度（π力、称号、关注等），避免后端覆盖
+          const localUser = await getUserById(backendUser.id).catch(() => undefined);
+          const finalUser = localUser ? mergeBackendAndLocal(backendUser, localUser) : backendUser;
           try {
-            await createUser(backendUser);
+            await createUser(finalUser);
           } catch (createError) {
             console.error('Failed to cache backend user locally:', createError);
           }
           set({
-            user: backendUser,
-            currentUserId: backendUser.id,
-            lastLoginAt: backendUser.lastLoginAt,
+            user: finalUser,
+            currentUserId: finalUser.id,
+            lastLoginAt: finalUser.lastLoginAt,
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -574,6 +580,7 @@ export const useAuth = create<AuthState>()(
 
           const updatedUser = { ...user, piPower };
           await updateUser(updatedUser);
+          void syncUserToApi(updatedUser).catch((syncError) => console.warn('同步π力到后端失败:', syncError));
           set({ user: updatedUser });
         }
 
@@ -618,6 +625,7 @@ export const useAuth = create<AuthState>()(
             },
           };
           await updateUser(updatedUser);
+          void syncUserToApi(updatedUser).catch((syncError) => console.warn('同步π力到后端失败:', syncError));
           set({ user: updatedUser });
           return true;
         }
@@ -686,10 +694,13 @@ export const useAuth = create<AuthState>()(
             try {
               const res = await authAPI.getMe();
               const apiUser = apiUserToLocalUser(res.user);
+              // 合并本地进度（π力等），避免后端覆盖
+              const localUser = await getUserById(apiUser.id).catch(() => undefined);
+              const mergedUser = localUser ? mergeBackendAndLocal(apiUser, localUser) : apiUser;
               useAuth.setState({
-                user: apiUser,
-                currentUserId: apiUser.id,
-                lastLoginAt: apiUser.lastLoginAt,
+                user: mergedUser,
+                currentUserId: mergedUser.id,
+                lastLoginAt: mergedUser.lastLoginAt,
                 isAuthenticated: true,
                 hasHydrated: true,
               });

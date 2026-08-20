@@ -24,6 +24,8 @@ model User {
   favoritePosts String[] @default([])
   // 收藏的每日一题
   favoriteQuestions String[] @default([])
+  // π力系统（前端统计，云端持久化）
+  piPower       Json?
 
   // 关注统计
   followingCount Int      @default(0)
