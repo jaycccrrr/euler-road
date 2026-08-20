@@ -89,6 +89,10 @@ export default function CoursesPage() {
 function ModuleCard({ module, index }: { module: typeof KNOWLEDGE_MODULES[0]; index: number }) {
   const colors: Record<string, string> = {
     'from-blue-500 to-blue-600': 'bg-blue-500',
+    'from-blue-400 to-blue-600': 'bg-blue-500',
+    'from-indigo-400 to-indigo-600': 'bg-indigo-500',
+    'from-violet-400 to-violet-600': 'bg-violet-500',
+    'from-pink-400 to-rose-500': 'bg-pink-500',
     'from-purple-500 to-purple-600': 'bg-purple-500',
     'from-emerald-500 to-emerald-600': 'bg-emerald-500',
     'from-emerald-400 to-emerald-600': 'bg-emerald-500',

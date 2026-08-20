@@ -122,7 +122,7 @@ export function MathRenderer({ children, className = '' }: MathRendererProps) {
     html = html.replace(/^# (.*)$/gm, '<h1 class="text-3xl font-bold text-slate-900 mt-12 mb-6 pb-4 border-b-2 border-slate-300">$1</h1>');
 
     // 粗体
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-slate-700 bg-slate-50 px-1 rounded">$1</strong>');
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-800">$1</strong>');
 
     // 斜体
     html = html.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em class="italic text-slate-600">$1</em>');
@@ -140,7 +140,7 @@ export function MathRenderer({ children, className = '' }: MathRendererProps) {
     html = html.replace(/(<li[^>]*>.*<\/li>\n?)+/g, '<ul class="list-disc list-inside my-4 space-y-1 marker:text-slate-400">$&</ul>');
 
     // 引用
-    html = html.replace(/^\s*> (.*)$/gm, '<blockquote class="border-l-4 border-indigo-400 bg-indigo-50 pl-4 py-3 pr-3 my-4 text-slate-700 italic rounded-r-lg">$1</blockquote>');
+    html = html.replace(/^\s*> (.*)$/gm, '<blockquote class="font-bold text-slate-800 my-2">$1</blockquote>');
 
     // Markdown 表格
     // 匹配连续的以 | 开头的行（至少2行，含表头+分隔行）
