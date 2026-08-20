@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '@/lib/auth';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+  // 限流：每 IP 每小时最多 10 次注册
+  const limited = rateLimit(`register:${getClientIp(request)}`, 10, 60 * 60 * 1000);
+  if (limited) return limited;
+
   try {
     const { nickname, password, avatar } = await request.json();
 

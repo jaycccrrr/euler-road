@@ -1,6 +1,26 @@
 // 服务端 AI 判卷（识图 + 文本），供答题提交接口与每日一题共用
 // 判卷链路：识图判卷（视觉模型）→ 文本 AI 判卷（DeepSeek）→ 返回 null 由调用方降级
 
+// 判卷图片限制：防止超大 base64 打爆内存和视觉 API 账单
+export const MAX_GRADING_IMAGES = 4;
+export const MAX_GRADING_IMAGE_LENGTH = 2_000_000; // base64 字符数，约 1.5MB
+
+/**
+ * 校验并清洗判卷图片数组。
+ * 只接受 data:image/* 或 https? URL，超限/非法的条目被丢弃。
+ */
+export function sanitizeGradingImages(images: unknown): string[] {
+  if (!Array.isArray(images)) return [];
+  return images
+    .filter(
+      (src): src is string =>
+        typeof src === 'string' &&
+        src.length <= MAX_GRADING_IMAGE_LENGTH &&
+        (/^data:image\//i.test(src) || /^https?:\/\//i.test(src))
+    )
+    .slice(0, MAX_GRADING_IMAGES);
+}
+
 export interface GradingResult {
   score: number;
   feedback: string;

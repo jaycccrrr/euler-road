@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '@/lib/auth';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+  // 限流：每 IP 每分钟最多 10 次登录尝试
+  const limited = rateLimit(`login:${getClientIp(request)}`, 10, 60 * 1000);
+  if (limited) return limited;
+
   try {
     const { nickname, password } = await request.json();
 
@@ -15,14 +20,15 @@ export async function POST(request: NextRequest) {
       where: { nickname },
     });
 
+    // 统一错误信息，避免通过不同响应枚举已注册昵称
     if (!user) {
-      return NextResponse.json({ error: '用户不存在' }, { status: 404 });
+      return NextResponse.json({ error: '昵称或密码错误' }, { status: 401 });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
-      return NextResponse.json({ error: '密码错误' }, { status: 401 });
+      return NextResponse.json({ error: '昵称或密码错误' }, { status: 401 });
     }
 
     await prisma.user.update({

@@ -30,13 +30,12 @@ export async function PATCH(
       return NextResponse.json({ error: '无权操作' }, { status: 403 });
     }
 
-    const { content, images, isPublic, likes, likedBy } = await request.json();
+    // 注意：likes/likedBy 只通过 /like 接口由服务端维护，这里不接受客户端传入（防刷赞）
+    const { content, images, isPublic } = await request.json();
     const updateData: any = {};
     if (content !== undefined) updateData.content = content;
     if (images !== undefined) updateData.images = images;
     if (isPublic !== undefined) updateData.isPublic = !!isPublic;
-    if (likes !== undefined) updateData.likes = likes;
-    if (likedBy !== undefined) updateData.likedBy = likedBy;
 
     const answer = await prisma.answerRecord.update({ where: { id }, data: updateData });
     return NextResponse.json({ answer });

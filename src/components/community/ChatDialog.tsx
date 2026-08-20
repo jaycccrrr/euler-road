@@ -16,7 +16,6 @@ import {
   createMessage,
   markMessagesAsRead,
 } from '@/lib/db';
-import { subscribeToTable } from '@/lib/cloud-sync';
 import { User, Message, QuestionCardPayload, PostCardPayload } from '@/types';
 import { Send, Image as ImageIcon, X, FileQuestion, FileText, Flame, ExternalLink } from 'lucide-react';
 import { LazyImage } from '@/components/LazyImage';
@@ -62,21 +61,7 @@ export function ChatDialog({ isOpen, onClose, currentUser, friend }: ChatDialogP
   useEffect(() => {
     loadMessages();
 
-    // 优先使用 Supabase Realtime 实时推送；未配置云端时降级为轮询
-    const unsubscribe = subscribeToTable('messages', (payload) => {
-      const row = payload.new as { data?: Message; sender_id?: string; receiver_id?: string } | null;
-      const msg = row?.data;
-      if (!msg) return;
-      // 只关心当前会话的消息
-      const involvesPair =
-        (msg.senderId === currentUser.id && msg.receiverId === friend.id) ||
-        (msg.senderId === friend.id && msg.receiverId === currentUser.id);
-      if (involvesPair) void loadMessages();
-    });
-
-    if (unsubscribe) {
-      return unsubscribe;
-    }
+    // 轮询刷新当前会话消息
     const interval = setInterval(loadMessages, 3000);
     return () => clearInterval(interval);
   }, [loadMessages, currentUser.id, friend.id]);

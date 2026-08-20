@@ -94,9 +94,14 @@ async function gradeViaBackend(
   userImages: string[]
 ): Promise<AIGradingResponse | null> {
   try {
+    // 判卷接口需要登录，附带 JWT
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const res = await fetch('/api/grade', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         title: question.title,
         content: question.content,

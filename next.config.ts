@@ -21,8 +21,8 @@ const nextConfig: NextConfig = {
   // （GitHub Pages 静态托管时代需要，Vercel 上不需要）
   trailingSlash: false,
   images: {
-    // 静态导出时必须为 true；部署到 Vercel 时设为 false 以启用自动图片优化
-    unoptimized: true,
+    // 静态导出（GitHub Pages）时必须为 true；Vercel 部署下启用自动图片优化
+    unoptimized: isGithubPages,
   },
 
   // 启用 gzip/brotli 压缩

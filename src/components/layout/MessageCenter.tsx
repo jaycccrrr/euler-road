@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getUnreadMessageCount, getChatSessions } from '@/lib/db';
-import { subscribeToTable } from '@/lib/cloud-sync';
 import { useAuth } from '@/hooks/useAuth';
 import { ChatDialog } from '@/components/community/ChatDialog';
 import { LazyImage } from '@/components/LazyImage';
@@ -20,7 +19,7 @@ import { User } from '@/types';
 
 /**
  * Header 消息中心：铃铛红点 + 会话列表 + 打开聊天窗口。
- * 有云端时通过 Realtime 刷新未读数，否则每 15s 轮询。
+ * 每 15s 轮询刷新未读数。
  */
 export function MessageCenter() {
   const { user, isAuthenticated } = useAuth();
@@ -43,12 +42,7 @@ export function MessageCenter() {
     if (!isAuthenticated || !user) return;
     void refresh();
 
-    const unsubscribe = subscribeToTable('messages', (payload) => {
-      const row = payload.new as { receiver_id?: string } | null;
-      if (row?.receiver_id === user.id) void refresh();
-    });
-    if (unsubscribe) return unsubscribe;
-
+    // 每 15s 轮询未读数
     const interval = setInterval(() => void refresh(), 15000);
     return () => clearInterval(interval);
   }, [isAuthenticated, user, refresh]);

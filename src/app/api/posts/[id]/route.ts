@@ -30,7 +30,8 @@ export async function PATCH(
       return NextResponse.json({ error: '无权操作' }, { status: 403 });
     }
 
-    const { title, content, images, moduleId, postType, topics, likes, likedBy } = await request.json();
+    // 注意：likes/likedBy 只通过 /like 接口由服务端维护，这里不接受客户端传入（防刷赞）
+    const { title, content, images, moduleId, postType, topics } = await request.json();
     const updateData: any = {};
     if (title !== undefined) updateData.title = title;
     if (content !== undefined) updateData.content = content;
@@ -38,8 +39,6 @@ export async function PATCH(
     if (moduleId !== undefined) updateData.moduleId = moduleId;
     if (postType !== undefined) updateData.postType = postType;
     if (topics !== undefined) updateData.topics = topics;
-    if (likes !== undefined) updateData.likes = likes;
-    if (likedBy !== undefined) updateData.likedBy = likedBy;
 
     const post = await prisma.post.update({
       where: { id },

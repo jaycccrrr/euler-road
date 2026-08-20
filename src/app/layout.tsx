@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "katex/dist/katex.min.css";
 import { AnimationProvider } from "@/contexts/AnimationContext";
-import { CloudSyncProvider } from "@/components/providers/CloudSyncProvider";
 
 export const metadata: Metadata = {
   title: "欧拉之路 - 数学学习交流平台",
@@ -27,9 +26,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-white min-h-screen">
         <AnimationProvider>
-          <CloudSyncProvider>
-            {children}
-          </CloudSyncProvider>
+          {children}
         </AnimationProvider>
       </body>
     </html>

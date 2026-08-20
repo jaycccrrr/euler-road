@@ -2,16 +2,6 @@ import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { User, DailyQuestion, AnswerRecord, Post, Comment, Message, Note, CustomLesson, DiscussionMessage } from '@/types';
 import { initModuleData } from '@/lib/gamification';
 import { hashPassword } from '@/lib/utils';
-import { cloudUpsert, cloudDelete } from '@/lib/cloud-sync';
-
-// 云端同步（fire-and-forget，失败不影响本地写入）
-type SyncStore = 'users' | 'dailyQuestions' | 'answerRecords' | 'posts' | 'comments' | 'messages' | 'notes' | 'customLessons';
-function syncUpsert(store: SyncStore, value: { id: string }): void {
-  void cloudUpsert(store, value).catch(() => {});
-}
-function syncDelete(store: SyncStore, id: string): void {
-  void cloudDelete(store, id).catch(() => {});
-}
 
 interface EulerDBSchema extends DBSchema {
   users: {
@@ -245,7 +235,6 @@ export async function initDB(): Promise<IDBPDatabase<EulerDBSchema>> {
 export async function createUser(user: User): Promise<void> {
   const database = await initDB();
   await database.add('users', user);
-  syncUpsert('users', user);
 }
 
 // 用户数据迁移：确保旧用户数据包含 moduleData
@@ -275,7 +264,6 @@ export async function getUserByNickname(nickname: string): Promise<User | undefi
 export async function updateUser(user: User): Promise<void> {
   const database = await initDB();
   await database.put('users', user);
-  syncUpsert('users', user);
 }
 
 export async function getAllUsers(): Promise<User[]> {
@@ -288,7 +276,6 @@ export async function getAllUsers(): Promise<User[]> {
 export async function createDailyQuestion(question: DailyQuestion): Promise<void> {
   const database = await initDB();
   await database.add('dailyQuestions', question);
-  syncUpsert('dailyQuestions', question);
 }
 
 export async function getDailyQuestionById(id: string): Promise<DailyQuestion | undefined> {
@@ -308,7 +295,6 @@ export async function getDailyQuestionByDate(date: string, moduleId?: string): P
 export async function deleteDailyQuestion(id: string): Promise<void> {
   const database = await initDB();
   await database.delete('dailyQuestions', id);
-  syncDelete('dailyQuestions', id);
 }
 
 export async function getDailyQuestionsByModule(moduleId: string): Promise<DailyQuestion[]> {
@@ -344,7 +330,6 @@ export async function getHistoricalQuestions(
 export async function createAnswerRecord(record: AnswerRecord): Promise<void> {
   const database = await initDB();
   await database.add('answerRecords', record);
-  syncUpsert('answerRecords', record);
 }
 
 export async function getAnswerRecordsByUser(userId: string): Promise<AnswerRecord[]> {
@@ -391,20 +376,17 @@ export async function getAllAnswerRecords(): Promise<AnswerRecord[]> {
 export async function updateAnswerRecord(record: AnswerRecord): Promise<void> {
   const database = await initDB();
   await database.put('answerRecords', record);
-  syncUpsert('answerRecords', record);
 }
 
 export async function deleteAnswerRecord(recordId: string): Promise<void> {
   const database = await initDB();
   await database.delete('answerRecords', recordId);
-  syncDelete('answerRecords', recordId);
 }
 
 // Post operations
 export async function createPost(post: Post): Promise<void> {
   const database = await initDB();
   await database.add('posts', post);
-  syncUpsert('posts', post);
 }
 
 export async function getPostById(id: string): Promise<Post | undefined> {
@@ -473,13 +455,11 @@ export async function getPostsByModule(moduleId: string): Promise<Post[]> {
 export async function updatePost(post: Post): Promise<void> {
   const database = await initDB();
   await database.put('posts', post);
-  syncUpsert('posts', post);
 }
 
 export async function deletePost(id: string): Promise<void> {
   const database = await initDB();
   await database.delete('posts', id);
-  syncDelete('posts', id);
 }
 
 // 更新用户所有帖子的头像和昵称
@@ -501,7 +481,6 @@ export async function updateUserPostsAvatar(userId: string, avatar: string, nick
   }
 
   await tx.done;
-  userPosts.forEach((post) => syncUpsert('posts', post));
 }
 
 // 更新用户所有评论的头像和昵称
@@ -524,14 +503,12 @@ export async function updateUserCommentsAvatar(userId: string, avatar: string, n
   }
 
   await tx.done;
-  userComments.forEach((comment) => syncUpsert('comments', comment));
 }
 
 // Comment operations
 export async function createComment(comment: Comment): Promise<void> {
   const database = await initDB();
   await database.add('comments', comment);
-  syncUpsert('comments', comment);
 }
 
 export async function getCommentById(id: string): Promise<Comment | undefined> {
@@ -617,7 +594,6 @@ export async function initAdminUser(): Promise<void> {
 export async function createMessage(message: Message): Promise<void> {
   const database = await initDB();
   await database.add('messages', message);
-  syncUpsert('messages', message);
 }
 
 export async function getMessageById(id: string): Promise<Message | undefined> {
@@ -650,7 +626,6 @@ export async function markMessagesAsRead(receiverId: string, senderId: string): 
   }
 
   await tx.done;
-  unreadMessages.forEach((message) => syncUpsert('messages', message));
 }
 
 export async function getUnreadMessageCount(userId: string): Promise<number> {
@@ -726,7 +701,6 @@ export async function followUser(userId: string, targetUserId: string): Promise<
   if (!user.following.includes(targetUserId)) {
     user.following.push(targetUserId);
     await database.put('users', user);
-    syncUpsert('users', user);
   }
 }
 
@@ -737,7 +711,6 @@ export async function unfollowUser(userId: string, targetUserId: string): Promis
 
   user.following = user.following.filter(id => id !== targetUserId);
   await database.put('users', user);
-  syncUpsert('users', user);
 }
 
 export async function getFollowers(userId: string): Promise<User[]> {
@@ -798,14 +771,12 @@ export async function updateUserProfile(userId: string, updates: Partial<User>):
 
   Object.assign(user, updates);
   await database.put('users', user);
-  syncUpsert('users', user);
 }
 
 // ===== 笔记操作 =====
 export async function createNote(note: Note): Promise<void> {
   const database = await initDB();
   await database.add('notes', note);
-  syncUpsert('notes', note);
 }
 
 export async function getNoteById(id: string): Promise<Note | undefined> {
@@ -826,13 +797,11 @@ export async function getNotesByModule(moduleId: string): Promise<Note[]> {
 export async function updateNote(note: Note): Promise<void> {
   const database = await initDB();
   await database.put('notes', note);
-  syncUpsert('notes', note);
 }
 
 export async function deleteNote(id: string): Promise<void> {
   const database = await initDB();
   await database.delete('notes', id);
-  syncDelete('notes', id);
 }
 
 // ==================== 自定义课时（导入管线） ====================
@@ -840,7 +809,6 @@ export async function deleteNote(id: string): Promise<void> {
 export async function createCustomLesson(lesson: CustomLesson): Promise<void> {
   const database = await initDB();
   await database.put('customLessons', lesson);
-  syncUpsert('customLessons', lesson);
 }
 
 export async function getCustomLessonsByModule(moduleId: string): Promise<CustomLesson[]> {
@@ -856,13 +824,11 @@ export async function getAllCustomLessons(): Promise<CustomLesson[]> {
 export async function updateCustomLesson(lesson: CustomLesson): Promise<void> {
   const database = await initDB();
   await database.put('customLessons', lesson);
-  syncUpsert('customLessons', lesson);
 }
 
 export async function deleteCustomLesson(id: string): Promise<void> {
   const database = await initDB();
   await database.delete('customLessons', id);
-  syncDelete('customLessons', id);
 }
 
 // ===== 讨论区消息 =====

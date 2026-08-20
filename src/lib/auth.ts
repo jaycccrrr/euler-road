@@ -1,7 +1,15 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-minimum-32-characters-long';
+function loadJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error('JWT_SECRET 未配置或长度不足 32 字符，请在环境变量中设置后重启服务');
+  }
+  return secret;
+}
+
+const JWT_SECRET: string = loadJwtSecret();
 const SALT_ROUNDS = 10;
 
 export async function hashPassword(password: string): Promise<string> {

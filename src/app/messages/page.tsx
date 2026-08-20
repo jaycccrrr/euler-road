@@ -16,7 +16,6 @@ import {
   getUserById,
   areFriends,
 } from '@/lib/db';
-import { subscribeToTable } from '@/lib/cloud-sync';
 import { mergeMessagesFromBackend, mergeConversationsFromBackend, syncMessageToBackend, fetchAndCacheUser } from '@/lib/api-sync';
 import CubeLoader from '@/components/ui/cube-loader';
 import { useAuth } from '@/hooks/useAuth';
@@ -164,24 +163,10 @@ export default function MessagesPage() {
     }
   }, [currentUser, activeFriend]);
 
-  // 实时订阅（无云端时降级轮询）
+  // 轮询刷新会话消息
   useEffect(() => {
     if (!currentUser || !activeFriend) return;
     void loadMessages();
-
-    const unsubscribe = subscribeToTable('messages', (payload) => {
-      const row = payload.new as { data?: Message } | null;
-      const msg = row?.data;
-      if (!msg) return;
-      const involvesPair =
-        (msg.senderId === currentUser.id && msg.receiverId === activeFriend.id) ||
-        (msg.senderId === activeFriend.id && msg.receiverId === currentUser.id);
-      if (involvesPair) {
-        void loadMessages();
-        void loadSessions();
-      }
-    });
-    if (unsubscribe) return unsubscribe;
 
     const interval = setInterval(() => {
       void loadMessages();

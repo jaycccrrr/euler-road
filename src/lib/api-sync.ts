@@ -222,8 +222,6 @@ export async function syncAnswerUpdateToBackend(record: AnswerRecord): Promise<v
   try {
     await answersAPI.update(record.id, {
       isPublic: record.isPublic,
-      likes: record.likes,
-      likedBy: record.likedBy,
     });
   } catch (error) {
     console.warn('同步答题记录更新到后端失败:', error);
@@ -293,8 +291,6 @@ export async function syncPostUpdateToBackend(post: Post): Promise<void> {
       images: post.images,
       postType: post.postType,
       topics: post.topics || [],
-      likes: post.likes,
-      likedBy: post.likedBy,
     });
   } catch (error) {
     console.warn('同步帖子更新到后端失败:', error);

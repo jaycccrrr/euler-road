@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import katex from 'katex';
+import DOMPurify from 'dompurify';
 import 'katex/dist/katex.min.css';
 import { assetPath } from '@/lib/asset';
 
@@ -194,7 +195,7 @@ export function MathRenderer({ children, className = '' }: MathRendererProps) {
         : cleanUrl.startsWith('/') ? cleanUrl : '/' + cleanUrl;
       // GitHub Pages 子路径部署时，本地绝对路径需要补 basePath 前缀
       const finalUrl = assetPath(rawUrl);
-      return `<div class="my-4"><img src="${finalUrl}" alt="${cleanAlt}" class="max-w-full rounded-lg" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.parentElement.querySelector('.img-error').style.display='block';" /><div class="img-error" style="display:none; padding:12px; background:#fee; color:#c00; border:1px solid #fcc; border-radius:8px; word-break:break-all;"><strong>图片加载失败</strong><br/>路径: ${finalUrl}</div></div>`;
+      return `<div class="my-4"><img src="${finalUrl}" alt="${cleanAlt}" class="max-w-full rounded-lg" loading="lazy" decoding="async" referrerpolicy="no-referrer" /><div class="img-error" style="display:none; padding:12px; background:#fee; color:#c00; border:1px solid #fcc; border-radius:8px; word-break:break-all;"><strong>图片加载失败</strong><br/>路径: ${finalUrl}</div></div>`;
     });
 
     // 段落分割（将空行分隔的文本包装在 p 标签中）
@@ -265,7 +266,24 @@ export function MathRenderer({ children, className = '' }: MathRendererProps) {
     // 单个换行转为空格
     html = html.replace(/\n/g, ' ');
 
-    containerRef.current.innerHTML = html;
+    // 安全消毒：内容可能来自其他用户（讨论区、答题墙等），
+    // DOMPurify 移除事件处理器（onerror/onload 等）、javascript: URL 与危险标签，
+    // 保留 KaTeX 输出的 class/style/MathML/SVG。
+    const container = containerRef.current;
+    container.innerHTML = DOMPurify.sanitize(html, {
+      ADD_ATTR: ['loading', 'decoding', 'referrerpolicy'],
+    });
+
+    // 图片加载失败的占位提示：用捕获阶段事件委托实现（内联 onerror 会被消毒移除）
+    const handleImageError = (event: Event) => {
+      const target = event.target as HTMLElement;
+      if (target.tagName !== 'IMG') return;
+      (target as HTMLImageElement).style.display = 'none';
+      const fallback = target.parentElement?.querySelector<HTMLElement>('.img-error');
+      if (fallback) fallback.style.display = 'block';
+    };
+    container.addEventListener('error', handleImageError, true);
+    return () => container.removeEventListener('error', handleImageError, true);
   }, [children]);
 
   return (
