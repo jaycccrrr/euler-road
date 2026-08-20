@@ -1,4 +1,5 @@
 import { KnowledgeModule } from '@/types';
+import { discreteMathChapters } from './discreteMathBlocks';
 
 export const KNOWLEDGE_MODULES: KnowledgeModule[] = [
   {
@@ -1177,6 +1178,22 @@ $P\{|X-E(X)|\geq\varepsilon\}\leq\frac{D(X)}{\varepsilon^2}$
 - $Z$ 检验、$t$ 检验、$\chi^2$ 检验`,
       },
     ],
+  },
+  {
+    id: 'discrete-math',
+    name: '离散数学',
+    category: 'math',
+    icon: '🧩',
+    color: 'from-emerald-500 to-emerald-600',
+    description: '离散数学知识体系，涵盖数理逻辑、集合论、数论、计数、图论、树、布尔代数与形式语言',
+    topics: discreteMathChapters.map((ch, i) => ({
+      id: `dm-topic-${i + 1}`,
+      title: ch.title,
+      difficulty: 3,
+      content: `## ${ch.title}
+
+${ch.description ?? ''}`,
+    })),
   },
 ];
 

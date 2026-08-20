@@ -7,7 +7,19 @@ import Header from '@/components/layout/Header';
 import { TEXTBOOKS } from '@/data/textbooks';
 import { Button } from '@/components/ui/button';
 import CubeLoader from '@/components/ui/cube-loader';
-import { ArrowLeft, ChevronLeft, ChevronRight, Download, ZoomIn, ZoomOut } from 'lucide-react';
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react';
+import {
+  getCachedTextbook,
+  saveCachedTextbook,
+  removeCachedTextbook,
+} from '@/lib/textbook-cache';
 
 import type { PDFDocumentProxy, PDFDocumentLoadingTask } from 'pdfjs-dist';
 
@@ -20,6 +32,8 @@ async function loadPdfJs() {
 const BASE_SCALE = 1.15;
 const MAX_DPR = 2;
 
+type CacheStatus = 'none' | 'loading' | 'caching' | 'cached';
+
 function ReaderContent() {
   const searchParams = useSearchParams();
   const file = searchParams.get('file');
@@ -30,6 +44,7 @@ function ReaderContent() {
   const pdfRef = useRef<PDFDocumentProxy | null>(null);
   const loadingTaskRef = useRef<PDFDocumentLoadingTask | null>(null);
   const sliderTimerRef = useRef<number | null>(null);
+  const aliveRef = useRef(true);
   const [numPages, setNumPages] = useState(0);
   const [page, setPage] = useState(1);
   const [sliderPage, setSliderPage] = useState(1);
@@ -37,12 +52,14 @@ function ReaderContent() {
   const [loading, setLoading] = useState(true);
   const [rendering, setRendering] = useState(false);
   const [error, setError] = useState('');
+  const [cacheStatus, setCacheStatus] = useState<CacheStatus>('none');
+  const [cacheProgress, setCacheProgress] = useState<number | null>(null);
 
   // 拖动滑块时防抖跳页，松手/键盘确认时立即跳页
   const queueSlider = useCallback((v: number) => {
     setSliderPage(v);
     if (sliderTimerRef.current !== null) window.clearTimeout(sliderTimerRef.current);
-    sliderTimerRef.current = window.setTimeout(() => setPage(v), 180);
+    sliderTimerRef.current = window.setTimeout(() => setPage(v), 160);
   }, []);
 
   const commitSlider = useCallback((v: number) => {
@@ -58,47 +75,81 @@ function ReaderContent() {
     setSliderPage(page);
   }, [page]);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    aliveRef.current = true;
+    return () => {
+      aliveRef.current = false;
       if (sliderTimerRef.current !== null) window.clearTimeout(sliderTimerRef.current);
-    },
-    []
-  );
+    };
+  }, []);
 
-  // 首次打开时按阅读区宽度自动缩放，避免大页面渲染过慢
+  // 首次打开时按阅读区宽高自动缩放，避免大页面渲染过慢
   const fittedScale = useCallback(async (pdf: PDFDocumentProxy) => {
     try {
       const first = await pdf.getPage(1);
       const base = first.getViewport({ scale: 1 });
-      const avail = (viewerRef.current?.clientWidth || Math.min(window.innerWidth, 896)) - 48;
-      return Math.max(0.6, Math.min(BASE_SCALE, avail / base.width));
+      const el = viewerRef.current;
+      const availW = (el?.clientWidth || Math.min(window.innerWidth, 1000)) - 64;
+      const availH = (el?.clientHeight || window.innerHeight) - 96;
+      return Math.max(0.5, Math.min(BASE_SCALE, availW / base.width, availH / base.height));
     } catch {
       return BASE_SCALE;
     }
   }, []);
 
-  const renderPage = useCallback(
-    async (pageNumber: number, pdf: PDFDocumentProxy, s: number) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const pageObj = await pdf.getPage(pageNumber);
-      const viewport = pageObj.getViewport({ scale: s });
-      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
-      canvas.width = Math.floor(viewport.width * dpr);
-      canvas.height = Math.floor(viewport.height * dpr);
-      canvas.style.width = `${Math.floor(viewport.width)}px`;
-      canvas.style.height = `${Math.floor(viewport.height)}px`;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, viewport.width, viewport.height);
-      await pageObj.render({ canvas, canvasContext: ctx, viewport }).promise;
+  // 后台整本下载教材并写入本地缓存（带进度）
+  const downloadAndCache = useCallback(async (fileName: string) => {
+    try {
+      setCacheStatus('caching');
+      setCacheProgress(0);
+      const res = await fetch(`/api/textbook?file=${encodeURIComponent(fileName)}`);
+      if (!res.ok || !res.body) throw new Error('download failed');
+      const total = Number(res.headers.get('content-length') || 0);
+      const reader = res.body.getReader();
+      const chunks: Uint8Array[] = [];
+      let received = 0;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+          chunks.push(value);
+          received += value.byteLength;
+        }
+        if (aliveRef.current) {
+          setCacheProgress(total ? Math.min(100, Math.round((received / total) * 100)) : null);
+        }
+      }
+      const buffer = await new Blob(chunks as BlobPart[]).arrayBuffer();
+      await saveCachedTextbook(fileName, buffer, total || received);
+      if (aliveRef.current) setCacheStatus('cached');
+    } catch {
+      if (aliveRef.current) setCacheStatus('none');
+    } finally {
+      if (aliveRef.current) setCacheProgress(null);
+    }
+  }, []);
+
+  // 打开缓存后后台校验文件大小是否变化，变化则重新缓存
+  const verifyCachedSize = useCallback(
+    async (fileName: string, cachedSize: number) => {
+      try {
+        const res = await fetch(`/api/textbook?file=${encodeURIComponent(fileName)}`, {
+          headers: { Range: 'bytes=0-0' },
+        });
+        const cr = res.headers.get('content-range') || '';
+        const total = Number(cr.match(/\/(\d+)\s*$/)?.[1] || 0);
+        if (total && total !== cachedSize) {
+          await removeCachedTextbook(fileName);
+          await downloadAndCache(fileName);
+        }
+      } catch {
+        // 校验失败不影响阅读
+      }
     },
-    []
+    [downloadAndCache]
   );
 
-  // 首次加载 PDF 元数据（按需分块，不整本预下载）
+  // 首次加载 PDF：优先本地缓存，未缓存则按需加载并后台缓存
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -109,11 +160,21 @@ function ReaderContent() {
       }
       try {
         const pdfjsLib = await loadPdfJs();
-        const task = pdfjsLib.getDocument({
-          url: `/api/textbook?file=${encodeURIComponent(book.file)}`,
-          disableStream: true,
-          disableAutoFetch: true,
-        });
+        const cached = await getCachedTextbook(book.file);
+        let task: PDFDocumentLoadingTask;
+        if (cached) {
+          setCacheStatus('cached');
+          task = pdfjsLib.getDocument({ data: cached.data });
+          verifyCachedSize(book.file, cached.size);
+        } else {
+          setCacheStatus('loading');
+          task = pdfjsLib.getDocument({
+            url: `/api/textbook?file=${encodeURIComponent(book.file)}`,
+            disableStream: true,
+            disableAutoFetch: true,
+          });
+          downloadAndCache(book.file);
+        }
         loadingTaskRef.current = task;
         const pdf = await task.promise;
         if (cancelled) {
@@ -142,7 +203,28 @@ function ReaderContent() {
       loadingTaskRef.current = null;
       pdfRef.current = null;
     };
-  }, [book, fittedScale]);
+  }, [book, fittedScale, downloadAndCache, verifyCachedSize]);
+
+  const renderPage = useCallback(
+    async (pageNumber: number, pdf: PDFDocumentProxy, s: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const pageObj = await pdf.getPage(pageNumber);
+      const viewport = pageObj.getViewport({ scale: s });
+      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+      canvas.width = Math.floor(viewport.width * dpr);
+      canvas.height = Math.floor(viewport.height * dpr);
+      canvas.style.width = `${Math.floor(viewport.width)}px`;
+      canvas.style.height = `${Math.floor(viewport.height)}px`;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, viewport.width, viewport.height);
+      await pageObj.render({ canvas, canvasContext: ctx, viewport }).promise;
+    },
+    []
+  );
 
   // 页码 / 缩放变化时渲染当前页，并预取后两页数据
   useEffect(() => {
@@ -182,6 +264,8 @@ function ReaderContent() {
     return () => window.removeEventListener('keydown', onKey);
   }, [numPages]);
 
+
+
   if (!book) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -199,40 +283,61 @@ function ReaderContent() {
   }
 
   const downloadUrl = `https://github.com/jaycccrrr/euler-road/releases/download/textbooks/${encodeURIComponent(book.file)}`;
+  const progressWidth = cacheProgress !== null ? `${cacheProgress}%` : undefined;
+  const cacheBadge =
+    cacheStatus === 'caching' && cacheProgress !== null
+      ? `缓存 ${cacheProgress}%`
+      : cacheStatus === 'cached'
+        ? '已缓存'
+        : '';
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col">
+    <div className="h-screen flex flex-col bg-slate-100 overflow-hidden">
       <Header />
-      <main className="flex-1 flex flex-col items-center px-4 py-6">
-        {/* 顶部工具栏 */}
-        <div className="w-full max-w-4xl flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link href="/courses">
-              <Button variant="outline" size="sm" className="rounded-lg shrink-0">
-                <ArrowLeft className="w-4 h-4 mr-1" /> 返回
-              </Button>
-            </Link>
-            <div className="min-w-0">
-              <h1 className="text-sm font-semibold text-slate-800 truncate">{book.name}</h1>
-              <p className="text-xs text-slate-400 truncate">{book.author}</p>
-            </div>
-          </div>
-          <a href={downloadUrl} download target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" size="sm" className="rounded-lg">
-              <Download className="w-4 h-4 mr-1.5" /> 下载
-            </Button>
-          </a>
-        </div>
 
+      {/* 顶部工具栏（紧凑） */}
+      <div className="h-12 shrink-0 bg-white border-b border-slate-200 flex items-center gap-2 px-3">
+        <Link href="/courses">
+          <Button variant="ghost" size="sm" className="rounded-lg shrink-0 px-2">
+            <ArrowLeft className="w-4 h-4 mr-1" /> 返回
+          </Button>
+        </Link>
+        <div className="min-w-0">
+          <h1 className="text-sm font-semibold text-slate-800 truncate leading-tight">{book.name}</h1>
+          <p className="text-[11px] text-slate-400 truncate leading-tight">{book.author}</p>
+        </div>
+        <div className="flex-1" />
+        <a href={downloadUrl} download target="_blank" rel="noopener noreferrer">
+          <Button variant="outline" size="sm" className="rounded-lg">
+            <Download className="w-4 h-4 mr-1.5" /> 下载
+          </Button>
+        </a>
+      </div>
+
+      <main className="flex-1 min-h-0 flex">
         {/* 阅读区 */}
-        <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex items-center justify-center min-h-[70vh]">
+        <div
+          ref={viewerRef}
+          className="relative flex-1 min-h-0 bg-slate-100 flex items-center justify-center overflow-hidden"
+        >
+          {/* 首页加载进度条 */}
+          {loading && (
+            <div className="absolute top-0 inset-x-0 z-20 h-1.5 bg-slate-200/70 overflow-hidden">
+              <div
+                className={progressWidth ? 'h-full bg-blue-500 transition-all duration-200' : 'h-full w-1/3 bg-blue-500 animate-pulse'}
+                style={progressWidth ? { width: progressWidth } : undefined}
+              />
+            </div>
+          )}
+
           {loading ? (
-            <div className="flex flex-col items-center gap-3 py-24">
+            <div className="flex flex-col items-center gap-3 py-16 px-6">
               <CubeLoader />
               <p className="text-sm text-slate-400">正在加载教材…</p>
+              <p className="text-xs text-slate-300">首次打开会自动缓存，之后打开秒开</p>
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center gap-4 py-24 px-6 text-center">
+            <div className="flex flex-col items-center gap-4 py-16 px-6 text-center">
               <p className="text-slate-600">{error}</p>
               <Button
                 className="rounded-xl"
@@ -240,11 +345,17 @@ function ReaderContent() {
                   setError('');
                   setLoading(true);
                   const pdfjsLib = await loadPdfJs();
-                  const task = pdfjsLib.getDocument({
-                    url: `/api/textbook?file=${encodeURIComponent(book.file)}`,
-                    disableStream: true,
-                    disableAutoFetch: true,
-                  });
+                  const cached = await getCachedTextbook(book.file);
+                  let task: PDFDocumentLoadingTask;
+                  if (cached) {
+                    task = pdfjsLib.getDocument({ data: cached.data });
+                  } else {
+                    task = pdfjsLib.getDocument({
+                      url: `/api/textbook?file=${encodeURIComponent(book.file)}`,
+                      disableStream: true,
+                      disableAutoFetch: true,
+                    });
+                  }
                   loadingTaskRef.current?.destroy();
                   loadingTaskRef.current = task;
                   task.promise
@@ -266,70 +377,83 @@ function ReaderContent() {
               </Button>
             </div>
           ) : (
-            <div ref={viewerRef} className="relative w-full flex items-center justify-center py-6 px-4">
+            <div className="w-full h-full overflow-auto grid place-items-center p-6">
               {rendering && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 pointer-events-none">
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/40 pointer-events-none">
                   <p className="text-xs text-slate-400 bg-white/80 px-3 py-1 rounded-full shadow-sm">
                     渲染中…
                   </p>
                 </div>
               )}
-              <canvas ref={canvasRef} className="shadow-md max-w-full h-auto" />
+              <canvas ref={canvasRef} className="shadow-md m-auto" />
             </div>
+          )}
+
+          {/* 左右翻页按钮 */}
+          {!loading && !error && (
+            <>
+              <button
+                type="button"
+                aria-label="上一页"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/85 shadow-md border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-blue-50 hover:text-blue-600 motion-safe:transition-colors disabled:opacity-35 disabled:pointer-events-none"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="下一页"
+                disabled={page >= numPages}
+                onClick={() => setPage((p) => Math.min(numPages, p + 1))}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/85 shadow-md border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-blue-50 hover:text-blue-600 motion-safe:transition-colors disabled:opacity-35 disabled:pointer-events-none"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </>
           )}
         </div>
 
-        {/* 底部控制栏 */}
-        {!loading && !error && numPages > 0 && (
-          <div className="w-full max-w-4xl flex flex-col gap-3 mt-4 bg-white rounded-2xl border border-slate-200 px-4 py-3 shadow-sm">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-lg"
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <span className="text-sm text-slate-600 tabular-nums min-w-[96px] text-center">
-                  第 {page} / {numPages} 页
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-lg"
-                  disabled={page >= numPages}
-                  onClick={() => setPage((p) => Math.min(numPages, p + 1))}
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-lg"
-                  disabled={scale <= 0.6}
-                  onClick={() => setScale((s) => Math.max(0.6, +(s - 0.15).toFixed(2)))}
-                >
-                  <ZoomOut className="w-4 h-4" />
-                </Button>
-                <span className="text-xs text-slate-500 tabular-nums w-10 text-center">
-                  {Math.round(scale * 100)}%
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-lg"
-                  disabled={scale >= 2.5}
-                  onClick={() => setScale((s) => Math.min(2.5, +(s + 0.15).toFixed(2)))}
-                >
-                  <ZoomIn className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+        {/* 右侧控制栏 */}
+        <aside className="w-16 shrink-0 bg-white border-l border-slate-200 flex flex-col items-center justify-between py-3">
+          <div className="flex flex-col items-center gap-1.5">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-lg px-1"
+              aria-label="缩小"
+              disabled={scale <= 0.5}
+              onClick={() => setScale((s) => Math.max(0.5, +(s - 0.15).toFixed(2)))}
+            >
+              <ZoomOut className="w-4 h-4" />
+            </Button>
+            <span className="text-xs text-slate-600 tabular-nums w-10 text-center">
+              {Math.round(scale * 100)}%
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-lg px-1"
+              aria-label="放大"
+              disabled={scale >= 2.5}
+              onClick={() => setScale((s) => Math.min(2.5, +(s + 0.15).toFixed(2)))}
+            >
+              <ZoomIn className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="text-xs text-slate-500 tabular-nums text-center leading-relaxed">
+            第
+            <br />
+            {page}
+            <br />/
+            <br />
+            {numPages}
+            <br />
+            页
+          </div>
+
+          <div className="h-60 w-8 flex items-center justify-center">
             <input
               type="range"
               min={1}
@@ -341,10 +465,15 @@ function ReaderContent() {
               onMouseUp={(e) => commitSlider(Number((e.currentTarget as HTMLInputElement).value))}
               onKeyUp={(e) => commitSlider(Number((e.target as HTMLInputElement).value))}
               aria-label="拖动跳转页码"
-              className="w-full h-2 accent-blue-600 cursor-pointer"
+              className="w-52 h-2 accent-blue-600 cursor-pointer"
+              style={{ transform: 'rotate(-90deg)' }}
             />
           </div>
-        )}
+
+          <div className="text-[10px] text-slate-400 text-center leading-tight min-h-[14px]">
+            {cacheBadge}
+          </div>
+        </aside>
       </main>
     </div>
   );

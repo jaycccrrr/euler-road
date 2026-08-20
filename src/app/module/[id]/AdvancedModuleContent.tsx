@@ -123,6 +123,16 @@ function useCourseChapters(moduleId: string) {
           });
           return;
         }
+        if (moduleId === 'discrete-math') {
+          if (!mounted) return;
+          const { discreteMathChapters } = await import('@/data/discreteMathBlocks');
+          setData({
+            chapters: customChapter ? [...discreteMathChapters, customChapter] : discreteMathChapters,
+            loading: false,
+            error: null,
+          });
+          return;
+        }
         // 高等数学
         const { basicChapters } = await import('@/data/advancedMathBlocks');
         if (!mounted) return;
