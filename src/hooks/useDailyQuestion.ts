@@ -298,8 +298,9 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           // Grade the answer（双通道：本地算法 + 低置信度时 AI 二次批改）
           const grading = await gradeAnswerDual(question, content, images);
 
-          // Calculate experience
-          const expGained = calculateAnswerExp(grading.score);
+          // Calculate experience（含连续学习加成：每连续答对 1 天 +1，上限 +10）
+          const streakDays = user.piPower?.currentStreak || 0;
+          const expGained = calculateAnswerExp(grading.score, streakDays);
 
           // Create answer record
           const record: AnswerRecord = {

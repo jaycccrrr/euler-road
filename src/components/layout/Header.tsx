@@ -17,6 +17,7 @@ import { BookOpen, Users, Calendar, LogOut, User as UserIcon, GraduationCap } fr
 import { getPrimaryFrame, initModuleData, FRAME_COLORS } from '@/lib/gamification';
 import { navigateTo } from '@/lib/asset';
 import { MessageCenter } from './MessageCenter';
+import { NotificationCenter } from './NotificationCenter';
 
 export default function Header() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -65,6 +66,7 @@ export default function Header() {
         <div className="flex items-center gap-2">
           {isAuthenticated && user ? (
             <>
+              <NotificationCenter />
               <MessageCenter />
               <DropdownMenu>
               <DropdownMenuTrigger>

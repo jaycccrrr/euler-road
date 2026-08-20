@@ -2,9 +2,10 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import Fuse from 'fuse.js';
-import { Search, X, ArrowRight, BookOpen } from 'lucide-react';
+import { Search, X, ArrowRight, BookOpen, History, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import { useSearchHistory } from '@/hooks/useSearchHistory';
 
 interface SearchItem {
   id: string;
@@ -37,6 +38,7 @@ export default function CourseSearch({ modules }: CourseSearchProps) {
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { history, addHistory, removeHistory, clearHistory } = useSearchHistory('course');
 
   // 构建搜索索引
   const searchItems: SearchItem[] = useMemo(() => {
@@ -105,6 +107,12 @@ export default function CourseSearch({ modules }: CourseSearchProps) {
     inputRef.current?.focus();
   };
 
+  // 应用搜索词（历史记录/热门搜索点击时回填并记录）
+  const applyTerm = (term: string) => {
+    setQuery(term);
+    addHistory(term);
+  };
+
   return (
     <div ref={containerRef} className="relative w-full max-w-2xl mx-auto">
       {/* 搜索输入框 */}
@@ -117,6 +125,9 @@ export default function CourseSearch({ modules }: CourseSearchProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && query.trim()) addHistory(query);
+          }}
           className="w-full pl-12 pr-12 py-6 text-lg bg-white border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
         />
         {query && (
@@ -133,22 +144,63 @@ export default function CourseSearch({ modules }: CourseSearchProps) {
       {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50 max-h-[60vh] overflow-y-auto origin-top animate-popover-in">
           {!query ? (
-            // 默认状态：显示热门搜索
-            <div className="p-4">
-              <p className="text-sm text-slate-400 mb-3 flex items-center gap-2">
-                <BookOpen className="w-4 h-4" />
-                热门搜索
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {['集合', '函数', '导数', '积分', '矩阵'].map((term) => (
-                  <button
-                    key={term}
-                    onClick={() => setQuery(term)}
-                    className="px-3 py-1.5 bg-slate-50 hover:bg-blue-50 hover:text-blue-600 rounded-full text-sm text-slate-600 transition-colors"
-                  >
-                    {term}
-                  </button>
-                ))}
+            // 默认状态：搜索历史 + 热门搜索
+            <div className="p-4 space-y-4">
+              {history.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm text-slate-400 flex items-center gap-2">
+                      <History className="w-4 h-4" />
+                      搜索历史
+                    </p>
+                    <button
+                      onClick={clearHistory}
+                      className="text-xs text-slate-400 hover:text-red-500 flex items-center gap-1 transition-colors"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      清空
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {history.map((term) => (
+                      <span
+                        key={term}
+                        className="group inline-flex items-center gap-1 pl-3 pr-1.5 py-1.5 bg-slate-50 hover:bg-blue-50 rounded-full text-sm text-slate-600 transition-colors"
+                      >
+                        <button
+                          onClick={() => applyTerm(term)}
+                          className="hover:text-blue-600 transition-colors"
+                        >
+                          {term}
+                        </button>
+                        <button
+                          onClick={() => removeHistory(term)}
+                          className="p-0.5 rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                          aria-label={`删除搜索历史 ${term}`}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div>
+                <p className="text-sm text-slate-400 mb-3 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  热门搜索
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {['集合', '函数', '导数', '积分', '矩阵'].map((term) => (
+                    <button
+                      key={term}
+                      onClick={() => applyTerm(term)}
+                      className="px-3 py-1.5 bg-slate-50 hover:bg-blue-50 hover:text-blue-600 rounded-full text-sm text-slate-600 transition-colors"
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           ) : results.length === 0 ? (
@@ -173,6 +225,7 @@ export default function CourseSearch({ modules }: CourseSearchProps) {
                   key={item.id}
                   href={item.url}
                   onClick={() => {
+                    addHistory(query);
                     setIsOpen(false);
                     setQuery('');
                   }}

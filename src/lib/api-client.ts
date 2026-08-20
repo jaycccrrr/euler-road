@@ -234,3 +234,14 @@ export const leaderboardAPI = {
   get: () =>
     fetchAPI<{ users: any[] }>('/api/leaderboard'),
 };
+
+// 通知中心
+export const notificationsAPI = {
+  list: (limit = 30) =>
+    fetchAPI<{ notifications: any[]; unreadCount: number }>(`/api/notifications?limit=${limit}`),
+  markRead: (payload: { all?: boolean; ids?: string[] }) =>
+    fetchAPI<{ ok: boolean; unreadCount: number }>('/api/notifications/read', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+};

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { createNotification } from '@/lib/notifications';
 
 function getUserId(request: NextRequest): string | null {
   const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -62,6 +63,19 @@ export async function POST(
         },
       },
     });
+
+    // 通知答案作者有新评论
+    const answer = await prisma.answerRecord.findUnique({ where: { id: answerId }, select: { userId: true } });
+    if (answer) {
+      void createNotification({
+        userId: answer.userId,
+        type: 'answer_comment',
+        actorId: userId,
+        targetType: 'answer',
+        targetId: answerId,
+        content: content.trim(),
+      });
+    }
 
     return NextResponse.json({ comment });
   } catch (error) {

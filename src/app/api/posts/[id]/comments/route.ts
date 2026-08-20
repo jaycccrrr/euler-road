@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { createNotification } from '@/lib/notifications';
 
 function getUserId(request: NextRequest): string | null {
   const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -62,6 +63,19 @@ export async function POST(
         },
       },
     });
+
+    // 通知帖子作者有新评论
+    const post = await prisma.post.findUnique({ where: { id: postId }, select: { userId: true } });
+    if (post) {
+      void createNotification({
+        userId: post.userId,
+        type: 'post_comment',
+        actorId: userId,
+        targetType: 'post',
+        targetId: postId,
+        content: content.trim(),
+      });
+    }
 
     return NextResponse.json({ comment });
   } catch (error) {

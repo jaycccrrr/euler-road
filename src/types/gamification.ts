@@ -32,22 +32,34 @@ export interface ModuleTitles {
   level6: string;
 }
 
-// 经验值奖励
+// 经验值奖励规则
+//
+// 设计原则：
+// 1. 参与即有保底（基础分），避免"答错白忙"的挫败感；
+// 2. 质量分层加成，得分越高加成越大，鼓励追求完整解答；
+// 3. 连续学习加成随连续天数递增但有上限，鼓励长期坚持而非单日刷量；
+// 4. 社区贡献（每日首发帖）给予固定奖励。
+//
+// 单次答题经验 = 基础参与 + 质量加成 + 连续学习加成
 export const EXP_REWARDS = {
-  CORRECT_ANSWER: 20,
-  PARTIAL_ANSWER: 10,
-  WRONG_ANSWER: 5,
-  DAILY_FIRST_POST: 10,
+  BASE_PARTICIPATION: 5,   // 完成作答保底
+  QUALITY_EXCELLENT: 15,   // 得分 ≥ 90
+  QUALITY_GOOD: 10,        // 得分 80–89
+  QUALITY_PASS: 5,         // 得分 60–79
+  STREAK_BONUS_CAP: 10,    // 连续学习加成上限（每连续学习 1 天 +1）
+  DAILY_FIRST_POST: 10,    // 每日首次发帖
 };
 
 // 等级配置（所有模块共用等级经验值要求）
+// 阈值按几何节奏递增：以每日 3 题、平均 15 EXP/题估算，
+// Lv.2 ≈ 2 天，Lv.3 ≈ 1 周，Lv.4 ≈ 3 周，Lv.5 ≈ 2 个月，Lv.6 ≈ 3 个月以上
 export const LEVEL_CONFIG: LevelConfig[] = [
-  { level: 1, minExp: 0, maxExp: 49, frame: 'default', reward: '默认头像框' },
-  { level: 2, minExp: 50, maxExp: 149, frame: 'bronze', reward: '铜色头像框' },
-  { level: 3, minExp: 150, maxExp: 299, frame: 'silver', reward: '银色头像框' },
-  { level: 4, minExp: 300, maxExp: 499, frame: 'gold', reward: '金色头像框' },
-  { level: 5, minExp: 500, maxExp: 799, frame: 'diamond', reward: '钻石头像框' },
-  { level: 6, minExp: 800, maxExp: 1200, frame: 'starry', reward: '星空头像框' },
+  { level: 1, minExp: 0, maxExp: 99, frame: 'default', reward: '默认头像框' },
+  { level: 2, minExp: 100, maxExp: 299, frame: 'bronze', reward: '铜色头像框' },
+  { level: 3, minExp: 300, maxExp: 699, frame: 'silver', reward: '银色头像框' },
+  { level: 4, minExp: 700, maxExp: 1499, frame: 'gold', reward: '金色头像框' },
+  { level: 5, minExp: 1500, maxExp: 2999, frame: 'diamond', reward: '钻石头像框' },
+  { level: 6, minExp: 3000, maxExp: 99999, frame: 'starry', reward: '星空头像框' },
 ];
 
 // 数学模块称号 - 与等级头像框统一
@@ -127,11 +139,14 @@ export function getExpToNextLevel(exp: number): number {
   return nextLevelConfig.minExp - exp;
 }
 
-// 计算答题获得的经验值
-export function calculateAnswerExp(score: number): number {
-  if (score >= 90) return EXP_REWARDS.CORRECT_ANSWER;
-  if (score >= 60) return EXP_REWARDS.PARTIAL_ANSWER;
-  return EXP_REWARDS.WRONG_ANSWER;
+// 计算答题获得的经验值：基础参与 + 质量加成 + 连续学习加成
+export function calculateAnswerExp(score: number, streakDays = 0): number {
+  let exp = EXP_REWARDS.BASE_PARTICIPATION;
+  if (score >= 90) exp += EXP_REWARDS.QUALITY_EXCELLENT;
+  else if (score >= 80) exp += EXP_REWARDS.QUALITY_GOOD;
+  else if (score >= 60) exp += EXP_REWARDS.QUALITY_PASS;
+  exp += Math.min(Math.max(0, streakDays), EXP_REWARDS.STREAK_BONUS_CAP);
+  return exp;
 }
 
 // 获取模块显示名称

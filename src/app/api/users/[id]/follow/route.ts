@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { createNotification } from '@/lib/notifications';
 
 // 关注/取消关注用户
 export async function POST(
@@ -77,6 +78,15 @@ export async function POST(
       await prisma.user.update({
         where: { id: followingId },
         data: { followerCount: { increment: 1 } },
+      });
+
+      // 通知被关注者
+      void createNotification({
+        userId: followingId,
+        type: 'follow',
+        actorId: followerId,
+        targetType: 'user',
+        targetId: followerId,
       });
 
       return NextResponse.json({ message: '关注成功', following: true });

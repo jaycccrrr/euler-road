@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/hooks/useAuth';
@@ -64,13 +64,14 @@ import {
   UserPlus,
 } from 'lucide-react';
 import Link from 'next/link';
-import { Post, Note, User as UserType } from '@/types';
+import { Post, Note, User as UserType, AnswerRecord } from '@/types';
 import { getAllPosts, deletePost, getNotesByUser, deleteNote, getFollowing, getFollowers, getUserById, getAnswerRecordsByUser, areFriends } from '@/lib/db';
 import { syncPostDeleteToBackend } from '@/lib/api-sync';
 import CubeLoader from '@/components/ui/cube-loader';
 import { navigateTo } from '@/lib/asset';
 import { getDailyQuestionsByDate } from '@/lib/daily-question-bank';
-import { formatRelativeTime } from '@/lib/utils';
+import { findBankQuestion } from '@/lib/question-bank-lookup';
+import { formatRelativeTime, formatLocalDate } from '@/lib/utils';
 import { EditProfileDialog } from '@/components/profile/EditProfileDialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
@@ -97,12 +98,12 @@ export default function ProfilePage() {
   const [selectedUserFollowing, setSelectedUserFollowing] = useState<UserType[]>([]);
   const [selectedUserFollowers, setSelectedUserFollowers] = useState<UserType[]>([]);
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
-  const [answerStats, setAnswerStats] = useState<{
-    total: number;
-    correct: number;
-    avgScore: number;
-    byModule: Record<string, { total: number; correct: number }>;
-  } | null>(null);
+  const [answerRecords, setAnswerRecords] = useState<AnswerRecord[]>([]);
+  // π力统计筛选：日期范围（7/30/90 天或自定义）与科目范围
+  const [statsRange, setStatsRange] = useState<7 | 30 | 90 | 'custom'>(30);
+  const [customStart, setCustomStart] = useState('');
+  const [customEnd, setCustomEnd] = useState('');
+  const [statsSubject, setStatsSubject] = useState<'all' | 'highschool-math' | 'advanced-math' | 'linear-algebra'>('all');
   const [postToDelete, setPostToDelete] = useState<Post | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [favoritesSubTab, setFavoritesSubTab] = useState<'posts' | 'questions'>('posts');
@@ -130,31 +131,12 @@ export default function ProfilePage() {
     setPosts(allPosts);
   };
 
-  // 聚合答题记录：总数 / 正确率 / 平均分 / 按模块分布
+  // 加载答题记录（统计由 useMemo 按筛选条件实时计算）
   const loadAnswerStats = async () => {
     if (!user) return;
     try {
       const records = await getAnswerRecordsByUser(user.id);
-      const byModule: Record<string, { total: number; correct: number }> = {};
-      let correct = 0;
-      let scoreSum = 0;
-      for (const r of records) {
-        const m = r.questionId.match(/^daily-\d{4}-\d{2}-\d{2}-(.+)$/);
-        const mod = m ? m[1] : 'other';
-        byModule[mod] = byModule[mod] || { total: 0, correct: 0 };
-        byModule[mod].total++;
-        if (r.isCorrect) {
-          byModule[mod].correct++;
-          correct++;
-        }
-        scoreSum += r.aiScore || 0;
-      }
-      setAnswerStats({
-        total: records.length,
-        correct,
-        avgScore: records.length > 0 ? Math.round(scoreSum / records.length) : 0,
-        byModule,
-      });
+      setAnswerRecords(records);
     } catch (err) {
       console.error('Failed to load answer stats:', err);
     }
@@ -201,6 +183,50 @@ export default function ProfilePage() {
   );
 
   const myPosts = posts.filter(post => post.userId === user?.id);
+
+  // ── π力统计：连续学习天数（全局，不受筛选影响） ──
+  const studyStreak = useMemo(() => computeStudyStreak(answerRecords), [answerRecords]);
+
+  // ── π力统计：按日期范围 + 科目范围筛选答题记录 ──
+  const filteredStats = useMemo(() => {
+    const now = new Date();
+    now.setHours(23, 59, 59, 999);
+    let start: Date;
+    let end: Date = now;
+    if (statsRange === 'custom') {
+      if (customStart && customEnd) {
+        start = new Date(`${customStart}T00:00:00`);
+        end = new Date(`${customEnd}T23:59:59.999`);
+      } else {
+        start = new Date(0); // 自定义未填全时不过滤起点
+      }
+    } else {
+      start = new Date(now);
+      start.setDate(start.getDate() - statsRange + 1);
+      start.setHours(0, 0, 0, 0);
+    }
+    const moduleOf = (questionId: string) => {
+      const m = questionId.match(/^daily-\d{4}-\d{2}-\d{2}-(.+)$/);
+      return m ? m[1] : 'other';
+    };
+    const scoped = answerRecords
+      .filter((r) => {
+        const t = new Date(r.submittedAt);
+        return t >= start && t <= end;
+      })
+      .filter((r) => statsSubject === 'all' || moduleOf(r.questionId) === statsSubject);
+    const total = scoped.length;
+    const correct = scoped.filter((r) => r.isCorrect).length;
+    const avgScore = total > 0 ? Math.round(scoped.reduce((s, r) => s + (r.aiScore || 0), 0) / total) : 0;
+    const byModule: Record<string, { total: number; correct: number }> = {};
+    for (const r of scoped) {
+      const mod = moduleOf(r.questionId);
+      byModule[mod] = byModule[mod] || { total: 0, correct: 0 };
+      byModule[mod].total++;
+      if (r.isCorrect) byModule[mod].correct++;
+    }
+    return { total, correct, avgScore, byModule };
+  }, [answerRecords, statsRange, customStart, customEnd, statsSubject]);
 
   const loadSocial = async () => {
     if (!user) return;
@@ -601,8 +627,8 @@ export default function ProfilePage() {
                   {[
                     { label: '累计π力', value: `${user.piPower?.currentPi || 0}π`, icon: TrendingUp, iconBg: 'bg-indigo-100 text-indigo-600' },
                     { label: '本月π力', value: `${user.piPower?.monthlyPi || 0}π`, icon: Flame, iconBg: 'bg-violet-100 text-violet-600' },
-                    { label: '累计答对', value: user.piPower?.totalAnswered || 0, icon: CheckCircle2, iconBg: 'bg-emerald-100 text-emerald-600' },
-                    { label: '连续答对', value: `${user.piPower?.currentStreak || 0}天`, icon: Zap, iconBg: 'bg-rose-100 text-rose-500' },
+                    { label: '总做题数', value: filteredStats.total, icon: CheckCircle2, iconBg: 'bg-emerald-100 text-emerald-600' },
+                    { label: '连续学习', value: `${studyStreak}天`, icon: Zap, iconBg: 'bg-rose-100 text-rose-500' },
                   ].map((stat) => (
                     <div key={stat.label} className="flex items-center gap-3 p-3.5 rounded-xl bg-white/80 backdrop-blur border border-violet-100 hover:border-violet-300 hover:shadow-sm motion-safe:transition-all motion-safe:duration-200">
                       <div className={`w-9 h-9 rounded-lg ${stat.iconBg} flex items-center justify-center shrink-0`}>
@@ -616,72 +642,134 @@ export default function ProfilePage() {
                   ))}
                 </div>
 
-                {/* 答题统计 */}
-                {answerStats && answerStats.total > 0 && (
-                  <div className="relative mt-6 pt-5 border-t border-violet-100">
-                    <div className="grid grid-cols-3 gap-4 mb-5">
-                      <div className="text-center p-3 rounded-xl bg-white/80 border border-violet-100">
-                        <div className="text-xl font-bold text-slate-900">{answerStats.total}</div>
-                        <div className="text-[11px] text-slate-500">累计答题</div>
-                      </div>
-                      <div className="text-center p-3 rounded-xl bg-white/80 border border-violet-100">
-                        <div className="text-xl font-bold text-emerald-600">
-                          {Math.round((answerStats.correct / answerStats.total) * 100)}%
-                        </div>
-                        <div className="text-[11px] text-slate-500">正确率</div>
-                      </div>
-                      <div className="text-center p-3 rounded-xl bg-white/80 border border-violet-100">
-                        <div className="text-xl font-bold text-indigo-600">{answerStats.avgScore}</div>
-                        <div className="text-[11px] text-slate-500">平均得分</div>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      {Object.entries(answerStats.byModule).map(([mod, stat]) => {
-                        const name =
-                          mod === 'highschool-math' ? '高中数学'
-                          : mod === 'advanced-math' ? '高等数学'
-                          : mod === 'linear-algebra' ? '线性代数'
-                          : mod;
-                        const rate = Math.round((stat.correct / stat.total) * 100);
-                        return (
-                          <div key={mod}>
-                            <div className="flex justify-between text-sm mb-1.5">
-                              <span className="text-slate-600">{name}</span>
-                              <span className="text-slate-500">{stat.correct}/{stat.total} · {rate}%</span>
-                            </div>
-                            <div className="h-2 bg-white rounded-full overflow-hidden border border-violet-100">
-                              <div
-                                className="h-full bg-gradient-to-r from-violet-400 to-fuchsia-400 rounded-full transition-all duration-500"
-                                style={{ width: `${rate}%` }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                {/* 统计筛选：日期范围 + 科目范围（点击不触发卡片跳转） */}
+                <div
+                  className="relative mt-5 pt-4 border-t border-violet-100 space-y-3"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[11px] text-slate-400 shrink-0">日期范围</span>
+                    {([
+                      { id: 7, label: '近7天' },
+                      { id: 30, label: '近30天' },
+                      { id: 90, label: '近90天' },
+                      { id: 'custom', label: '自定义' },
+                    ] as const).map((r) => (
+                      <button
+                        key={r.id}
+                        onClick={() => setStatsRange(r.id)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                          statsRange === r.id
+                            ? 'bg-violet-600 text-white shadow-sm'
+                            : 'bg-white/80 text-slate-500 border border-violet-100 hover:border-violet-300 hover:text-violet-700'
+                        }`}
+                      >
+                        {r.label}
+                      </button>
+                    ))}
+                    {statsRange === 'custom' && (
+                      <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <input
+                          type="date"
+                          value={customStart}
+                          onChange={(e) => setCustomStart(e.target.value)}
+                          className="px-2 py-1 rounded-lg border border-violet-200 bg-white text-xs text-slate-600 focus:outline-none focus:ring-1 focus:ring-violet-400"
+                        />
+                        至
+                        <input
+                          type="date"
+                          value={customEnd}
+                          onChange={(e) => setCustomEnd(e.target.value)}
+                          className="px-2 py-1 rounded-lg border border-violet-200 bg-white text-xs text-slate-600 focus:outline-none focus:ring-1 focus:ring-violet-400"
+                        />
+                      </span>
+                    )}
                   </div>
-                )}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[11px] text-slate-400 shrink-0">科目范围</span>
+                    {([
+                      { id: 'all', label: '全部科目' },
+                      { id: 'highschool-math', label: '高中数学' },
+                      { id: 'advanced-math', label: '高等数学' },
+                      { id: 'linear-algebra', label: '线性代数' },
+                    ] as const).map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => setStatsSubject(s.id)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                          statsSubject === s.id
+                            ? 'bg-violet-600 text-white shadow-sm'
+                            : 'bg-white/80 text-slate-500 border border-violet-100 hover:border-violet-300 hover:text-violet-700'
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-                <div className="relative mt-5 pt-4 border-t border-violet-100 flex items-center justify-between">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsLocationDialogOpen(true);
-                    }}
-                    className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors"
-                  >
-                    <MapPin className="w-4 h-4" />
-                    {user.location?.province ? `当前位置：${user.location.province}` : '设置位置'}
-                  </button>
+                {/* 答题统计（随筛选联动） */}
+                <div className="relative mt-5 pt-5 border-t border-violet-100">
+                  {filteredStats.total === 0 ? (
+                    <p className="text-center text-xs text-slate-400 py-3">该范围内暂无答题记录</p>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-3 gap-4 mb-5">
+                        <div className="text-center p-3 rounded-xl bg-white/80 border border-violet-100">
+                          <div className="text-xl font-bold text-slate-900">{filteredStats.total}</div>
+                          <div className="text-[11px] text-slate-500">做题数</div>
+                        </div>
+                        <div className="text-center p-3 rounded-xl bg-white/80 border border-violet-100">
+                          <div className="text-xl font-bold text-emerald-600">
+                            {Math.round((filteredStats.correct / filteredStats.total) * 100)}%
+                          </div>
+                          <div className="text-[11px] text-slate-500">正确率</div>
+                        </div>
+                        <div className="text-center p-3 rounded-xl bg-white/80 border border-violet-100">
+                          <div className="text-xl font-bold text-indigo-600">{filteredStats.avgScore}</div>
+                          <div className="text-[11px] text-slate-500">平均得分</div>
+                        </div>
+                      </div>
+                      {statsSubject === 'all' && (
+                        <div className="space-y-3">
+                          {Object.entries(filteredStats.byModule).map(([mod, stat]) => {
+                            const name =
+                              mod === 'highschool-math' ? '高中数学'
+                              : mod === 'advanced-math' ? '高等数学'
+                              : mod === 'linear-algebra' ? '线性代数'
+                              : mod;
+                            const rate = Math.round((stat.correct / stat.total) * 100);
+                            return (
+                              <div key={mod}>
+                                <div className="flex justify-between text-sm mb-1.5">
+                                  <span className="text-slate-600">{name}</span>
+                                  <span className="text-slate-500">{stat.correct}/{stat.total} · {rate}%</span>
+                                </div>
+                                <div className="h-2 bg-white rounded-full overflow-hidden border border-violet-100">
+                                  <div
+                                    className="h-full bg-gradient-to-r from-violet-400 to-fuchsia-400 rounded-full transition-all duration-500"
+                                    style={{ width: `${rate}%` }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                <div className="relative mt-5 pt-4 border-t border-violet-100 text-right">
                   <span className="text-[11px] text-violet-400">点击查看答题日历与每日题目 →</span>
                 </div>
               </Card>
 
-              {/* 登基之路 */}
+              {/* 等级 */}
               <Card className="p-6 bg-white border-slate-200 shadow-sm">
                 <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-amber-500" />
-                  登基之路
+                  等级
                 </h3>
                 <div className="space-y-3">
                   {modules.map(({ category, icon, color, gradient }) => {
@@ -781,35 +869,45 @@ export default function ProfilePage() {
                   <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
                     <div className="flex items-center gap-2 mb-3">
                       <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                      <span className="font-bold text-emerald-800">完全正确</span>
+                      <span className="font-bold text-emerald-800">优秀作答</span>
                     </div>
-                    <p className="text-2xl font-bold text-emerald-600 mb-1">+{EXP_REWARDS.CORRECT_ANSWER}</p>
-                    <p className="text-xs text-emerald-600">得分 ≥ 90分</p>
+                    <p className="text-2xl font-bold text-emerald-600 mb-1">+{EXP_REWARDS.BASE_PARTICIPATION + EXP_REWARDS.QUALITY_EXCELLENT}</p>
+                    <p className="text-xs text-emerald-600">得分 ≥ 90分（基础 {EXP_REWARDS.BASE_PARTICIPATION} + 质量 {EXP_REWARDS.QUALITY_EXCELLENT}）</p>
                   </div>
                   <div className="p-4 rounded-xl bg-amber-50 border border-amber-100">
                     <div className="flex items-center gap-2 mb-3">
                       <HelpCircle className="w-5 h-5 text-amber-600" />
-                      <span className="font-bold text-amber-800">部分正确</span>
+                      <span className="font-bold text-amber-800">合格作答</span>
                     </div>
-                    <p className="text-2xl font-bold text-amber-600 mb-1">+{EXP_REWARDS.PARTIAL_ANSWER}</p>
-                    <p className="text-xs text-amber-600">60分 ≤ 得分 &lt; 90分</p>
+                    <p className="text-2xl font-bold text-amber-600 mb-1">+{EXP_REWARDS.BASE_PARTICIPATION + EXP_REWARDS.QUALITY_PASS} ~ +{EXP_REWARDS.BASE_PARTICIPATION + EXP_REWARDS.QUALITY_GOOD}</p>
+                    <p className="text-xs text-amber-600">60–89分（基础 {EXP_REWARDS.BASE_PARTICIPATION} + 质量 {EXP_REWARDS.QUALITY_PASS}~{EXP_REWARDS.QUALITY_GOOD}）</p>
                   </div>
                   <div className="p-4 rounded-xl bg-rose-50 border border-rose-100">
                     <div className="flex items-center gap-2 mb-3">
                       <XCircle className="w-5 h-5 text-rose-600" />
-                      <span className="font-bold text-rose-800">需要努力</span>
+                      <span className="font-bold text-rose-800">参与作答</span>
                     </div>
-                    <p className="text-2xl font-bold text-rose-600 mb-1">+{EXP_REWARDS.WRONG_ANSWER}</p>
-                    <p className="text-xs text-rose-600">得分 &lt; 60分</p>
+                    <p className="text-2xl font-bold text-rose-600 mb-1">+{EXP_REWARDS.BASE_PARTICIPATION}</p>
+                    <p className="text-xs text-rose-600">得分 &lt; 60分（基础保底）</p>
                   </div>
                 </div>
-                <div className="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Flame className="w-5 h-5 text-indigo-600" />
-                    <span className="font-bold text-slate-800">每日首帖</span>
-                    <span className="text-lg font-bold text-indigo-600 ml-auto">+{EXP_REWARDS.DAILY_FIRST_POST}</span>
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl bg-violet-50 border border-violet-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Zap className="w-5 h-5 text-violet-600" />
+                      <span className="font-bold text-slate-800">连续学习加成</span>
+                      <span className="text-lg font-bold text-violet-600 ml-auto">+1/天</span>
+                    </div>
+                    <p className="text-xs text-slate-500">每连续学习 1 天，当次答题经验 +1，上限 +{EXP_REWARDS.STREAK_BONUS_CAP}，鼓励长期坚持</p>
                   </div>
-                  <p className="text-xs text-slate-500">每天在社区发布第一个帖子可获得额外经验值</p>
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Flame className="w-5 h-5 text-indigo-600" />
+                      <span className="font-bold text-slate-800">每日首帖</span>
+                      <span className="text-lg font-bold text-indigo-600 ml-auto">+{EXP_REWARDS.DAILY_FIRST_POST}</span>
+                    </div>
+                    <p className="text-xs text-slate-500">每天在社区发布第一个帖子可获得额外经验值</p>
+                  </div>
                 </div>
               </Card>
             </div>
@@ -912,7 +1010,33 @@ export default function ProfilePage() {
                   <div className="grid gap-4">
                     {(user?.favoriteQuestions || []).map((qid) => {
                       const match = qid.match(/^daily-(\d{4}-\d{2}-\d{2})-(.+)$/);
-                      if (!match) return null;
+                      // 题库收藏题（非每日一题）：从题库索引反查
+                      if (!match) {
+                        const info = findBankQuestion(qid);
+                        if (!info) return null;
+                        return (
+                          <Card
+                            key={qid}
+                            onClick={() => router.push('/question-bank/')}
+                            className="p-5 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge variant="secondary" className="text-xs">题库</Badge>
+                                  <Badge className="tag-math text-xs">{info.subjectName}</Badge>
+                                  <span className="text-xs text-slate-400 truncate">{info.chapterTitle}</span>
+                                </div>
+                                <p className="text-slate-700 text-sm line-clamp-2">{info.preview || '查看题目详情'}</p>
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-indigo-500 shrink-0 self-center">
+                                前往题库
+                                <ChevronRight className="w-4 h-4" />
+                              </div>
+                            </div>
+                          </Card>
+                        );
+                      }
                       const [, dateStr, moduleId] = match;
                       const dailyQs = getDailyQuestionsByDate(dateStr);
                       const q = dailyQs.find(dq => dq.moduleId === moduleId);
@@ -1419,6 +1543,23 @@ export default function ProfilePage() {
       </main>
     </div>
   );
+}
+
+// 连续学习天数：有任意答题记录的连续天数（今天没答则从昨天算起，保持连续感）
+function computeStudyStreak(records: AnswerRecord[]): number {
+  if (records.length === 0) return 0;
+  const days = new Set(records.map((r) => formatLocalDate(new Date(r.submittedAt))));
+  const cursor = new Date();
+  if (!days.has(formatLocalDate(cursor))) {
+    cursor.setDate(cursor.getDate() - 1);
+    if (!days.has(formatLocalDate(cursor))) return 0;
+  }
+  let streak = 0;
+  while (days.has(formatLocalDate(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
 }
 
 // 经验进度条：挂载/数值变化时以 easeOut 动画增长，reduced-motion 时直接取值

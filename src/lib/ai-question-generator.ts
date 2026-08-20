@@ -1,82 +1,10 @@
 import { DailyQuestion } from '@/types';
-import { generateId, formatLocalDate } from './utils';
+import { formatLocalDate } from './utils';
 import { getDailyQuestionsByDate } from './daily-question-bank';
 
-// DeepSeek API 配置
-const DEEPSEEK_API_KEY = process.env.NEXT_PUBLIC_DEEPSEEK_API_KEY || '';
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
-
 // 强制使用备用题库（设置为 true 以禁用 AI 生成）
-const FORCE_USE_BACKUP_BANK = true;
-
-// 题目生成提示词模板
-const QUESTION_PROMPTS: Record<string, string> = {
-  'highschool-math': `你是一位资深高中数学竞赛教练。请出一道高难度的高中数学题目，要求：
-
-1. **难度等级**：高考压轴题或数学竞赛初赛水平
-2. **知识点范围**：函数与方程、数列、解析几何、导数应用、不等式证明、立体几何
-3. **题目类型**：综合性大题，需要多步骤推理
-4. **具体要求**：
-   - 题目要有一定的创新性和思维深度
-   - 避免陈题，设计新颖的情境或角度
-   - 解答需要运用多种数学方法和技巧
-   - 计算量适中，重思维轻计算
-
-5. **输出格式**（严格遵循）：
-   {
-     "title": "题目标题（15字以内）",
-     "content": "题目内容，使用LaTeX格式书写数学公式",
-     "answer": "详细解答过程，包含完整步骤和最终答案",
-     "difficulty": 5,
-     "hint": "给学生的提示（可选）"
-   }
-
-注意：题目必须是原创的，不要直接复制经典竞赛题。`,
-
-  'advanced-math': `你是一位大学数学教授。请出一道高难度的高等数学题目，要求：
-
-1. **难度等级**：985高校期末考试难题或研究生入学考试水平
-2. **知识点范围**：多元函数微积分、重积分、曲线曲面积分、无穷级数、常微分方程
-3. **题目类型**：计算与证明结合的综合性题目
-4. **具体要求**：
-   - 涉及多个知识点的交叉应用
-   - 需要灵活运用各种定理和技巧
-   - 考查对概念本质的理解深度
-   - 可以是带有物理或几何背景的数学建模问题
-
-5. **输出格式**（严格遵循）：
-   {
-     "title": "题目标题（15字以内）",
-     "content": "题目内容，使用LaTeX格式书写数学公式",
-     "answer": "详细解答过程，包含完整推导和最终答案",
-     "difficulty": 5,
-     "hint": "解题思路提示（可选）"
-   }
-
-注意：题目应具有学术严谨性，避免计算过于繁琐。`,
-
-  'linear-algebra': `你是一位线性代数专家。请出一道高难度的线性代数题目，要求：
-
-1. **难度等级**：数学系本科高年级或研究生水平
-2. **知识点范围**：矩阵理论、特征值与特征向量、二次型、线性空间、线性变换
-3. **题目类型**：理论推导与计算结合
-4. **具体要求**：
-   - 涉及抽象代数概念的深入理解
-   - 需要构造反例或证明一般性结论
-   - 可涉及多种标准形的应用
-   - 考查对线性代数几何意义的理解
-
-5. **输出格式**（严格遵循）：
-   {
-     "title": "题目标题（15字以内）",
-     "content": "题目内容，使用LaTeX格式书写数学公式",
-     "answer": "详细解答过程，包含完整推导和最终答案",
-     "difficulty": 5,
-     "hint": "关键概念提示（可选）"
-   }
-
-注意：强调线性代数的结构美感和内在联系。`
-};
+// AI 出题通过服务端 /api/questions/generate 调用 DeepSeek，密钥不暴露在前端
+const FORCE_USE_BACKUP_BANK = false;
 
 interface GeneratedQuestion {
   title: string;
@@ -87,83 +15,40 @@ interface GeneratedQuestion {
 }
 
 /**
- * 使用 DeepSeek API 生成题目
- *
- * 注意：当前配置为强制使用备用题库，不调用 AI API
- * 如需启用 AI，请将 FORCE_USE_BACKUP_BANK 设为 false
+ * 通过服务端接口调用 AI（DeepSeek）生成一道题。
+ * 返回 null 表示 AI 不可用，调用方应回退到备用题库。
  */
-async function generateQuestionWithAI(moduleId: string): Promise<GeneratedQuestion | null> {
-  // 强制使用备用题库
+async function generateQuestionWithAI(moduleId: string, date: string): Promise<GeneratedQuestion | null> {
   if (FORCE_USE_BACKUP_BANK) {
-    console.log('[AI Question Generator] Using backup question bank for:', moduleId);
-    return null;
-  }
-
-  if (!DEEPSEEK_API_KEY) {
-    console.warn('[AI Question Generator] DeepSeek API key not configured');
-    return null;
-  }
-
-  const prompt = QUESTION_PROMPTS[moduleId];
-  if (!prompt) {
-    console.error(`[AI Question Generator] No prompt found for module: ${moduleId}`);
     return null;
   }
 
   try {
-    const response = await fetch(DEEPSEEK_API_URL, {
+    const response = await fetch('/api/questions/generate', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          {
-            role: 'system',
-            content: '你是一个专业的数学教育专家，擅长设计高质量的数学题目。请严格按照要求的JSON格式输出，不要包含任何markdown代码块标记。'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-        response_format: { type: 'json_object' },
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ moduleId, date }),
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error('[AI Question Generator] API error:', error);
+      console.warn('[AI Question Generator] 出题接口 HTTP 错误:', response.status);
       return null;
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-
-    if (!content) {
-      console.error('[AI Question Generator] Empty response from API');
-      return null;
-    }
-
-    // 解析 JSON 响应
-    const parsed: GeneratedQuestion = JSON.parse(content);
-
-    // 验证必要字段
-    if (!parsed.title || !parsed.content || !parsed.answer) {
-      console.error('[AI Question Generator] Missing required fields in response');
+    const q = data?.question;
+    if (!data?.aiAvailable || !q?.title || !q?.content || !q?.answer) {
       return null;
     }
 
     return {
-      ...parsed,
-      difficulty: 5, // 强制设为最高难度
+      title: q.title,
+      content: q.content,
+      answer: q.answer,
+      difficulty: Math.min(5, Math.max(1, Number(q.difficulty) || 5)),
     };
   } catch (error) {
-    console.error('[AI Question Generator] Failed to generate question:', error);
+    console.warn('[AI Question Generator] 出题接口调用失败，将使用备用题库:', error);
     return null;
   }
 }
@@ -204,37 +89,47 @@ function generateFallbackQuestion(moduleId: string): GeneratedQuestion {
 /**
  * 生成每日题目
  *
- * 使用新的备用题库系统：
- * - 高中数学：来自精编题库的高难度题目
- * - 高等数学：来自 neumathe_data 的高难度题目
- * - 线性代数：高质量理论推导题目
+ * 出题链路：AI（DeepSeek，走 /api/questions/generate 服务端接口）→ 备用题库 → 静态兜底题。
+ * 同一天同一科目服务端会缓存 AI 结果，所有用户拿到同一道题。
  */
 export async function generateDailyQuestions(date: string): Promise<DailyQuestion[]> {
-  console.log('[Daily Question] Generating questions from backup bank for date:', date);
+  const moduleIds = ['highschool-math', 'advanced-math', 'linear-algebra'];
+  const backupByModule = new Map(getDailyQuestionsByDate(date).map((q) => [q.moduleId, q]));
 
-  // 使用新的备用题库获取题目
-  const dailyQuestions = getDailyQuestionsByDate(date);
-  const questions: DailyQuestion[] = [];
+  const results = await Promise.all(
+    moduleIds.map(async (moduleId) => {
+      // 1. 优先 AI 出题
+      const ai = await generateQuestionWithAI(moduleId, date);
+      const source = ai
+        ? { title: ai.title, content: ai.content, answer: ai.answer, difficulty: ai.difficulty }
+        : null;
 
-  for (const q of dailyQuestions) {
-    const question: DailyQuestion = {
-      id: `daily-${date}-${q.moduleId}`,
-      moduleId: q.moduleId,
-      date,
-      title: q.title,
-      content: q.content,
-      images: [],
-      answer: q.answer,
-      answerImages: [],
-      difficulty: q.difficulty,
-      isAutoGenerated: true,
-      createdAt: new Date(date).toISOString(),
-    };
+      // 2. AI 不可用时回退到备用题库（按日期哈希稳定选题）
+      const backup = backupByModule.get(moduleId);
+      const finalSource = source || (backup
+        ? { title: backup.title, content: backup.content, answer: backup.answer, difficulty: backup.difficulty }
+        : null);
 
-    questions.push(question);
-  }
+      // 3. 双层兜底：静态内置题
+      const fallback = finalSource || generateFallbackQuestion(moduleId);
 
-  return questions;
+      return {
+        id: `daily-${date}-${moduleId}`,
+        moduleId,
+        date,
+        title: fallback.title,
+        content: fallback.content,
+        images: [],
+        answer: fallback.answer,
+        answerImages: [],
+        difficulty: fallback.difficulty,
+        isAutoGenerated: !!source,
+        createdAt: new Date(date).toISOString(),
+      } satisfies DailyQuestion;
+    })
+  );
+
+  return results;
 }
 
 /**

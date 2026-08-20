@@ -113,6 +113,78 @@ function chapterProgress(ch: ChapterNode, progress: QbProgress) {
   return { done, pct };
 }
 
+// ── 收藏模式：仅保留含收藏题的章节，章节内仅保留收藏题 ──
+type PracticeMode = 'all' | 'favorites';
+
+function filterSubjectsByFavorites(subjects: SubjectNode[], favIds: Set<string>): SubjectNode[] {
+  const filterChapter = (ch: ChapterNode): ChapterNode | null => {
+    const qs = ch.questions.filter((q) => favIds.has(q.id));
+    if (qs.length === 0) return null;
+    return { ...ch, questions: qs, count: qs.length };
+  };
+  return subjects.map((s) => ({
+    ...s,
+    chapters: s.chapters.map(filterChapter).filter((c): c is ChapterNode => c !== null),
+    groups: s.groups
+      ?.map((g) => ({
+        ...g,
+        chapters: g.chapters.map(filterChapter).filter((c): c is ChapterNode => c !== null),
+      }))
+      .filter((g) => g.chapters.length > 0),
+  }));
+}
+
+// ── 刷题模式切换（全部 / 收藏），放在「选择科目」下方 ──
+function ModeToggle({
+  mode,
+  favCount,
+  onChange,
+}: {
+  mode: PracticeMode;
+  favCount: number;
+  onChange: (mode: PracticeMode) => void;
+}) {
+  return (
+    <div className="mt-3 grid grid-cols-2 gap-1 p-1 rounded-xl bg-slate-100">
+      {([
+        { id: 'all', label: '全部题目', icon: BookOpen },
+        { id: 'favorites', label: favCount > 0 ? `收藏 ${favCount}` : '收藏题目', icon: Bookmark },
+      ] as const).map((m) => (
+        <button
+          key={m.id}
+          onClick={() => onChange(m.id)}
+          className={`flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium motion-safe:transition-all motion-safe:duration-200 ${PRESS} ${
+            mode === m.id ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          <m.icon className="w-3.5 h-3.5" />
+          {m.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── 收藏模式空状态 ──
+function FavoritesEmptyState({ isAuthenticated }: { isAuthenticated: boolean }) {
+  return (
+    <Card className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-16 text-center">
+      <Bookmark className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+      {isAuthenticated ? (
+        <>
+          <p className="text-slate-500 text-sm">该科目还没有收藏题目</p>
+          <p className="text-slate-400 text-xs mt-1">刷题时点击题目右上角的书签即可收藏</p>
+        </>
+      ) : (
+        <>
+          <p className="text-slate-500 text-sm">登录后才能使用收藏模式</p>
+          <p className="text-slate-400 text-xs mt-1">收藏的题目会同步到你的账号</p>
+        </>
+      )}
+    </Card>
+  );
+}
+
 // ── Helpers ──
 // 高等数学习题数据里混有 `<span ...>标签: ...</span>` 原始 HTML 标签块，渲染前剔除
 const TAG_BLOCK_RE = /^\s*<span[^>]*>\s*标签[:：]/;
@@ -389,23 +461,33 @@ function ChapterRow({
 function BankHome({
   subjects,
   progress,
+  mode,
+  favCount,
+  isAuthenticated,
+  onModeChange,
   onStartChapter,
 }: {
   subjects: SubjectNode[];
   progress: QbProgress;
+  mode: PracticeMode;
+  favCount: number;
+  isAuthenticated: boolean;
+  onModeChange: (mode: PracticeMode) => void;
   onStartChapter: (subjectId: string, chapterId: string) => void;
 }) {
   const [subjectId, setSubjectId] = useState(subjects[0].id);
   const subject = subjects.find((s) => s.id === subjectId) || subjects[0];
+  const subjectEmpty = subject.chapters.length === 0;
 
   return (
     <section className="container mx-auto px-4 py-6 md:py-8 flex-1">
       <div className="max-w-6xl mx-auto grid gap-5 lg:grid-cols-[280px_1fr] items-start">
-        {/* 左栏：科目选择 */}
+        {/* 左栏：科目选择 + 模式切换 */}
         <div className="lg:sticky lg:top-6 lg:self-stretch lg:flex lg:flex-col">
           <Card className="p-4 rounded-2xl border border-slate-200 bg-white shadow-sm lg:flex-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-3 px-1">选择科目</p>
             <SubjectList subjects={subjects} progress={progress} activeId={subjectId} onSelect={setSubjectId} />
+            <ModeToggle mode={mode} favCount={favCount} onChange={onModeChange} />
           </Card>
         </div>
 
@@ -413,8 +495,11 @@ function BankHome({
         <div className="space-y-4 min-w-0">
           <DailyBanner />
 
+          {mode === 'favorites' && subjectEmpty ? (
+            <FavoritesEmptyState isAuthenticated={isAuthenticated} />
+          ) : (
           <Card className="rounded-2xl border border-slate-200 bg-white shadow-sm px-3 md:px-4 py-2">
-            {subject.groups ? (
+            {subject.groups && subject.groups.length > 0 ? (
               /* 有大章节：手风琴分组，展开为小章节（点击即练） */
               <Accordion type="single" collapsible className="w-full">
                 {subject.groups.map((g) => {
@@ -475,6 +560,7 @@ function BankHome({
               </div>
             )}
           </Card>
+          )}
         </div>
       </div>
     </section>
@@ -732,6 +818,10 @@ function QuizView({
   initialSubject,
   initialChapter,
   progress,
+  mode,
+  favCount,
+  isAuthenticated,
+  onModeChange,
   onAnswered,
   onBack,
 }: {
@@ -739,6 +829,10 @@ function QuizView({
   initialSubject: string;
   initialChapter: string | null;
   progress: QbProgress;
+  mode: PracticeMode;
+  favCount: number;
+  isAuthenticated: boolean;
+  onModeChange: (mode: PracticeMode) => void;
   onAnswered: (questionId: string) => void;
   onBack: () => void;
 }) {
@@ -796,14 +890,24 @@ function QuizView({
             <BackButton onClick={onBack} label="返回题库" />
             <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
             <span className="text-slate-800 font-medium">{subject.name}习题</span>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
-            <span className="text-slate-500 truncate">{currentChapter?.title}</span>
+            {currentChapter && (
+              <>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+                <span className="text-slate-500 truncate">{currentChapter.title}</span>
+              </>
+            )}
+            {mode === 'favorites' && (
+              <Badge className="bg-amber-100 text-amber-700 border border-amber-200 hover:bg-amber-100 shrink-0">
+                <Bookmark className="w-3 h-3 mr-1" />
+                收藏模式
+              </Badge>
+            )}
           </div>
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-xl md:text-2xl font-bold text-slate-800">{currentChapter?.title}</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-slate-800">{currentChapter?.title || '收藏题目'}</h2>
               <p className="text-xs md:text-sm text-slate-500 mt-0.5">
-                共 {currentChapter?.count || 0} 道题 · 第 {page} / {Math.max(totalPages, 1)} 页
+                共 {currentChapter?.count || 0} 道题{currentChapter ? ` · 第 ${page} / ${Math.max(totalPages, 1)} 页` : ''}
               </p>
             </div>
           </div>
@@ -818,6 +922,8 @@ function QuizView({
                 />
               ))}
             </div>
+          ) : mode === 'favorites' ? (
+            <FavoritesEmptyState isAuthenticated={isAuthenticated} />
           ) : (
             <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-200">
               <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-3" />
@@ -880,6 +986,7 @@ function QuizView({
                   setPage(1);
                 }}
               />
+              <ModeToggle mode={mode} favCount={favCount} onChange={onModeChange} />
             </div>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-3 px-1">章节</p>
@@ -957,7 +1064,9 @@ function QuizView({
 // ── Main Page ──
 export default function QuestionBankPage() {
   const subjects = useMemo(() => buildSubjects(), []);
+  const { user, isAuthenticated } = useAuth();
   const [viewMode, setViewMode] = useState<'bank' | 'quiz'>('bank');
+  const [practiceMode, setPracticeMode] = useState<PracticeMode>('all');
   const [selected, setSelected] = useState<{ subject: string; chapter: string | null }>({
     subject: '',
     chapter: null,
@@ -966,6 +1075,16 @@ export default function QuestionBankPage() {
   const storedProgress = useSyncExternalStore(subscribeNoop, readProgress, getServerProgress);
   const [answered, setAnswered] = useState<QbProgress>(EMPTY_PROGRESS);
   const progress = useMemo(() => ({ ...storedProgress, ...answered }), [storedProgress, answered]);
+
+  // 收藏的题目 ID 集合；收藏模式下科目/章节/题目全部按此过滤
+  const favoriteIds = useMemo(
+    () => new Set(user?.favoriteQuestions || []),
+    [user?.favoriteQuestions]
+  );
+  const displaySubjects = useMemo(
+    () => (practiceMode === 'favorites' ? filterSubjectsByFavorites(subjects, favoriteIds) : subjects),
+    [subjects, practiceMode, favoriteIds]
+  );
 
   const markAnswered = (questionId: string) => {
     if (progress[questionId]) return;
@@ -984,22 +1103,36 @@ export default function QuestionBankPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleModeChange = (mode: PracticeMode) => {
+    setPracticeMode(mode);
+    // 切换模式后回到题库主页，避免当前章节在新模式下被过滤掉导致空白
+    setViewMode('bank');
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f8fafc]">
       <Header />
 
       {viewMode === 'bank' ? (
         <BankHome
-          subjects={subjects}
+          subjects={displaySubjects}
           progress={progress}
+          mode={practiceMode}
+          favCount={favoriteIds.size}
+          isAuthenticated={isAuthenticated}
+          onModeChange={handleModeChange}
           onStartChapter={handleStartChapter}
         />
       ) : (
         <QuizView
-          subjects={subjects}
+          subjects={displaySubjects}
           initialSubject={selected.subject}
           initialChapter={selected.chapter}
           progress={progress}
+          mode={practiceMode}
+          favCount={favoriteIds.size}
+          isAuthenticated={isAuthenticated}
+          onModeChange={handleModeChange}
           onAnswered={markAnswered}
           onBack={() => setViewMode('bank')}
         />

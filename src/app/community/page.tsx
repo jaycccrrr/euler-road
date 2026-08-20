@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/hooks/useAuth';
@@ -47,6 +47,8 @@ import {
   Users,
   X,
   Flame,
+  History,
+  Trash2,
 } from 'lucide-react';
 import { formatRelativeTime, generateId } from '@/lib/utils';
 import { KNOWLEDGE_MODULES, MODULE_CATEGORIES } from '@/data/modules';
@@ -57,6 +59,7 @@ import { LazyImage } from '@/components/LazyImage';
 import { UserProfileCard } from '@/components/user/UserProfileCard';
 import { PollDisplay } from '@/components/community/PollDisplay';
 import { sortByHot } from '@/lib/hot-feed';
+import { useSearchHistory } from '@/hooks/useSearchHistory';
 
 const POST_TYPE_ICONS: Record<PostType, React.ReactNode> = {
   question: <HelpCircle className="w-3 h-3" />,
@@ -115,6 +118,27 @@ export default function CommunityPage() {
   const [postSearchResults, setPostSearchResults] = useState<Post[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
+
+  // 搜索历史（localStorage 持久化）
+  const {
+    history: searchHistory,
+    addHistory: addSearchHistory,
+    removeHistory: removeSearchHistory,
+    clearHistory: clearSearchHistory,
+  } = useSearchHistory('community');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
+
+  // 点击搜索框外部时收起历史记录下拉
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // 加载关注列表和好友关系
   const loadFollowingData = useCallback(async () => {
@@ -626,7 +650,7 @@ export default function CommunityPage() {
 
           <div className="flex items-center gap-3 w-full md:w-auto">
             {/* Search Box */}
-            <div className="relative flex-1 md:w-72">
+            <div ref={searchBoxRef} className="relative flex-1 md:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 placeholder="搜索帖子、用户..."
@@ -638,7 +662,13 @@ export default function CommunityPage() {
                     setUserSearchResults([]);
                   }
                 }}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                onFocus={() => setIsSearchFocused(true)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    addSearchHistory(searchQuery);
+                    handleSearch();
+                  }
+                }}
                 className="pl-9 pr-9"
               />
               {searchQuery && (
@@ -648,6 +678,50 @@ export default function CommunityPage() {
                 >
                   <X className="w-4 h-4" />
                 </button>
+              )}
+
+              {/* 搜索历史下拉（聚焦且无输入时展示） */}
+              {isSearchFocused && !searchQuery.trim() && searchHistory.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 z-50 p-3 origin-top animate-popover-in">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                      <History className="w-3.5 h-3.5" />
+                      搜索历史
+                    </p>
+                    <button
+                      onClick={clearSearchHistory}
+                      className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 transition-colors"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      清空
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {searchHistory.map((term) => (
+                      <span
+                        key={term}
+                        className="inline-flex items-center gap-1 pl-3 pr-1.5 py-1 bg-slate-50 hover:bg-blue-50 rounded-full text-sm text-slate-600 transition-colors"
+                      >
+                        <button
+                          onClick={() => {
+                            setSearchQuery(term);
+                            addSearchHistory(term);
+                          }}
+                          className="hover:text-blue-600 transition-colors"
+                        >
+                          {term}
+                        </button>
+                        <button
+                          onClick={() => removeSearchHistory(term)}
+                          className="p-0.5 rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                          aria-label={`删除搜索历史 ${term}`}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
 
@@ -823,6 +897,7 @@ export default function CommunityPage() {
                             key={post.id}
                             className="p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
                             onClick={() => {
+                              addSearchHistory(searchQuery);
                               router.push(`/community/post/#id=${post.id}`);
                               setShowSearchResults(false);
                             }}
@@ -872,6 +947,7 @@ export default function CommunityPage() {
                             key={result.id}
                             className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
                             onClick={() => {
+                              addSearchHistory(searchQuery);
                               handleOpenUserDialog(result.id);
                               setShowSearchResults(false);
                             }}

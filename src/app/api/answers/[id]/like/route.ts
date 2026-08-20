@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { createNotification } from '@/lib/notifications';
 
 // 点赞 / 取消点赞答案（toggle）
 export async function POST(
@@ -29,6 +30,17 @@ export async function POST(
         likes: liked ? Math.max(0, answer.likes - 1) : answer.likes + 1,
       },
     });
+
+    // 新点赞时通知答案作者
+    if (!liked) {
+      void createNotification({
+        userId: answer.userId,
+        type: 'answer_like',
+        actorId: payload.userId,
+        targetType: 'answer',
+        targetId: answer.id,
+      });
+    }
 
     return NextResponse.json({ liked: !liked, likes: updated.likes, likedBy: updated.likedBy });
   } catch (error) {

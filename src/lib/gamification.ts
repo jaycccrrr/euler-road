@@ -83,11 +83,14 @@ export function getExpToNextLevel(exp: number): number {
   return nextLevelConfig.minExp - exp;
 }
 
-// 计算答题获得的经验值
-export function calculateAnswerExp(score: number): number {
-  if (score >= 90) return EXP_REWARDS.CORRECT_ANSWER;
-  if (score >= 60) return EXP_REWARDS.PARTIAL_ANSWER;
-  return EXP_REWARDS.WRONG_ANSWER;
+// 计算答题获得的经验值：基础参与 + 质量加成 + 连续学习加成
+export function calculateAnswerExp(score: number, streakDays = 0): number {
+  let exp = EXP_REWARDS.BASE_PARTICIPATION;
+  if (score >= 90) exp += EXP_REWARDS.QUALITY_EXCELLENT;
+  else if (score >= 80) exp += EXP_REWARDS.QUALITY_GOOD;
+  else if (score >= 60) exp += EXP_REWARDS.QUALITY_PASS;
+  exp += Math.min(Math.max(0, streakDays), EXP_REWARDS.STREAK_BONUS_CAP);
+  return exp;
 }
 
 // 获取模块显示名称
