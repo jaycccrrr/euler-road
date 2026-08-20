@@ -4,7 +4,9 @@ import { KNOWLEDGE_MODULES } from '@/data/modules';
 import { staticAdvancedTopics } from '@/data/highschoolStatic';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowRight, BookOpen } from 'lucide-react';
+import { ArrowRight, BookOpen, Download, ExternalLink, Library } from 'lucide-react';
+import { TEXTBOOKS } from '@/data/textbooks';
+import { Card } from '@/components/ui/card';
 
 // 搜索索引：高中数学页实际渲染的是提高篇 staticAdvancedTopics，
 // 其标题与 KNOWLEDGE_MODULES 的主题标题不一致（如「函数」vs「函数与方程」），
@@ -66,6 +68,47 @@ export default function CoursesPage() {
               {KNOWLEDGE_MODULES.map((module, index) => (
                 <ModuleCard key={module.id} module={module} index={index} />
               ))}
+            </div>
+          </div>
+        </section>
+        {/* 常用教材 */}
+        <section className="pb-16 bg-slate-50/60">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <div className="flex items-center gap-2 mb-2">
+              <Library className="w-5 h-5 text-blue-600" />
+              <h2 className="text-2xl font-bold text-slate-900">常用教材</h2>
+            </div>
+            <p className="text-sm text-slate-500 mb-8">经典教材 PDF，可直接在线阅读或下载。</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {TEXTBOOKS.map((book) => {
+                const url = `https://bwnbrbfcgynkojlaicpd.supabase.co/storage/v1/object/public/textbooks/${encodeURIComponent(book.file)}`;
+                return (
+                  <Card key={book.id} className="p-5 flex flex-col gap-3 rounded-2xl border-slate-200">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                        <BookOpen className="w-5 h-5 text-red-500" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-slate-900 leading-snug">{book.name}</h3>
+                        <p className="text-xs text-slate-500 mt-1">{book.author}</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-400">{book.note}</p>
+                    <div className="flex gap-2 mt-auto">
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full rounded-lg">
+                          <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> 在线阅读
+                        </Button>
+                      </a>
+                      <a href={url} download className="flex-1">
+                        <Button size="sm" className="w-full rounded-lg">
+                          <Download className="w-3.5 h-3.5 mr-1.5" /> 下载
+                        </Button>
+                      </a>
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </section>
