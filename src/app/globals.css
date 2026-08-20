@@ -154,7 +154,7 @@
   }
   /* 衬线字体配置 - 用于大标题 */
   .font-serif {
-    font-family: var(--font-playfair), var(--font-noto-serif-sc), 'Noto Serif SC', 'Playfair Display', Georgia, 'Times New Roman', serif;
+    font-family: 'Noto Serif SC', 'Songti SC', SimSun, Georgia, 'Times New Roman', serif;
   }
 }
 

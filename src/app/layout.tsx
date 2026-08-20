@@ -17,12 +17,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Noto+Serif+SC:wght@400;500;600;700&family=Playfair+Display:wght@400..900&family=Caveat:wght@500;600;700&display=swap"
-          rel="stylesheet"
-        />
+        {/* 使用系统字体栈，避免 Google Fonts 在国内不可达导致首屏阻塞 */}
       </head>
       <body className="antialiased bg-white min-h-screen">
         <AnimationProvider>
