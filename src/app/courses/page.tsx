@@ -23,61 +23,64 @@ const SEARCH_MODULES = KNOWLEDGE_MODULES.map((m) =>
 );
 
 export default function CoursesPage() {
+  const totalTopics = KNOWLEDGE_MODULES.reduce((n, m) => n + m.topics.length, 0);
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
 
       <main>
-        {/* Hero Section */}
-        <section className="relative py-16 bg-slate-50">
-          <div className="container mx-auto px-4 max-w-6xl text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full mb-6 shadow-sm">
-              <BookOpen className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-slate-600">全部课程</span>
+        {/* Hero */}
+        <section className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-b from-slate-50 via-white to-white">
+          <div className="pointer-events-none absolute inset-0 bg-pattern-dots opacity-30" />
+          <div className="pointer-events-none absolute -top-28 left-1/2 h-72 w-[760px] -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-200/40 via-indigo-200/40 to-violet-200/40 blur-3xl" />
+          <div className="relative container mx-auto px-4 max-w-6xl py-14 md:py-16 text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-1.5 text-xs font-medium tracking-wide text-slate-500 shadow-sm backdrop-blur">
+              <BookOpen className="h-3.5 w-3.5 text-blue-600" />
+              知识库 · {KNOWLEDGE_MODULES.length} 大数学模块
             </div>
-
-            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-              选择你的学习领域
+            <h1 className="mt-6 text-3xl md:text-[42px] font-bold tracking-tight text-slate-900">
+              系统构建你的数学知识体系
             </h1>
-
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-8">
-              三大核心模块，涵盖高中数学、高等数学、线性代数。
-              <br className="hidden md:block" />
-              从基础概念到高级理论，循序渐进掌握数学知识。
+            <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-relaxed text-slate-500">
+              高中数学、高等数学、线性代数、概率论与数理统计、离散数学——五大模块，从基础概念到高阶理论，循序渐进，逐章精进。
             </p>
-
-            {/* 搜索框 */}
-            <div className="max-w-2xl mx-auto">
+            <div className="mx-auto mt-8 max-w-2xl">
               <CourseSearch modules={SEARCH_MODULES} />
             </div>
           </div>
         </section>
 
-        {/* Course Grid */}
-        <section className="py-16">
+        {/* 课程区：紧凑上移，让下方教材区露出一角 */}
+        <section className="pt-10 pb-8">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-slate-900">所有课程</h2>
-              <span className="text-sm text-slate-500">
-                共 {KNOWLEDGE_MODULES.length} 个模块
+            <div className="mb-6 flex items-end justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-blue-600">知识库</p>
+                <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">所有课程</h2>
+              </div>
+              <span className="text-sm text-slate-400">
+                {KNOWLEDGE_MODULES.length} 个模块 · {totalTopics} 个主题
               </span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
-              {KNOWLEDGE_MODULES.map((module, index) => (
-                <ModuleCard key={module.id} module={module} index={index} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {KNOWLEDGE_MODULES.map((module) => (
+                <ModuleCard key={module.id} module={module} />
               ))}
             </div>
           </div>
         </section>
 
         {/* 常用教材 */}
-        <section className="py-16 bg-slate-50/60">
+        <section className="pt-10 pb-16 bg-slate-50/70 border-t border-slate-100">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="flex items-center gap-2 mb-2">
-              <Library className="w-5 h-5 text-blue-600" />
-              <h2 className="text-2xl font-bold text-slate-900">常用教材</h2>
+            <div className="mb-8 flex items-end justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-blue-600">经典资源</p>
+                <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">常用教材</h2>
+              </div>
+              <p className="hidden md:block text-sm text-slate-400">封面可拖动浏览，点击即可在线阅读</p>
             </div>
-            <p className="text-sm text-slate-500 mb-10">经典教材 PDF，封面可拖动浏览，点击封面或按钮即可在线阅读。</p>
             <TextbookSection />
           </div>
         </section>
@@ -86,42 +89,39 @@ export default function CoursesPage() {
   );
 }
 
-function ModuleCard({ module, index }: { module: typeof KNOWLEDGE_MODULES[0]; index: number }) {
-  const colors: Record<string, string> = {
-    'from-blue-500 to-blue-600': 'bg-blue-500',
-    'from-blue-400 to-blue-600': 'bg-blue-500',
-    'from-indigo-400 to-indigo-600': 'bg-indigo-500',
-    'from-violet-400 to-violet-600': 'bg-violet-500',
-    'from-pink-400 to-rose-500': 'bg-pink-500',
-    'from-purple-500 to-purple-600': 'bg-purple-500',
-    'from-emerald-500 to-emerald-600': 'bg-emerald-500',
-    'from-emerald-400 to-emerald-600': 'bg-emerald-500',
-    'from-rose-500 to-rose-600': 'bg-rose-500',
-    'from-amber-500 to-amber-600': 'bg-amber-500',
-    'from-cyan-500 to-cyan-600': 'bg-cyan-500',
-  };
+interface ModuleCardProps {
+  module: (typeof KNOWLEDGE_MODULES)[0];
+}
 
-  const bgColor = colors[module.color] || 'bg-slate-500';
+function ModuleCard({ module }: ModuleCardProps) {
+  const softColors: Record<string, { bg: string; text: string; ring: string }> = {
+    'from-blue-400 to-blue-600': { bg: 'bg-blue-50', text: 'text-blue-600', ring: 'hover:border-blue-200' },
+    'from-indigo-400 to-indigo-600': { bg: 'bg-indigo-50', text: 'text-indigo-600', ring: 'hover:border-indigo-200' },
+    'from-violet-400 to-violet-600': { bg: 'bg-violet-50', text: 'text-violet-600', ring: 'hover:border-violet-200' },
+    'from-pink-400 to-rose-500': { bg: 'bg-rose-50', text: 'text-rose-600', ring: 'hover:border-rose-200' },
+    'from-emerald-400 to-emerald-600': { bg: 'bg-emerald-50', text: 'text-emerald-600', ring: 'hover:border-emerald-200' },
+  };
+  const s = softColors[module.color] || { bg: 'bg-slate-50', text: 'text-slate-600', ring: 'hover:border-slate-200' };
 
   return (
-    <Link href={`/module/${module.id}/`} className="group">
-      <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 motion-safe:active:scale-[0.98] border border-slate-100 h-full">
-        <div className="flex items-start gap-4">
-          <div className={`w-14 h-14 ${bgColor} rounded-2xl flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
+    <Link href={`/module/${module.id}/`} className="group block h-full">
+      <div
+        className={`flex h-full flex-col rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-16px_rgba(15,23,42,0.16)] ${s.ring}`}
+      >
+        <div className="flex items-start justify-between">
+          <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${s.bg}`}>
             {module.icon}
           </div>
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
-              {module.name}
-            </h3>
-            <p className="text-sm text-slate-500 leading-relaxed">
-              {module.description}
-            </p>
-          </div>
+          <ArrowRight className="h-4 w-4 text-slate-300 transition-all duration-300 group-hover:translate-x-1 group-hover:text-slate-500" />
         </div>
-        <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-          <span className="text-sm text-slate-400">{module.topics.length} 个主题</span>
-          <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+        <h3 className="mt-5 text-lg font-semibold tracking-tight text-slate-900">{module.name}</h3>
+        <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-500">{module.description}</p>
+        <div className="mt-5 flex items-center gap-2">
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-500">
+            {module.topics.length} 个主题
+          </span>
+          <span className="text-xs text-slate-300">·</span>
+          <span className="text-xs text-slate-400">点击开始学习</span>
         </div>
       </div>
     </Link>

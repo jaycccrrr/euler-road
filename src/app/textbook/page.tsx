@@ -264,8 +264,6 @@ function ReaderContent() {
     return () => window.removeEventListener('keydown', onKey);
   }, [numPages]);
 
-
-
   if (!book) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -307,6 +305,9 @@ function ReaderContent() {
           <p className="text-[11px] text-slate-400 truncate leading-tight">{book.author}</p>
         </div>
         <div className="flex-1" />
+        {cacheBadge && (
+          <span className="hidden sm:inline text-xs text-slate-400 tabular-nums">{cacheBadge}</span>
+        )}
         <a href={downloadUrl} download target="_blank" rel="noopener noreferrer">
           <Button variant="outline" size="sm" className="rounded-lg">
             <Download className="w-4 h-4 mr-1.5" /> 下载
@@ -314,13 +315,25 @@ function ReaderContent() {
         </a>
       </div>
 
-      <main className="flex-1 min-h-0 flex">
+      <main className="flex-1 min-h-0 flex flex-col">
         {/* 阅读区 */}
         <div
           ref={viewerRef}
           className="relative flex-1 min-h-0 bg-slate-100 flex items-center justify-center overflow-hidden"
         >
-
+          {/* 加载 / 缓存进度条（横置） */}
+          {(loading || cacheStatus === 'caching') && (
+            <div className="absolute top-0 inset-x-0 z-20 h-1 bg-slate-200 overflow-hidden">
+              <div
+                className={
+                  progressWidth
+                    ? 'h-full bg-blue-500 transition-all duration-200'
+                    : 'h-full w-1/3 bg-blue-500 animate-pulse'
+                }
+                style={progressWidth ? { width: progressWidth } : undefined}
+              />
+            </div>
+          )}
 
           {loading ? (
             <div className="flex flex-col items-center gap-3 py-16 px-6">
@@ -389,7 +402,7 @@ function ReaderContent() {
                 aria-label="上一页"
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="absolute left-10 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/55 backdrop-blur-sm shadow-md border border-white/70 flex items-center justify-center text-slate-700 hover:bg-white/85 hover:text-blue-600 motion-safe:transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                className="absolute left-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/55 backdrop-blur-sm shadow-md border border-white/70 flex items-center justify-center text-slate-700 hover:bg-white/85 hover:text-blue-600 motion-safe:transition-colors disabled:opacity-30 disabled:pointer-events-none"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
@@ -398,7 +411,7 @@ function ReaderContent() {
                 aria-label="下一页"
                 disabled={page >= numPages}
                 onClick={() => setPage((p) => Math.min(numPages, p + 1))}
-                className="absolute right-10 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/55 backdrop-blur-sm shadow-md border border-white/70 flex items-center justify-center text-slate-700 hover:bg-white/85 hover:text-blue-600 motion-safe:transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                className="absolute right-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/55 backdrop-blur-sm shadow-md border border-white/70 flex items-center justify-center text-slate-700 hover:bg-white/85 hover:text-blue-600 motion-safe:transition-colors disabled:opacity-30 disabled:pointer-events-none"
               >
                 <ChevronRight className="w-6 h-6" />
               </button>
@@ -406,60 +419,21 @@ function ReaderContent() {
           )}
         </div>
 
-        {/* 右侧控制栏 */}
-        <aside className="w-16 shrink-0 bg-white border-l border-slate-200 flex flex-col items-center justify-between py-3">
-          <div className="flex flex-col items-center gap-1.5">
+        {/* 底部控制栏（横置） */}
+        {!loading && !error && numPages > 0 && (
+          <div className="h-14 shrink-0 bg-white border-t border-slate-200 flex items-center gap-3 px-4">
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-lg px-1"
-              aria-label="缩小"
-              disabled={scale <= 0.5}
-              onClick={() => setScale((s) => Math.max(0.5, +(s - 0.15).toFixed(2)))}
+              className="rounded-lg shrink-0"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              <ZoomOut className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
             </Button>
-            <span className="text-xs text-slate-600 tabular-nums w-10 text-center">
-              {Math.round(scale * 100)}%
+            <span className="text-sm text-slate-600 tabular-nums whitespace-nowrap shrink-0">
+              第 {page} / {numPages} 页
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-lg px-1"
-              aria-label="放大"
-              disabled={scale >= 2.5}
-              onClick={() => setScale((s) => Math.min(2.5, +(s + 0.15).toFixed(2)))}
-            >
-              <ZoomIn className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {(loading || cacheStatus === 'caching') && (
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="w-1.5 h-24 rounded-full bg-slate-200 overflow-hidden relative">
-                <div
-                  className={
-                    progressWidth
-                      ? 'absolute bottom-0 inset-x-0 bg-blue-500 transition-all duration-200'
-                      : 'absolute bottom-0 inset-x-0 h-1/3 bg-blue-500 animate-pulse'
-                  }
-                  style={progressWidth ? { height: progressWidth } : undefined}
-                />
-              </div>
-              {cacheProgress !== null && (
-                <span className="text-[10px] text-slate-400 tabular-nums">{cacheProgress}%</span>
-              )}
-            </div>
-          )}
-
-          <div
-            className="text-xs text-slate-600 tabular-nums whitespace-nowrap"
-            style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
-          >
-            第 {page} / {numPages} 页
-          </div>
-
-          <div className="h-60 w-8 flex items-center justify-center">
             <input
               type="range"
               min={1}
@@ -471,15 +445,35 @@ function ReaderContent() {
               onMouseUp={(e) => commitSlider(Number((e.currentTarget as HTMLInputElement).value))}
               onKeyUp={(e) => commitSlider(Number((e.target as HTMLInputElement).value))}
               aria-label="拖动跳转页码"
-              className="w-52 h-2 accent-blue-600 cursor-pointer"
-              style={{ transform: 'rotate(-90deg)' }}
+              className="flex-1 min-w-0 h-2 accent-blue-600 cursor-pointer"
             />
+            <div className="flex items-center gap-0.5 shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-lg px-1.5"
+                aria-label="缩小"
+                disabled={scale <= 0.5}
+                onClick={() => setScale((s) => Math.max(0.5, +(s - 0.15).toFixed(2)))}
+              >
+                <ZoomOut className="w-4 h-4" />
+              </Button>
+              <span className="text-xs text-slate-600 tabular-nums w-10 text-center">
+                {Math.round(scale * 100)}%
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-lg px-1.5"
+                aria-label="放大"
+                disabled={scale >= 2.5}
+                onClick={() => setScale((s) => Math.min(2.5, +(s + 0.15).toFixed(2)))}
+              >
+                <ZoomIn className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
-
-          <div className="text-[10px] text-slate-400 text-center leading-tight min-h-[14px]">
-            {cacheBadge}
-          </div>
-        </aside>
+        )}
       </main>
     </div>
   );
