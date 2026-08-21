@@ -66,7 +66,7 @@ import {
 import Link from 'next/link';
 import { Post, Note, User as UserType, AnswerRecord } from '@/types';
 import { getAllPosts, deletePost, getNotesByUser, deleteNote, getFollowing, getFollowers, getUserById, getAnswerRecordsByUser, areFriends } from '@/lib/db';
-import { syncPostDeleteToBackend } from '@/lib/api-sync';
+import { syncPostDeleteToBackend, getFollowingWithBackend, getFollowersWithBackend } from '@/lib/api-sync';
 import CubeLoader from '@/components/ui/cube-loader';
 import { navigateTo } from '@/lib/asset';
 import { getDailyQuestionsByDate } from '@/lib/daily-question-bank';
@@ -237,8 +237,8 @@ export default function ProfilePage() {
     setSocialLoading(true);
     try {
       const [following, followers] = await Promise.all([
-        getFollowing(user.id),
-        getFollowers(user.id),
+        getFollowingWithBackend(user.id),
+        getFollowersWithBackend(user.id),
       ]);
       setFollowingList(following);
       setFollowersList(followers);
@@ -257,8 +257,8 @@ export default function ProfilePage() {
     setSelectedUserPosts(posts.filter((p) => p.userId === userId));
     // 加载该用户的社交数据（新版用户卡片需要）
     const [following, followers] = await Promise.all([
-      getFollowing(userId),
-      getFollowers(userId),
+      getFollowingWithBackend(userId),
+      getFollowersWithBackend(userId),
     ]);
     setSelectedUserFollowing(following);
     setSelectedUserFollowers(followers);

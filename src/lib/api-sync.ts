@@ -38,6 +38,50 @@ export async function getFriends(userId: string): Promise<User[]> {
   return following.filter((u) => followerIds.has(u.id));
 }
 
+/** 后端优先获取关注列表（跨设备一致），失败回退本地；同时把资料缓存到本地 */
+export async function getFollowingWithBackend(userId: string): Promise<User[]> {
+  if (hasApiToken()) {
+    try {
+      const list = await usersAPI.followingList(userId);
+      const result: User[] = [];
+      for (const item of list || []) {
+        result.push(apiUserToLocalUser(item));
+        try {
+          await cacheApiUser(item);
+        } catch {
+          // 缓存失败不影响列表展示
+        }
+      }
+      return result;
+    } catch (error) {
+      console.warn('获取关注列表失败，回退本地:', error);
+    }
+  }
+  return getFollowing(userId);
+}
+
+/** 后端优先获取粉丝列表（跨设备一致），失败回退本地；同时把资料缓存到本地 */
+export async function getFollowersWithBackend(userId: string): Promise<User[]> {
+  if (hasApiToken()) {
+    try {
+      const list = await usersAPI.followersList(userId);
+      const result: User[] = [];
+      for (const item of list || []) {
+        result.push(apiUserToLocalUser(item));
+        try {
+          await cacheApiUser(item);
+        } catch {
+          // 缓存失败不影响列表展示
+        }
+      }
+      return result;
+    } catch (error) {
+      console.warn('获取粉丝列表失败，回退本地:', error);
+    }
+  }
+  return getFollowers(userId);
+}
+
 // 答题记录与社区帖子的后端同步（Supabase，最佳努力：失败不影响本地）
 import { answersAPI, postsAPI } from '@/lib/api-client';
 import {

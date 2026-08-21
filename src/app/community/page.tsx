@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/hooks/useAuth';
 import { getPostsPaginated, getAllPosts, createPost, updatePost, getUserById, resetDatabase, getFollowing, getFollowers, areFriends, searchUsers } from '@/lib/db';
-import { mergePostsFromBackend, syncPostToBackend, syncPostUpdateToBackend, fetchAndCacheUser } from '@/lib/api-sync';
+import { mergePostsFromBackend, syncPostToBackend, syncPostUpdateToBackend, fetchAndCacheUser, getFollowingWithBackend } from '@/lib/api-sync';
 import { StarFavoriteButton } from '@/components/ui/star-favorite-button';
 import CubeLoader from '@/components/ui/cube-loader';
 import { likesAPI, usersAPI } from '@/lib/api-client';
@@ -146,7 +146,7 @@ export default function CommunityPage() {
   const loadFollowingData = useCallback(async () => {
     if (!user) return;
     try {
-      const following = await getFollowing(user.id);
+      const following = await getFollowingWithBackend(user.id);
       setFollowingUsers(following);
 
       // 检查哪些是好友（互相关注）
