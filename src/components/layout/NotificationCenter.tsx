@@ -112,6 +112,7 @@ export function NotificationCenter() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showQuestionPicker, setShowQuestionPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const listSeqRef = useRef(0);
 
   const refreshUnread = useCallback(async () => {
     if (!user || !hasApiToken()) return;
@@ -144,22 +145,30 @@ export function NotificationCenter() {
   }, [isAuthenticated, user, refreshUnread, refreshMsgUnread]);
 
   const loadLists = useCallback(async (uid: string) => {
+    const seq = ++listSeqRef.current;
     setListLoading(true);
     const listStartedAt = Date.now();
     try {
       const list = await getChatSessions(uid);
-      setSessions(list.sort((a, b) => b.lastMessage.createdAt.localeCompare(a.lastMessage.createdAt)));
+      if (listSeqRef.current === seq) {
+        setSessions(list.sort((a, b) => b.lastMessage.createdAt.localeCompare(a.lastMessage.createdAt)));
+      }
     } catch {
-      setSessions([]);
+      if (listSeqRef.current === seq) setSessions([]);
     }
     try {
-      setFriends(await getFriends(uid));
+      const friends = await getFriends(uid);
+      if (listSeqRef.current === seq) setFriends(friends);
     } catch {
-      setFriends([]);
+      if (listSeqRef.current === seq) setFriends([]);
     } finally {
-      // 加载动画至少展示 350ms，避免“暂无好友”闪烁
-      const wait = Math.max(0, 350 - (Date.now() - listStartedAt));
-      setTimeout(() => setListLoading(false), wait);
+      if (listSeqRef.current === seq) {
+        // 加载动画至少展示 350ms，避免“暂无好友”闪烁
+        const wait = Math.max(0, 350 - (Date.now() - listStartedAt));
+        setTimeout(() => {
+          if (listSeqRef.current === seq) setListLoading(false);
+        }, wait);
+      }
     }
   }, []);
 
@@ -169,9 +178,10 @@ export function NotificationCenter() {
     setShowNotices(false);
     setChatFriend(null);
     setSelectedImage(null);
+    // 好友/会话列表立即并行加载，避免通知接口慢时长期显示“还没有好友”
+    void loadLists(user.id);
     if (!hasApiToken()) {
       setIsLoading(false);
-      void loadLists(user.id);
       return;
     }
     setIsLoading(true);

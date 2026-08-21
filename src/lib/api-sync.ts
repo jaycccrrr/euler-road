@@ -26,12 +26,9 @@ export async function getFriends(userId: string): Promise<User[]> {
       ]);
       const followerIds = new Set((followers || []).map((u: any) => u.id));
       const ids = (following || []).filter((u: any) => followerIds.has(u.id)).map((u: any) => u.id);
-      const result: User[] = [];
-      for (const id of ids) {
-        const cached = await fetchAndCacheUser(id);
-        if (cached) result.push(cached);
-      }
-      return result;
+      // 并行拉取好友资料，避免好友多时逐个请求造成长时间等待
+      const cachedList = await Promise.all(ids.map((id) => fetchAndCacheUser(id)));
+      return cachedList.filter((u): u is User => Boolean(u));
     } catch (error) {
       console.warn('获取好友列表失败，回退本地:', error);
     }

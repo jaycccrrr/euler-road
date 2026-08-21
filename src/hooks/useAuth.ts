@@ -728,60 +728,81 @@ export const useAuth = create<AuthState>()(
         currentUserId: state.currentUserId,
         isAuthenticated: state.isAuthenticated,
         lastLoginAt: state.lastLoginAt,
+        // 缓存完整用户资料（去掉密码哈希），保证刷新/重新打开页面时登录态即时恢复，
+        // 不再出现“头像闪成登录/注册”的空白窗口
+        user: state.user ? { ...state.user, passwordHash: '' } : null,
       }),
-      onRehydrateStorage: () => async (state) => {
-        if (!state) return;
+      onRehydrateStorage: () => (state) => {
+        // persist 已把持久化的 user 同步合并进 store。
+        // 注意：此回调可能在模块初始化期间被触发，直接引用 useAuth 会触发 TDZ，
+        // 因此所有状态更新统一用 setTimeout 延后到初始化完成后再执行。
+        setTimeout(() => {
+          if (!state?.isAuthenticated || !state?.currentUserId) {
+            // 明确未登录：完成恢复
+            useAuth.setState({ hasHydrated: true });
+            return;
+          }
 
-        // 只持久化非敏感字段；恢复时优先从后端拉取完整用户，失败再回退本地
-        if (state.isAuthenticated && state.currentUserId) {
-          if (hasApiToken()) {
+          // 有缓存用户：合并数据已让头像即时显示，这里先完成恢复标记，再后台刷新
+          if (state.user) {
+            useAuth.setState({ hasHydrated: true });
+          }
+
+          void (async () => {
+            // 恢复时优先从后端拉取完整用户，失败再回退本地
+            if (hasApiToken()) {
+              try {
+                const res = await authAPI.getMe();
+                const apiUser = apiUserToLocalUser(res.user);
+                // 合并本地进度（π力等），避免后端覆盖
+                const localUser = await getUserById(apiUser.id).catch(() => undefined);
+                const mergedUser = localUser ? mergeBackendAndLocal(apiUser, localUser) : apiUser;
+                useAuth.setState({
+                  user: mergedUser,
+                  currentUserId: mergedUser.id,
+                  lastLoginAt: mergedUser.lastLoginAt,
+                  isAuthenticated: true,
+                  hasHydrated: true,
+                });
+                void mergeAnswersFromBackend();
+                return;
+              } catch (error) {
+                console.error('后端会话失效，回退本地:', error);
+                setApiToken(null);
+              }
+            }
+
             try {
-              const res = await authAPI.getMe();
-              const apiUser = apiUserToLocalUser(res.user);
-              // 合并本地进度（π力等），避免后端覆盖
-              const localUser = await getUserById(apiUser.id).catch(() => undefined);
-              const mergedUser = localUser ? mergeBackendAndLocal(apiUser, localUser) : apiUser;
-              useAuth.setState({
-                user: mergedUser,
-                currentUserId: mergedUser.id,
-                lastLoginAt: mergedUser.lastLoginAt,
-                isAuthenticated: true,
-                hasHydrated: true,
-              });
-              void mergeAnswersFromBackend();
-              return;
+              const user = await getUserById(state.currentUserId!);
+              if (user) {
+                useAuth.setState({
+                  user,
+                  currentUserId: user.id,
+                  lastLoginAt: user.lastLoginAt,
+                  isAuthenticated: true,
+                  hasHydrated: true,
+                });
+                return;
+              }
             } catch (error) {
-              console.error('后端会话失效，回退本地:', error);
-              setApiToken(null);
+              console.error('Failed to rehydrate auth user:', error);
             }
-          }
 
-          try {
-            const user = await getUserById(state.currentUserId);
-            if (user) {
+            // 后端与本地均不可用时：优先保留已持久化的缓存用户（避免误登出），
+            // 若连缓存用户都没有（旧数据），则清除登录状态
+            if (state.user) {
+              useAuth.setState({ isAuthenticated: true, hasHydrated: true });
+            } else {
               useAuth.setState({
-                user,
-                currentUserId: user.id,
-                lastLoginAt: user.lastLoginAt,
-                isAuthenticated: true,
+                user: null,
+                currentUserId: null,
+                lastLoginAt: null,
+                isAuthenticated: false,
                 hasHydrated: true,
               });
-              return;
             }
-          } catch (error) {
-            console.error('Failed to rehydrate auth user:', error);
-          }
-          // 用户不存在或加载失败，清除登录状态
-          useAuth.setState({
-            user: null,
-            currentUserId: null,
-            lastLoginAt: null,
-            isAuthenticated: false,
-            hasHydrated: true,
-          });
-        } else {
-          state.hasHydrated = true;
-        }
+          })();
+        }, 0);
       },
     }
   )

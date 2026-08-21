@@ -20,7 +20,7 @@ import { FeedbackButton } from './FeedbackButton';
 import { NotificationCenter } from './NotificationCenter';
 
 export default function Header() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, hasHydrated, logout } = useAuth();
   const { resetAnimation } = useAnimation();
 
   const handleLogout = () => {
@@ -65,7 +65,11 @@ export default function Header() {
         {/* User Menu - 更精致的交互 */}
         <div className="flex items-center gap-2">
           <FeedbackButton />
-          {isAuthenticated && user ? (
+          {!hasHydrated && !(isAuthenticated && user) ? (
+            <div className="flex items-center gap-2 pr-1" aria-hidden>
+              <div className="w-9 h-9 rounded-full bg-slate-100 animate-pulse" />
+            </div>
+          ) : isAuthenticated && user ? (
             <>
               <NotificationCenter />
               <DropdownMenu>
