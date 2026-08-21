@@ -767,12 +767,7 @@ export function DailyChallenge() {
                       </Card>
                     ) : (
                       <Card className="relative p-5 md:p-6 rounded-2xl border border-slate-200 bg-white flex flex-col min-h-[460px] h-full">
-                        {!isAuthenticated && (
-                          <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                            <span>游客模式：可先体验答题，答案仅保存在本机。</span>
-                            <Link href="/login" className="font-medium underline whitespace-nowrap">登录 / 注册</Link>
-                          </div>
-                        )}
+
                         <Textarea
                           placeholder="输入你的答案..."
                           value={answer}

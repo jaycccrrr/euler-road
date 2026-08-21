@@ -287,12 +287,9 @@ export const useDailyQuestion = create<DailyQuestionState>()(
         const user = useAuth.getState().user;
         const questionId = question.id;
 
-        // 游客模式：未登录也能本地作答（不累计经验/π力、不同步后端）
-        const isGuest = !user;
-        if (!question) {
+        if (!question || !user) {
           return { success: false, feedback: '无法提交答案' };
         }
-        const userId = isGuest ? 'guest-' + questionId : user!.id;
 
         set({ isLoading: true });
 
@@ -301,13 +298,13 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           const grading = await gradeAnswerDual(question, content, images);
 
           // Calculate experience（含连续学习加成：每连续答对 1 天 +1，上限 +10）
-          const streakDays = user?.piPower?.currentStreak || 0;
-          const expGained = isGuest ? 0 : calculateAnswerExp(grading.score, streakDays);
+          const streakDays = user.piPower?.currentStreak || 0;
+          const expGained = calculateAnswerExp(grading.score, streakDays);
 
           // Create answer record
           const record: AnswerRecord = {
             id: generateId(),
-            userId,
+            userId: user.id,
             questionId: questionId,
             content,
             images,
@@ -324,11 +321,13 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           };
 
           await createAnswerRecord(record);
-          // 同步到后端 + 经验（游客不执行）
-          if (!isGuest) {
-            void syncAnswerToBackend(record, question);
-            await useAuth.getState().addModuleExp('math' as const, expGained);
-          }
+          // 同步到后端（最佳努力）
+          void syncAnswerToBackend(record, question);
+
+          // Update module experience
+          const moduleCategory = 'math' as const;
+
+          await useAuth.getState().addModuleExp(moduleCategory, expGained);
 
           // Update todayAnswers - 替换已存在的记录而不是添加
           const { todayAnswers, userAnswerHistory } = get();
@@ -362,9 +361,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           return {
             success: true,
             record,
-            feedback: isGuest
-              ? grading.feedback + '\n（游客作答已保存到本机，注册登录后可同步进度并累计 π力）'
-              : grading.feedback + '\n获得 ' + expGained + ' 经验值！',
+            feedback: `${grading.feedback}\n获得 ${expGained} 经验值！`,
           };
         } catch (error) {
           set({ error: '提交失败', isLoading: false });
@@ -377,12 +374,9 @@ export const useDailyQuestion = create<DailyQuestionState>()(
         const user = useAuth.getState().user;
         const questionId = question.id;
 
-        // 游客模式：未登录也能本地作答（不累计经验/π力、不同步后端）
-        const isGuest = !user;
-        if (!question) {
+        if (!question || !user) {
           return { success: false, feedback: '无法提交答案' };
         }
-        const userId = isGuest ? 'guest-' + questionId : user!.id;
 
         set({ isLoading: true });
 
@@ -393,7 +387,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           // Create answer record
           const record: AnswerRecord = {
             id: generateId(),
-            userId,
+            userId: user.id,
             questionId: questionId,
             content,
             images,
@@ -410,8 +404,8 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           };
 
           await createAnswerRecord(record);
-          // 同步到后端（游客不执行）
-          if (!isGuest) void syncAnswerToBackend(record, question);
+          // 同步到后端（最佳努力）
+          void syncAnswerToBackend(record, question);
 
           // Reload answers
           await get().loadQuestionAnswers(questionId);
@@ -427,9 +421,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
           return {
             success: true,
             record,
-            feedback: isGuest
-              ? grading.feedback + '\n（游客作答已保存到本机，注册登录后可同步进度）'
-              : grading.feedback + '\n（历史题目不获得经验值）',
+            feedback: `${grading.feedback}\n（历史题目不获得经验值）`,
           };
         } catch (error) {
           set({ error: '提交失败', isLoading: false });
