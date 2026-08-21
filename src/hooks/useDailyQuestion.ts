@@ -373,9 +373,16 @@ export const useDailyQuestion = create<DailyQuestionState>()(
       // 提交历史题目答案（不给经验值）
       submitHistoryAnswer: async (questionId: string, content: string, images: string[], isPublic: boolean) => {
         const user = useAuth.getState().user;
-        const { currentQuestion } = get();
+        const { currentQuestion, todayQuestions, historicalQuestions } = get();
 
-        if (!currentQuestion || !user) {
+        // 判卷必须使用与作答一致的那道题，避免 currentQuestion 过期或备用题库内容不匹配
+        const question =
+          (currentQuestion?.id === questionId ? currentQuestion : null) ||
+          todayQuestions.find((q) => q.id === questionId) ||
+          historicalQuestions.find((q) => q.id === questionId) ||
+          currentQuestion;
+
+        if (!question || !user) {
           return { success: false, feedback: '无法提交答案' };
         }
 
@@ -383,7 +390,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
 
         try {
           // Grade the answer（双通道：本地算法 + 低置信度时 AI 二次批改）
-          const grading = await gradeAnswerDual(currentQuestion, content, images);
+          const grading = await gradeAnswerDual(question, content, images);
 
           // Create answer record
           const record: AnswerRecord = {
@@ -406,7 +413,7 @@ export const useDailyQuestion = create<DailyQuestionState>()(
 
           await createAnswerRecord(record);
           // 同步到后端（最佳努力）
-          void syncAnswerToBackend(record, currentQuestion);
+          void syncAnswerToBackend(record, question);
 
           // Reload answers
           await get().loadQuestionAnswers(questionId);
