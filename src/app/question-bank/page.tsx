@@ -487,7 +487,15 @@ function BankHome({
         <div className="lg:sticky lg:top-6 lg:self-stretch lg:flex lg:flex-col">
           <Card className="p-4 rounded-2xl border border-slate-200 bg-white shadow-sm lg:flex-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-3 px-1">选择科目</p>
-            <SubjectList subjects={subjects} progress={progress} activeId={subjectId} onSelect={setSubjectId} />
+            <SubjectList
+              subjects={subjects}
+              progress={progress}
+              activeId={subjectId}
+              onSelect={(v) => {
+                setSubjectId(v);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            />
             <ModeToggle mode={mode} favCount={favCount} onChange={onModeChange} />
           </Card>
         </div>
@@ -873,6 +881,7 @@ function QuizView({
   const handleSelectChapter = (chapterId: string) => {
     setActiveChapterId(chapterId);
     setPage(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -978,6 +987,7 @@ function QuizView({
                   setActiveSubject(v);
                   setActiveChapterId(null);
                   setPage(1);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
               />
               <ModeToggle mode={mode} favCount={favCount} onChange={onModeChange} />

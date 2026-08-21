@@ -118,7 +118,10 @@ function TopicDetail({
             {topic.subTopics.map((subTopic, index) => (
               <button
                 key={subTopic.id}
-                onClick={() => setSelectedSubTopicId(subTopic.id)}
+                onClick={() => {
+                  setSelectedSubTopicId(subTopic.id);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 className={`w-full text-left px-4 py-3 border-b border-slate-100 transition-colors ${
                   selectedSubTopicId === subTopic.id
                     ? 'bg-blue-50 text-blue-700 border-r-2 border-r-blue-500'
@@ -252,7 +255,10 @@ export function ReadonlyAdvancedTopics({ topics, moduleId, moduleName, userId, s
           key={`${selectedTopic.id}:${initialChapter || ''}`}
           topic={selectedTopic}
           initialSubTopicTitle={initialChapter}
-          onBack={() => setSelectedTopicId(null)}
+          onBack={() => {
+            setSelectedTopicId(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
           moduleId={moduleId}
           moduleName={moduleName}
           userId={userId}
@@ -273,7 +279,10 @@ export function ReadonlyAdvancedTopics({ topics, moduleId, moduleName, userId, s
             key={topic.id}
             topic={topic}
             isSelected={selectedTopicId === topic.id}
-            onClick={() => setSelectedTopicId(topic.id)}
+            onClick={() => {
+              setSelectedTopicId(topic.id);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
           />
         ))}
       </div>
