@@ -395,6 +395,16 @@ export async function getPostById(id: string): Promise<Post | undefined> {
   return database.get('posts', id);
 }
 
+export async function getPostsByUser(userId: string): Promise<Post[]> {
+  if (typeof window === 'undefined') return [];
+  try {
+    const database = await initDB();
+    return database.getAllFromIndex('posts', 'by-user', userId);
+  } catch {
+    return [];
+  }
+}
+
 export async function getAllPosts(): Promise<Post[]> {
   if (typeof window === 'undefined') return [];
   try {

@@ -1,3 +1,21 @@
+export async function getPostWithBackendFallback(id: string): Promise<Post | null> {
+  // 本地无该帖时从后端拉取并缓存，解决直链或通知跳转时找不到帖子的问题
+  const local = await getPostById(id);
+  if (local) return local;
+  if (!hasApiToken()) return null;
+  try {
+    const res = await postsAPI.getById(id);
+    if (res?.post) {
+      const mapped = mapApiPostToLocal(res.post);
+      await createPost(mapped);
+      return mapped;
+    }
+  } catch (error) {
+    console.warn('拉取后端帖子失败:', error);
+  }
+  return null;
+}
+
 // 答题记录与社区帖子的后端同步（Supabase，最佳努力：失败不影响本地）
 import { answersAPI, postsAPI } from '@/lib/api-client';
 import {

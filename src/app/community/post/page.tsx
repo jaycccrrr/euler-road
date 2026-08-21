@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
-import { getPostById, getUserById, getAllPosts, createComment, updatePost, getFollowing, getFollowers, areFriends } from '@/lib/db';
-import { mergePostCommentsFromBackend, syncPostCommentToBackend, fetchAndCacheUser } from '@/lib/api-sync';
+import { getPostById, getUserById, getAllPosts, getPostsByUser, createComment, updatePost, getFollowing, getFollowers, areFriends } from '@/lib/db';
+import { mergePostCommentsFromBackend, syncPostCommentToBackend, fetchAndCacheUser, getPostWithBackendFallback } from '@/lib/api-sync';
 import { StarFavoriteButton } from '@/components/ui/star-favorite-button';
 import CubeLoader from '@/components/ui/cube-loader';
 import { navigateTo } from '@/lib/asset';
@@ -133,63 +133,70 @@ function PostDetailContent() {
     if (!postId) return;
     try {
       setIsLoading(true);
-      const postData = await getPostById(postId);
-      if (postData) {
-        // 合并云端评论
-        const cloudComments = await mergePostCommentsFromBackend(postId);
-        const byId = new Map<string, Post['comments'][number]>();
-        for (const c of [...(postData.comments || []), ...cloudComments]) {
-          byId.set(c.id, c);
-        }
-        const mergedPost: Post = {
-          ...postData,
-          comments: Array.from(byId.values()).sort((a, b) =>
-            a.createdAt.localeCompare(b.createdAt)
-          ),
-        };
-        setPost(mergedPost);
-        setLikeCount(mergedPost.likes);
-        if (currentUser) {
-          setIsLiked(mergedPost.likedBy.includes(currentUser.id));
-        }
-        const authorData = await fetchAndCacheUser(mergedPost.userId);
-        if (authorData) {
-          setAuthor(authorData);
-          // 获取作者的所有帖子
-          const allPosts = await getAllPosts();
-          const userPosts = allPosts.filter(p => p.userId === authorData.id);
-          setAuthorPosts(userPosts);
-          // 相关推荐：同模块/同话题，按热度排序
-          setRelatedPosts(getRelatedPosts(mergedPost, allPosts, 5));
-        }
-
-        // 获取所有评论用户的头像框信息
-        const commentUserIds = [...new Set(mergedPost.comments.map(c => c.userId))];
-        const frameMap: Record<string, string> = {};
-
-        await Promise.all(
-          commentUserIds.map(async (userId) => {
-            try {
-              const userData = await fetchAndCacheUser(userId);
-              if (userData) {
-                const moduleData = userData.moduleData || initModuleData();
-                const frame = getPrimaryFrame(moduleData, userData.displayCategory);
-                frameMap[userId] = frame;
-              }
-            } catch (e) {
-              console.error('Failed to get user frame:', e);
-            }
-          })
-        );
-
-        setCommentUserFrames(frameMap);
+      // 本地没有时从后端拉取并缓存，避免直链或通知跳转时找不到帖子
+      const postData = await getPostWithBackendFallback(postId);
+      if (!postData) {
+        setIsLoading(false);
+        return;
       }
+      setPost(postData);
+      setLikeCount(postData.likes);
+      if (currentUser) {
+        setIsLiked(postData.likedBy.includes(currentUser.id));
+      }
+      // 主内容与点赞/收藏标记立即显示，其余数据后台加载
+      setIsLoading(false);
+
+      void (async () => {
+        try {
+          const cloudComments = await mergePostCommentsFromBackend(postId);
+          const byId = new Map<string, Post['comments'][number]>();
+          for (const c of [...(postData.comments || []), ...cloudComments]) {
+            byId.set(c.id, c);
+          }
+          const mergedPost: Post = {
+            ...postData,
+            comments: Array.from(byId.values()).sort((a, b) =>
+              a.createdAt.localeCompare(b.createdAt)
+            ),
+          };
+          setPost(mergedPost);
+
+          const authorData = await fetchAndCacheUser(mergedPost.userId);
+          if (authorData) {
+            setAuthor(authorData);
+            const userPosts = await getPostsByUser(authorData.id);
+            setAuthorPosts(userPosts);
+            const allPosts = await getAllPosts();
+            setRelatedPosts(getRelatedPosts(mergedPost, allPosts, 5));
+          }
+
+          const commentUserIds = [...new Set(mergedPost.comments.map((c) => c.userId))];
+          const frameMap: Record<string, string> = {};
+          await Promise.all(
+            commentUserIds.map(async (userId) => {
+              try {
+                const userData = await fetchAndCacheUser(userId);
+                if (userData) {
+                  const moduleData = userData.moduleData || initModuleData();
+                  const frame = getPrimaryFrame(moduleData, userData.displayCategory);
+                  frameMap[userId] = frame;
+                }
+              } catch (e) {
+                console.error('Failed to get user frame:', e);
+              }
+            })
+          );
+          setCommentUserFrames(frameMap);
+        } catch (error) {
+          console.error('Failed to load post details:', error);
+        }
+      })();
     } catch (error) {
       console.error('Failed to load post:', error);
-    } finally {
       setIsLoading(false);
     }
-  };
+  };;
 
   const handleLike = async () => {
     if (!isAuthenticated || !currentUser || !post) {

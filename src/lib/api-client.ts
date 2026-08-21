@@ -111,6 +111,9 @@ export const answersAPI = {
 
 // 社区相关
 export const postsAPI = {
+  getById: (id: string) =>
+    fetchAPI<{ post: any }>(`/api/posts/${id}`),
+
   getList: (page = 1, pageSize = 20, moduleId?: string, search?: string) =>
     fetchAPI<{ posts: any[]; pagination: any }>(
       `/api/posts?page=${page}&limit=${pageSize}${moduleId ? `&moduleId=${moduleId}` : ''}${search ? `&search=${search}` : ''}`
