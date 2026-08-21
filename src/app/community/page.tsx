@@ -1007,6 +1007,7 @@ export default function CommunityPage() {
                   <div className="text-center py-12 text-gray-500">暂无帖子</div>
                 ) : (
                   <>
+                    <p className="mb-4 text-sm text-slate-400">共 {filterPostsByModule(tabValue).length} 篇</p>
                     <div className="columns-1 md:columns-2 gap-4">
                       {filterPostsByModule(tabValue).map((post) => renderPostCard(post))}
                     </div>

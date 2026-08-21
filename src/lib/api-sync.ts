@@ -9,6 +9,7 @@ import {
 } from '@/lib/api-client';
 import { hasApiToken, apiUserToLocalUser } from '@/lib/api-auth';
 import {
+  updatePost,
   createAnswerRecord,
   getAnswerRecordById,
   createPost,
@@ -323,7 +324,14 @@ export async function mergePostsFromBackend(): Promise<void> {
         try {
           await cacheApiUser(apiPost.user);
           const existing = await getPostById(apiPost.id);
-          if (!existing) {
+          if (existing) {
+            // 已存在则刷新内容（保留本地点赞/评论等状态），避免本地旧数据漏显示
+            await updatePost({
+              ...mapApiPostToLocal(apiPost),
+              likedBy: existing.likedBy || [],
+              comments: existing.comments || [],
+            });
+          } else {
             await createPost(mapApiPostToLocal(apiPost));
           }
         } catch (error) {
