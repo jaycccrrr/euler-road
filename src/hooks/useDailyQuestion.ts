@@ -79,12 +79,12 @@ interface DailyQuestionState {
   loadQuestionById: (id: string) => Promise<DailyQuestion | null>;
   loadQuestionAnswers: (questionId: string) => Promise<void>;
   loadUserAnswerHistory: () => Promise<void>; // 加载用户历史记录
-  submitAnswer: (questionId: string, content: string, images: string[], isPublic: boolean) => Promise<{
+  submitAnswer: (question: DailyQuestion, content: string, images: string[], isPublic: boolean) => Promise<{
     success: boolean;
     record?: AnswerRecord;
     feedback?: string;
   }>;
-  submitHistoryAnswer: (questionId: string, content: string, images: string[], isPublic: boolean) => Promise<{
+  submitHistoryAnswer: (question: DailyQuestion, content: string, images: string[], isPublic: boolean) => Promise<{
     success: boolean;
     record?: AnswerRecord;
     feedback?: string;
@@ -283,10 +283,9 @@ export const useDailyQuestion = create<DailyQuestionState>()(
         }
       },
 
-      submitAnswer: async (questionId: string, content: string, images: string[], isPublic: boolean) => {
-        const { todayQuestions } = get();
+      submitAnswer: async (question: DailyQuestion, content: string, images: string[], isPublic: boolean) => {
         const user = useAuth.getState().user;
-        const question = todayQuestions.find(q => q.id === questionId);
+        const questionId = question.id;
 
         if (!question || !user) {
           return { success: false, feedback: '无法提交答案' };
@@ -371,16 +370,9 @@ export const useDailyQuestion = create<DailyQuestionState>()(
       },
 
       // 提交历史题目答案（不给经验值）
-      submitHistoryAnswer: async (questionId: string, content: string, images: string[], isPublic: boolean) => {
+      submitHistoryAnswer: async (question: DailyQuestion, content: string, images: string[], isPublic: boolean) => {
         const user = useAuth.getState().user;
-        const { currentQuestion, todayQuestions, historicalQuestions } = get();
-
-        // 判卷必须使用与作答一致的那道题，避免 currentQuestion 过期或备用题库内容不匹配
-        const question =
-          (currentQuestion?.id === questionId ? currentQuestion : null) ||
-          todayQuestions.find((q) => q.id === questionId) ||
-          historicalQuestions.find((q) => q.id === questionId) ||
-          currentQuestion;
+        const questionId = question.id;
 
         if (!question || !user) {
           return { success: false, feedback: '无法提交答案' };

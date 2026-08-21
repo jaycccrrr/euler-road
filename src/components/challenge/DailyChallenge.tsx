@@ -439,11 +439,11 @@ export function DailyChallenge() {
     let res;
     if (isTodayView && todayQuestions.some((q) => q.id === selectedQuestion.id)) {
       // 今日题：给经验值（默认私密，不自动发到讨论区）
-      res = await submitAnswer(selectedQuestion.id, answer, images, false);
+      res = await submitAnswer(selectedQuestion, answer, images, false);
     } else {
       // 历史题：无经验值；需先确保 store 的 currentQuestion 为该题
       await loadQuestionById(selectedQuestion.id);
-      res = await submitHistoryAnswer(selectedQuestion.id, answer, images, false);
+      res = await submitHistoryAnswer(selectedQuestion, answer, images, false);
       await loadUserAnswerHistory();
     }
 
