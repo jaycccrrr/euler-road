@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { useAnimation } from '@/contexts/AnimationContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -47,6 +48,7 @@ export function AuthSwitch({
   className,
 }: AuthSwitchProps) {
   const { login, register } = useAuth();
+  const { skipIntro } = useAnimation();
 
   const [mode, setMode] = useState<AuthMode>(defaultMode);
 
@@ -218,7 +220,13 @@ export function AuthSwitch({
         {onGuest && (
           <button
             type="button"
-            onClick={onGuest}
+            onClick={() => {
+              try {
+                localStorage.setItem('euler-road-animation-state', JSON.stringify({ hasCompletedRegistration: true }));
+              } catch {}
+              skipIntro();
+              onGuest?.();
+            }}
             className="mt-4 w-full text-center text-sm text-slate-400 hover:text-blue-600 transition-colors"
           >
             或 以游客身份先逛逛 →
@@ -355,7 +363,13 @@ export function AuthSwitch({
         {onGuest && (
           <button
             type="button"
-            onClick={onGuest}
+            onClick={() => {
+              try {
+                localStorage.setItem('euler-road-animation-state', JSON.stringify({ hasCompletedRegistration: true }));
+              } catch {}
+              skipIntro();
+              onGuest?.();
+            }}
             className="mt-4 w-full text-center text-sm text-slate-400 hover:text-blue-600 transition-colors"
           >
             或 以游客身份先逛逛 →
