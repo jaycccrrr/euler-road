@@ -175,8 +175,10 @@ export async function gradeAnswerServer(
   content: string,
   images: string[]
 ): Promise<GradingResult | null> {
-  return (
-    (await gradeWithVision(question, content, images || [])) ||
-    (await gradeWithAI(question, content))
-  );
+  // 有图片时只走识图判卷；识图不可用/失败时返回 null，
+  // 避免纯文本 AI 无视图片硬批改，产生误导性反馈
+  if (images && images.length > 0) {
+    return gradeWithVision(question, content, images);
+  }
+  return gradeWithAI(question, content);
 }

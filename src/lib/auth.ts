@@ -1,15 +1,18 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-function loadJwtSecret(): string {
-  const secret = process.env.JWT_SECRET;
-  if (!secret || secret.length < 32) {
-    throw new Error('JWT_SECRET 未配置或长度不足 32 字符，请在环境变量中设置后重启服务');
+let cachedJwtSecret: string | null = null;
+// 按需加载：仅生成/校验令牌时才需要密钥，避免未配置时拖垮无关接口（如匿名判卷）
+function getJwtSecret(): string {
+  if (!cachedJwtSecret) {
+    const secret = process.env.JWT_SECRET;
+    if (!secret || secret.length < 32) {
+      throw new Error('JWT_SECRET 未配置或长度不足 32 字符，请在环境变量中设置后重启服务');
+    }
+    cachedJwtSecret = secret;
   }
-  return secret;
+  return cachedJwtSecret;
 }
-
-const JWT_SECRET: string = loadJwtSecret();
 const SALT_ROUNDS = 10;
 
 export async function hashPassword(password: string): Promise<string> {
@@ -21,12 +24,12 @@ export async function comparePassword(password: string, hash: string): Promise<b
 }
 
 export function generateToken(userId: string): string {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ userId }, getJwtSecret(), { expiresIn: '7d' });
 }
 
 export function verifyToken(token: string): { userId: string } | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+    const decoded = jwt.verify(token, getJwtSecret()) as { userId: string };
     return decoded;
   } catch {
     return null;

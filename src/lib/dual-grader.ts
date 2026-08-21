@@ -116,6 +116,9 @@ async function gradeViaBackend(
       if (data.reason) console.warn('[Dual Grader] AI 判卷不可用：', data.reason);
       return null;
     }
+    if (data.imageCount !== undefined) {
+      console.log('[Dual Grader] 判卷诊断：图片', data.imageCount, '张 | 识图', data.visionUsed ? '是' : '否');
+    }
     return {
       score: data.score,
       isCorrect: data.isCorrect,

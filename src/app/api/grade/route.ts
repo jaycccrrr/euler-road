@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, content, answer, studentContent, images } = body || {};
 
+    const cleanImages = sanitizeGradingImages(images);
     const result = await gradeAnswerServer(
       {
         title: String(title || '每日一题'),
@@ -26,10 +27,11 @@ export async function POST(request: NextRequest) {
         answer: answer ? String(answer) : undefined,
       },
       String(studentContent || ''),
-      sanitizeGradingImages(images)
+      cleanImages
     );
 
     if (!result) {
+      if (cleanImages.length > 0) console.warn('判卷不可用：收到图片 ' + cleanImages.length + ' 张但识图未返回结果');
       return NextResponse.json({
         aiAvailable: false,
         reason: process.env.VISION_API_KEY
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
           : '服务端未配置识图密钥（VISION_API_KEY）',
       });
     }
-    return NextResponse.json({ aiAvailable: true, ...result });
+    return NextResponse.json({ aiAvailable: true, imageCount: cleanImages.length, visionUsed: true, ...result });
   } catch (error) {
     console.error('判卷接口失败:', error);
     return NextResponse.json({ aiAvailable: false }, { status: 500 });
