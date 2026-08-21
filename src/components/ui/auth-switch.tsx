@@ -24,6 +24,8 @@ export interface AuthSwitchProps {
   onLoginSuccess?: () => void;
   /** 注册成功回调（已完成自动登录） */
   onRegisterSuccess?: () => void;
+  /** 以游客身份进入（不注册） */
+  onGuest?: () => void;
   className?: string;
 }
 
@@ -41,6 +43,7 @@ export function AuthSwitch({
   defaultMode = 'login',
   onLoginSuccess,
   onRegisterSuccess,
+  onGuest,
   className,
 }: AuthSwitchProps) {
   const { login, register } = useAuth();
@@ -212,6 +215,15 @@ export function AuthSwitch({
             '登 录'
           )}
         </Button>
+        {onGuest && (
+          <button
+            type="button"
+            onClick={onGuest}
+            className="mt-4 w-full text-center text-sm text-slate-400 hover:text-blue-600 transition-colors"
+          >
+            或 以游客身份先逛逛 →
+          </button>
+        )}
       </form>
     </div>
   );
@@ -340,6 +352,15 @@ export function AuthSwitch({
             '创建账号'
           )}
         </Button>
+        {onGuest && (
+          <button
+            type="button"
+            onClick={onGuest}
+            className="mt-4 w-full text-center text-sm text-slate-400 hover:text-blue-600 transition-colors"
+          >
+            或 以游客身份先逛逛 →
+          </button>
+        )}
       </form>
     </div>
   );

@@ -25,8 +25,9 @@ export default function LoginPage() {
       <div className="relative z-10 w-full flex flex-col items-center gap-6">
         <AuthSwitch
           defaultMode="login"
-          onLoginSuccess={() => router.push('/')}
+                    onLoginSuccess={() => router.push('/')}
           onRegisterSuccess={() => router.push('/')}
+          onGuest={() => router.push('/')}
         />
         <Link href="/" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">
           返回首页
