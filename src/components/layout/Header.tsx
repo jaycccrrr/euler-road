@@ -16,7 +16,6 @@ import {
 import { BookOpen, Users, Calendar, LogOut, User as UserIcon, GraduationCap } from 'lucide-react';
 import { getPrimaryFrame, initModuleData, FRAME_COLORS } from '@/lib/gamification';
 import { navigateTo } from '@/lib/asset';
-import { MessageCenter } from './MessageCenter';
 import { FeedbackButton } from './FeedbackButton';
 import { NotificationCenter } from './NotificationCenter';
 
@@ -69,7 +68,6 @@ export default function Header() {
           {isAuthenticated && user ? (
             <>
               <NotificationCenter />
-              <MessageCenter />
               <DropdownMenu>
               <DropdownMenuTrigger>
                 <button className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100 transition-all duration-200 group">
