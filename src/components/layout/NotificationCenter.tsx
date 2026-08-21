@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Bell,
   Heart,
@@ -8,11 +8,14 @@ import {
   UserPlus,
   MessagesSquare,
   CheckCheck,
-  Loader2,
   ChevronDown,
   MessageCircle,
   ArrowLeft,
   Send,
+  Image as ImageIcon,
+  X,
+  FileQuestion,
+  Loader2,
 } from 'lucide-react';
 import {
   Dialog,
@@ -22,6 +25,7 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import UniqueLoading from '@/components/ui/morph-loading';
 import { notificationsAPI } from '@/lib/api-client';
 import { hasApiToken } from '@/lib/api-auth';
 import { useAuth } from '@/hooks/useAuth';
@@ -37,7 +41,9 @@ import { LazyImage } from '@/components/LazyImage';
 import { formatRelativeTime, generateId } from '@/lib/utils';
 import { navigateTo } from '@/lib/asset';
 import { cn } from '@/lib/utils';
-import type { User, Message } from '@/types';
+import { ShareQuestionPicker } from '@/components/community/ShareQuestionPicker';
+import { QuestionCardBubble, PostCardBubble } from '@/components/community/ChatDialog';
+import type { User, Message, QuestionCardPayload, PostCardPayload } from '@/types';
 
 interface AppNotification {
   id: string;
@@ -85,7 +91,7 @@ function isOnline(u: User | undefined): boolean {
 
 /**
  * Header 消息中心：顶部互动消息横条（可展开、可跳转来源），
- * 下方完整好友与私信列表（互关即出现），聊天直接嵌入本面板。
+ * 下方完整好友与私信列表（互关即出现），聊天直接嵌入本面板（支持文字/图片/题目卡片）。
  */
 export function NotificationCenter() {
   const { user, isAuthenticated } = useAuth();
@@ -94,13 +100,18 @@ export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [listLoading, setListLoading] = useState(false);
   const [showNotices, setShowNotices] = useState(false);
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [friends, setFriends] = useState<User[]>([]);
   const [chatFriend, setChatFriend] = useState<User | null>(null);
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [chatLoading, setChatLoading] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showQuestionPicker, setShowQuestionPicker] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const refreshUnread = useCallback(async () => {
     if (!user || !hasApiToken()) return;
@@ -133,6 +144,7 @@ export function NotificationCenter() {
   }, [isAuthenticated, user, refreshUnread, refreshMsgUnread]);
 
   const loadLists = useCallback(async (uid: string) => {
+    setListLoading(true);
     try {
       const list = await getChatSessions(uid);
       setSessions(list.sort((a, b) => b.lastMessage.createdAt.localeCompare(a.lastMessage.createdAt)));
@@ -143,6 +155,8 @@ export function NotificationCenter() {
       setFriends(await getFriends(uid));
     } catch {
       setFriends([]);
+    } finally {
+      setListLoading(false);
     }
   }, []);
 
@@ -151,6 +165,7 @@ export function NotificationCenter() {
     setIsOpen(true);
     setShowNotices(false);
     setChatFriend(null);
+    setSelectedImage(null);
     if (!hasApiToken()) {
       setIsLoading(false);
       void loadLists(user.id);
@@ -173,6 +188,7 @@ export function NotificationCenter() {
   useEffect(() => {
     if (!user || !chatFriend) return;
     let cancelled = false;
+    setChatLoading(true);
     void (async () => {
       try {
         const msgs = await getMessagesBetweenUsers(user.id, chatFriend.id);
@@ -182,6 +198,8 @@ export function NotificationCenter() {
         void loadLists(user.id);
       } catch {
         // 忽略
+      } finally {
+        if (!cancelled) setChatLoading(false);
       }
     })();
     return () => {
@@ -191,16 +209,19 @@ export function NotificationCenter() {
   }, [user, chatFriend?.id]);
 
   const sendChat = async () => {
-    if (!user || !chatFriend || !chatInput.trim()) return;
+    if (!user || !chatFriend) return;
+    if (!chatInput.trim() && !selectedImage) return;
     const content = chatInput.trim();
     setChatInput('');
+    const img = selectedImage;
+    setSelectedImage(null);
     setSending(true);
     const msg: Message = {
       id: generateId(),
       senderId: user.id,
       receiverId: chatFriend.id,
       content,
-      images: [],
+      images: img ? [img] : [],
       createdAt: new Date().toISOString(),
       isRead: false,
       messageType: 'text',
@@ -215,6 +236,42 @@ export function NotificationCenter() {
       setSending(false);
       void loadLists(user.id);
     }
+  };
+
+  // 发送卡片消息（题目卡片 / 帖子卡片共用）
+  const sendCardMessage = async (payload: QuestionCardPayload | PostCardPayload) => {
+    if (!user || !chatFriend) return;
+    const msg: Message = {
+      id: generateId(),
+      senderId: user.id,
+      receiverId: chatFriend.id,
+      content:
+        payload.kind === 'question-card'
+          ? `[题目卡片] ${payload.questionTitle}`
+          : `[帖子] ${payload.title}`,
+      images: [],
+      createdAt: new Date().toISOString(),
+      isRead: false,
+      messageType: payload.kind,
+      cardPayload: payload,
+    };
+    setChatMessages((prev) => [...prev, msg]);
+    try {
+      await createMessage(msg);
+      void syncMessageToBackend(msg);
+    } catch (error) {
+      console.warn('发送卡片失败:', error);
+    }
+    void loadLists(user.id);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => setSelectedImage(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const handleMarkAllRead = async () => {
@@ -319,7 +376,10 @@ export function NotificationCenter() {
   const renderRow = (friend: User, session?: SessionItem) => (
     <button
       key={friend.id}
-      onClick={() => setChatFriend(friend)}
+      onClick={() => {
+        setSelectedImage(null);
+        setChatFriend(friend);
+      }}
       className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors text-left"
     >
       {renderAvatar(friend, 'w-11 h-11')}
@@ -350,6 +410,37 @@ export function NotificationCenter() {
       <MessageCircle className="w-4 h-4 text-slate-300 shrink-0" />
     </button>
   );
+
+  const renderBubble = (m: Message) => {
+    const isSelf = m.senderId === user!.id;
+    const sender = isSelf ? user! : chatFriend!;
+    if (m.messageType === 'question-card' && m.cardPayload?.kind === 'question-card') {
+      return <QuestionCardBubble payload={m.cardPayload as QuestionCardPayload} isSelf={isSelf} senderNickname={sender.nickname} />;
+    }
+    if (m.messageType === 'post-card' && m.cardPayload?.kind === 'post-card') {
+      return <PostCardBubble payload={m.cardPayload as PostCardPayload} isSelf={isSelf} />;
+    }
+    return (
+      <div
+        className={cn(
+          'max-w-[72%] rounded-2xl px-3 py-2 text-sm break-words',
+          isSelf ? 'bg-blue-500 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'
+        )}
+      >
+        {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
+        {m.images && m.images.length > 0 && (
+          <div className="mt-2">
+            <img
+              src={m.images[0]}
+              alt="图片"
+              className="max-w-full max-h-[220px] rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => window.open(m.images![0], '_blank')}
+            />
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const totalUnread = unreadCount + msgUnread;
 
@@ -390,7 +481,10 @@ export function NotificationCenter() {
             <div className="flex-1 min-h-0 flex flex-col">
               <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-slate-100 shrink-0">
                 <button
-                  onClick={() => setChatFriend(null)}
+                  onClick={() => {
+                    setChatFriend(null);
+                    setSelectedImage(null);
+                  }}
                   className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
                   title="返回好友列表"
                 >
@@ -404,56 +498,66 @@ export function NotificationCenter() {
                   </p>
                 </div>
               </div>
+
               <ScrollArea className="flex-1 min-h-0 p-4">
                 <div className="space-y-2.5">
-                  {chatMessages.length === 0 ? (
+                  {chatLoading ? (
+                    <div className="flex items-center justify-center py-10">
+                      <UniqueLoading size="sm" />
+                    </div>
+                  ) : chatMessages.length === 0 ? (
                     <p className="text-center text-xs text-slate-400 py-8">还没有消息，打个招呼吧</p>
                   ) : (
-                    chatMessages.map((m) => {
-                      const isSelf = m.senderId === user.id;
-                      return (
-                        <div key={m.id} className={cn('flex', isSelf ? 'justify-end' : 'justify-start')}>
-                          <div
-                            className={cn(
-                              'max-w-[72%] rounded-2xl px-3 py-2 text-sm break-words',
-                              isSelf
-                                ? 'bg-blue-500 text-white rounded-br-md'
-                                : 'bg-slate-100 text-slate-800 rounded-bl-md'
-                            )}
-                          >
-                            {m.messageType === 'question-card'
-                              ? '[题目卡片]'
-                              : m.messageType === 'post-card'
-                                ? '[帖子卡片]'
-                                : m.content || '[图片]'}
-                          </div>
-                        </div>
-                      );
-                    })
+                    chatMessages.map((m) => (
+                      <div key={m.id} className={cn('flex', m.senderId === user.id ? 'justify-end' : 'justify-start')}>
+                        {renderBubble(m)}
+                      </div>
+                    ))
                   )}
                 </div>
               </ScrollArea>
-              <div className="flex items-center gap-2 border-t border-slate-100 p-3 shrink-0">
-                <input
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      void sendChat();
-                    }
-                  }}
-                  placeholder="输入消息…"
-                  className="flex-1 rounded-full bg-slate-50 border border-slate-200 px-4 py-2 text-sm outline-none focus:border-blue-300 focus:bg-white transition-colors"
-                />
-                <Button
-                  size="sm"
-                  className="rounded-full shrink-0"
-                  onClick={() => void sendChat()}
-                  disabled={sending || !chatInput.trim()}
-                >
-                  {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                </Button>
+
+              <div className="border-t border-slate-100 p-3 shrink-0">
+                {selectedImage && (
+                  <div className="relative mb-2 inline-block">
+                    <img src={selectedImage} alt="预览" className="h-16 w-16 object-cover rounded-lg border" />
+                    <button
+                      onClick={() => setSelectedImage(null)}
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon" className="shrink-0 rounded-full" onClick={() => fileInputRef.current?.click()} title="发送图片">
+                    <ImageIcon className="w-4 h-4" />
+                  </Button>
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+                  <Button variant="outline" size="icon" className="shrink-0 rounded-full" onClick={() => setShowQuestionPicker(true)} title="分享题目卡片">
+                    <FileQuestion className="w-4 h-4" />
+                  </Button>
+                  <input
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        void sendChat();
+                      }
+                    }}
+                    placeholder="输入消息…"
+                    className="flex-1 rounded-full bg-slate-50 border border-slate-200 px-4 py-2 text-sm outline-none focus:border-blue-300 focus:bg-white transition-colors"
+                  />
+                  <Button
+                    size="sm"
+                    className="rounded-full shrink-0"
+                    onClick={() => void sendChat()}
+                    disabled={sending || (!chatInput.trim() && !selectedImage)}
+                  >
+                    {sending ? <Loader2Icon /> : <Send className="w-4 h-4" />}
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (
@@ -481,9 +585,8 @@ export function NotificationCenter() {
                     <ScrollArea className="max-h-[260px]">
                       <div className="p-2">
                         {isLoading ? (
-                          <div className="flex items-center justify-center gap-2 py-8 text-gray-400">
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span className="text-sm">加载中…</span>
+                          <div className="flex items-center justify-center py-6">
+                            <UniqueLoading size="sm" />
                           </div>
                         ) : notifications.length === 0 ? (
                           <div className="text-center py-8 text-gray-400">
@@ -505,7 +608,11 @@ export function NotificationCenter() {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">好友与私信</p>
               </div>
               <ScrollArea className="flex-1 min-h-0 px-2 pb-3">
-                {rows.length === 0 ? (
+                {listLoading && rows.length === 0 ? (
+                  <div className="flex items-center justify-center py-10">
+                    <UniqueLoading size="sm" />
+                  </div>
+                ) : rows.length === 0 ? (
                   <div className="text-center py-12 text-gray-400">
                     <div className="text-3xl mb-2">💬</div>
                     <p className="text-sm">还没有好友</p>
@@ -519,6 +626,23 @@ export function NotificationCenter() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* 题目卡片选择器 */}
+      <ShareQuestionPicker
+        isOpen={showQuestionPicker}
+        onClose={() => setShowQuestionPicker(false)}
+        currentUser={user}
+        onSelect={(payload) => {
+          setShowQuestionPicker(false);
+          void sendCardMessage(payload);
+        }}
+      />
     </>
+  );
+}
+
+function Loader2Icon() {
+  return (
+    <Loader2 className="w-4 h-4 animate-spin" />
   );
 }
