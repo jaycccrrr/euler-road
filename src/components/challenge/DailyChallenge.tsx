@@ -167,6 +167,7 @@ export function DailyChallenge() {
   // 作答区状态
   const [answer, setAnswer] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const [uploadError, setUploadError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{
     success: boolean;
@@ -414,12 +415,19 @@ export function DailyChallenge() {
     const files = e.target.files;
     if (!files) return;
     const newImages: string[] = [];
+    let failedCount = 0;
     for (const file of Array.from(files).slice(0, 3)) {
       try {
         newImages.push(await compressImage(file));
       } catch (err) {
         console.error('Image upload failed:', err);
+        failedCount++;
       }
+    }
+    if (failedCount > 0) {
+      setUploadError(`${failedCount} 张图片处理失败，请换用 JPG/PNG 图片重试`);
+    } else {
+      setUploadError('');
     }
     setImages((prev) => [...prev, ...newImages].slice(0, 3));
   };
@@ -797,6 +805,9 @@ export function DailyChallenge() {
                               </label>
                             )}
                           </div>
+                          {uploadError && (
+                            <p className="w-full text-xs text-red-500">{uploadError}</p>
+                          )}
                           <div className="flex-1" />
                           <Button
                             size="sm"
