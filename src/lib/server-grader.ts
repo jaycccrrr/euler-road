@@ -94,7 +94,10 @@ export async function gradeWithVision(
     });
     clearTimeout(timer);
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn('识图判卷接口返回异常:', res.status, (await res.text()).slice(0, 200));
+      return null;
+    }
     const data = await res.json();
     const text = data?.choices?.[0]?.message?.content || '';
     const parsed = extractJson(text);
@@ -147,7 +150,10 @@ export async function gradeWithAI(
     });
     clearTimeout(timer);
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn('识图判卷接口返回异常:', res.status, (await res.text()).slice(0, 200));
+      return null;
+    }
     const data = await res.json();
     const text = data?.choices?.[0]?.message?.content || '';
     const parsed = extractJson(text);

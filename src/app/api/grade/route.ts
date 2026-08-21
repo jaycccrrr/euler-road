@@ -31,7 +31,12 @@ export async function POST(request: NextRequest) {
     );
 
     if (!result) {
-      return NextResponse.json({ aiAvailable: false });
+      return NextResponse.json({
+        aiAvailable: false,
+        reason: process.env.VISION_API_KEY
+          ? '识图/AI 判卷调用失败（详见服务端日志）'
+          : '服务端未配置识图密钥（VISION_API_KEY）',
+      });
     }
     return NextResponse.json({ aiAvailable: true, ...result });
   } catch (error) {

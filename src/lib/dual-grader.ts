@@ -112,7 +112,10 @@ async function gradeViaBackend(
     });
     if (!res.ok) return null;
     const data = await res.json();
-    if (!data.aiAvailable) return null;
+    if (!data.aiAvailable) {
+      if (data.reason) console.warn('[Dual Grader] AI 判卷不可用：', data.reason);
+      return null;
+    }
     return {
       score: data.score,
       isCorrect: data.isCorrect,
