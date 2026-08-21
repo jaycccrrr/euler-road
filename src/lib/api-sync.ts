@@ -309,24 +309,31 @@ export async function syncPostDeleteToBackend(postId: string): Promise<void> {
 
 /** 登录态下把后端帖子合并进本地（不覆盖本地已有记录；带30秒节流） */
 export async function mergePostsFromBackend(): Promise<void> {
-  if (!hasApiToken()) return;
+  // 帖子列表接口无需登录，游客/本地账号也应看到全部帖子
   const now = Date.now();
   if (now - lastPostsMergeAt < MERGE_INTERVAL) return;
   lastPostsMergeAt = now;
 
   try {
-    const res = await postsAPI.getList(1, 100);
-    for (const apiPost of res.posts || []) {
-      try {
-        // 缓存帖子作者，便于社区点击头像查看主页
-        await cacheApiUser(apiPost.user);
-        const existing = await getPostById(apiPost.id);
-        if (!existing) {
-          await createPost(mapApiPostToLocal(apiPost));
+    let page = 1;
+    for (;;) {
+      const res = await postsAPI.getList(page, 100);
+      const items = res.posts || [];
+      for (const apiPost of items) {
+        try {
+          await cacheApiUser(apiPost.user);
+          const existing = await getPostById(apiPost.id);
+          if (!existing) {
+            await createPost(mapApiPostToLocal(apiPost));
+          }
+        } catch (error) {
+          console.warn('合并帖子失败:', error);
         }
-      } catch (error) {
-        console.warn('合并帖子失败:', error);
       }
+      const totalPages = res.pagination?.totalPages ?? 1;
+      const total = res.pagination?.total ?? items.length;
+      if (page >= totalPages || items.length === 0 || total === 0) break;
+      page += 1;
     }
   } catch (error) {
     console.warn('拉取后端帖子失败:', error);

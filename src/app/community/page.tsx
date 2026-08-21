@@ -84,6 +84,7 @@ export default function CommunityPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [nextLastId, setNextLastId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -215,15 +216,16 @@ export default function CommunityPage() {
     return () => { cancelled = true; };
   }, [activeTab]);
 
-  const loadPosts = async (cursor?: string, append = false) => {
+  const loadPosts = async (cursor?: string, append = false, lastId?: string | null) => {
     if (append) setIsLoadingMore(true);
     else setIsLoading(true);
     try {
       // 先把后端（其他设备发布的）帖子合并进本地
       await mergePostsFromBackend();
 
-      const { posts: newPosts, nextCursor: newNextCursor } = await getPostsPaginated({
+      const { posts: newPosts, nextCursor: newNextCursor, nextLastId: newNextLastId } = await getPostsPaginated({
         cursor,
+        lastId: lastId ?? undefined,
         limit: 20,
         order: 'desc',
       });
@@ -245,6 +247,7 @@ export default function CommunityPage() {
         setPosts(migratedPosts);
       }
       setNextCursor(newNextCursor);
+      setNextLastId(newNextLastId);
       setHasMore(!!newNextCursor);
 
       // 获取新加载帖子用户的等级信息
@@ -278,8 +281,8 @@ export default function CommunityPage() {
 
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore || !nextCursor) return;
-    await loadPosts(nextCursor, true);
-  }, [isLoadingMore, hasMore, nextCursor]);
+    await loadPosts(nextCursor, true, nextLastId);
+  }, [isLoadingMore, hasMore, nextCursor, nextLastId]);
 
   const handleSubmitPost = async (postData: Omit<Post, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => {
     if (!user) throw new Error('未登录，无法发布');

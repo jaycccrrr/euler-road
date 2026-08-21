@@ -407,13 +407,14 @@ export async function getAllPosts(): Promise<Post[]> {
 export async function getPostsPaginated(
   options: {
     cursor?: string;
+    lastId?: string;
     limit?: number;
     moduleId?: string;
     order?: 'asc' | 'desc';
   } = {}
-): Promise<{ posts: Post[]; nextCursor: string | null }> {
-  if (typeof window === 'undefined') return { posts: [], nextCursor: null };
-  const { cursor, limit = 20, moduleId, order = 'desc' } = options;
+): Promise<{ posts: Post[]; nextCursor: string | null; nextLastId: string | null }> {
+  if (typeof window === 'undefined') return { posts: [], nextCursor: null, nextLastId: null };
+  const { cursor, lastId, limit = 20, moduleId, order = 'desc' } = options;
 
   try {
     const database = await initDB();
@@ -421,32 +422,38 @@ export async function getPostsPaginated(
     const store = tx.objectStore('posts');
     const index = store.index('by-date');
 
+    // 游标含边界，配合 lastId 跳过上一页最后一条，避免同时间戳帖子在翻页时被跳过
     const range = cursor
       ? order === 'desc'
-        ? IDBKeyRange.upperBound(cursor, true)
-        : IDBKeyRange.lowerBound(cursor, true)
+        ? IDBKeyRange.upperBound(cursor, false)
+        : IDBKeyRange.lowerBound(cursor, false)
       : undefined;
 
     const posts: Post[] = [];
     let cursorObj = await index.openCursor(range, order === 'desc' ? 'prev' : 'next');
+    let passedBoundary = !cursor || !lastId;
 
     while (cursorObj) {
       const post = cursorObj.value as Post;
+      if (!passedBoundary) {
+        if (post.id === lastId) passedBoundary = true;
+        cursorObj = await cursorObj.continue();
+        continue;
+      }
       if (!moduleId || post.moduleId === moduleId) {
         posts.push(post);
       }
       if (posts.length >= limit) {
-        return { posts, nextCursor: post.createdAt };
+        return { posts, nextCursor: post.createdAt, nextLastId: post.id };
       }
       cursorObj = await cursorObj.continue();
     }
 
-    return { posts, nextCursor: null };
+    return { posts, nextCursor: null, nextLastId: null };
   } catch {
-    return { posts: [], nextCursor: null };
+    return { posts: [], nextCursor: null, nextLastId: null };
   }
 }
-
 export async function getPostsByModule(moduleId: string): Promise<Post[]> {
   const database = await initDB();
   return database.getAllFromIndex('posts', 'by-module', moduleId);
