@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { gradeAnswerServer, sanitizeGradingImages } from '@/lib/server-grader';
 import { getAuthUserId } from '@/lib/auth';
-import { rateLimit } from '@/lib/rate-limit';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 // 判卷接口：供每日一题等前端调用，走后端 AI（识图 + DeepSeek）
 // 返回 { aiAvailable: true, score, feedback, isCorrect } 或 { aiAvailable: false }
 export async function POST(request: NextRequest) {
-  // 判卷调用外部付费 API，必须登录
+  // 判卷调用外部付费 API：有登录则按用户限流，未登录/本地账号按 IP 限流（10 次/分钟）
   const userId = getAuthUserId(request);
-  if (!userId) {
-    return NextResponse.json({ error: '未登录' }, { status: 401 });
-  }
-
-  // 限流：每用户每分钟最多 10 次（按用户而非 IP，防止换 IP 刷接口）
-  const limited = rateLimit(`grade:${userId}`, 10, 60 * 1000);
+  const limited = rateLimit(
+    userId ? `grade:${userId}` : `grade:ip:${getClientIp(request)}`,
+    10,
+    60 * 1000
+  );
   if (limited) return limited;
 
   try {

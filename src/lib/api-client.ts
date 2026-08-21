@@ -33,7 +33,9 @@ async function fetchAPI<T>(
   }
 
   if (!response.ok) {
-    throw new Error(data.error || '请求失败');
+    const err = new Error(data.error || '请求失败') as Error & { status?: number };
+    err.status = response.status;
+    throw err;
   }
 
   return data;

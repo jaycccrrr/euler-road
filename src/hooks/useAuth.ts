@@ -117,6 +117,15 @@ export const useAuth = create<AuthState>()(
 
       init: async () => {
         await initAdminUser();
+        // 校验后端令牌是否仍有效：失效（401）时清除，避免后续接口静默 401
+        if (hasApiToken()) {
+          try {
+            await authAPI.getMe();
+          } catch (tokenError) {
+            const status = (tokenError as Error & { status?: number })?.status;
+            if (status === 401) setApiToken(null);
+          }
+        }
       },
 
       setHasHydrated: (value: boolean) => {
