@@ -9,8 +9,8 @@ import {
   MessagesSquare,
   CheckCheck,
   Loader2,
-  Send,
-  Sparkles,
+  ChevronDown,
+  MessageCircle,
 } from 'lucide-react';
 import {
   Dialog,
@@ -22,7 +22,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { notificationsAPI } from '@/lib/api-client';
 import { hasApiToken } from '@/lib/api-auth';
 import { useAuth } from '@/hooks/useAuth';
-import { getChatSessions, getAllUsers, getUnreadMessageCount } from '@/lib/db';
+import { getChatSessions, getUnreadMessageCount } from '@/lib/db';
+import { getFriends } from '@/lib/api-sync';
 import { ChatDialog } from '@/components/community/ChatDialog';
 import { LazyImage } from '@/components/LazyImage';
 import { formatRelativeTime } from '@/lib/utils';
@@ -57,9 +58,6 @@ function resolveTarget(n: AppNotification): string | null {
   return null;
 }
 
-type NoticeTab = 'follow' | 'message';
-type Section = 'notice' | 'dm';
-
 interface SessionItem {
   friendId: string;
   friend: User | undefined;
@@ -68,20 +66,19 @@ interface SessionItem {
 }
 
 /**
- * Header 消息中心（通知 + 私信合并，知乎风格大画幅）：
- * 顶部「通知 / 私信」页签；通知内分「关注 / 消息」；附带好友与私信快捷入口与推荐用户。
+ * Header 消息中心：顶部互动消息横条（可展开、可跳转来源），
+ * 下方为完整好友与私信列表（互相关注即出现，含无消息好友）。
  */
 export function NotificationCenter() {
-  const { user, isAuthenticated, followUser, unfollowUser, isFollowing } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [msgUnread, setMsgUnread] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [section, setSection] = useState<Section>('notice');
-  const [tab, setTab] = useState<NoticeTab>('follow');
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showNotices, setShowNotices] = useState(false);
   const [sessions, setSessions] = useState<SessionItem[]>([]);
-  const [recommended, setRecommended] = useState<User[]>([]);
+  const [friends, setFriends] = useState<User[]>([]);
   const [chatFriend, setChatFriend] = useState<User | null>(null);
 
   const refreshUnread = useCallback(async () => {
@@ -114,36 +111,13 @@ export function NotificationCenter() {
     return () => clearInterval(interval);
   }, [isAuthenticated, user, refreshUnread, refreshMsgUnread]);
 
-  const loadSidebar = useCallback(
-    async (uid: string) => {
-      try {
-        const list = await getChatSessions(uid);
-        setSessions(
-          list.sort((a, b) => b.lastMessage.createdAt.localeCompare(a.lastMessage.createdAt))
-        );
-      } catch {
-        setSessions([]);
-      }
-      try {
-        const all = await getAllUsers();
-        const following = user?.following || [];
-        setRecommended(
-          all.filter((u) => u.id !== uid && !following.includes(u.id)).slice(0, 6)
-        );
-      } catch {
-        setRecommended([]);
-      }
-    },
-    [user]
-  );
-
   const handleOpen = async () => {
     if (!user) return;
     setIsOpen(true);
-    setSection('notice');
+    setShowNotices(false);
     if (!hasApiToken()) {
       setIsLoading(false);
-      void loadSidebar(user.id);
+      void loadLists(user.id);
       return;
     }
     setIsLoading(true);
@@ -156,8 +130,22 @@ export function NotificationCenter() {
     } finally {
       setIsLoading(false);
     }
-    void loadSidebar(user.id);
+    void loadLists(user.id);
   };
+
+  const loadLists = useCallback(async (uid: string) => {
+    try {
+      const list = await getChatSessions(uid);
+      setSessions(list.sort((a, b) => b.lastMessage.createdAt.localeCompare(a.lastMessage.createdAt)));
+    } catch {
+      setSessions([]);
+    }
+    try {
+      setFriends(await getFriends(uid));
+    } catch {
+      setFriends([]);
+    }
+  }, []);
 
   const handleMarkAllRead = async () => {
     try {
@@ -186,12 +174,23 @@ export function NotificationCenter() {
     }
   };
 
-  const followNotifications = notifications.filter((n) => n.type === 'follow');
-  const messageNotifications = notifications.filter((n) => n.type !== 'follow');
-  const followUnread = followNotifications.filter((n) => !n.isRead).length;
-  const messageUnread = messageNotifications.filter((n) => !n.isRead).length;
-  const activeList = tab === 'follow' ? followNotifications : messageNotifications;
-  const totalUnread = unreadCount + msgUnread;
+  // 好友与私信：有会话的按最近消息排序在前，无消息的互关好友排在后面
+  const sessionMap = new Map(sessions.map((s) => [s.friendId, s]));
+  const rows: { friend: User; session?: SessionItem }[] = [];
+  for (const f of friends) {
+    rows.push({ friend: f, session: sessionMap.get(f.id) });
+  }
+  for (const s of sessions) {
+    if (s.friend && !rows.some((r) => r.friend.id === s.friendId)) {
+      rows.push({ friend: s.friend, session: s });
+    }
+  }
+  rows.sort((a, b) => {
+    if (a.session && b.session) return b.session.lastMessage.createdAt.localeCompare(a.session.lastMessage.createdAt);
+    if (a.session) return -1;
+    if (b.session) return 1;
+    return a.friend.nickname.localeCompare(b.friend.nickname);
+  });
 
   const renderNotification = (n: AppNotification) => {
     const meta = TYPE_META[n.type] || TYPE_META.post_like;
@@ -230,51 +229,51 @@ export function NotificationCenter() {
     );
   };
 
-  const renderSession = (s: SessionItem, large = false) => (
+  const renderRow = (friend: User, session?: SessionItem) => (
     <button
-      key={s.friendId}
+      key={friend.id}
       onClick={() => {
-        if (!s.friend) return;
-        setChatFriend(s.friend);
+        setChatFriend(friend);
         setIsOpen(false);
       }}
-      className={cn(
-        'w-full flex items-center gap-3 rounded-lg hover:bg-slate-50 transition-colors text-left',
-        large ? 'p-3' : 'px-2 py-2'
-      )}
+      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors text-left"
     >
-      <div className={cn('relative shrink-0', large ? '' : '')}>
-        <div className={cn('rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center overflow-hidden', large ? 'w-11 h-11' : 'w-9 h-9')}>
-          {s.friend?.avatar?.startsWith('data:') || s.friend?.avatar?.startsWith('http')
-            ? <LazyImage src={s.friend!.avatar} alt="" className="w-full h-full object-cover" />
-            : (s.friend?.avatar || '👤')}
+      <div className="relative shrink-0">
+        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center overflow-hidden">
+          {friend.avatar?.startsWith('data:') || friend.avatar?.startsWith('http')
+            ? <LazyImage src={friend.avatar} alt="" className="w-full h-full object-cover" />
+            : (friend.avatar || '👤')}
         </div>
-        {s.unreadCount > 0 && (
+        {session && session.unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-            {s.unreadCount > 99 ? '99+' : s.unreadCount}
+            {session.unreadCount > 99 ? '99+' : session.unreadCount}
           </span>
         )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-slate-800 truncate">
-            {s.friend?.nickname || '未知用户'}
-          </span>
-          <span className="text-[10px] text-gray-400 shrink-0 ml-2">
-            {formatRelativeTime(s.lastMessage.createdAt)}
-          </span>
+          <span className="text-sm font-medium text-slate-800 truncate">{friend.nickname}</span>
+          {session && (
+            <span className="text-[10px] text-gray-400 shrink-0 ml-2">
+              {formatRelativeTime(session.lastMessage.createdAt)}
+            </span>
+          )}
         </div>
         <p className="text-xs text-slate-400 truncate mt-0.5">
-          {s.lastMessage.messageType === 'question-card'
-            ? '[题目卡片]'
-            : s.lastMessage.messageType === 'post-card'
-              ? '[帖子卡片]'
-              : s.lastMessage.content || '[图片]'}
+          {session
+            ? session.lastMessage.messageType === 'question-card'
+              ? '[题目卡片]'
+              : session.lastMessage.messageType === 'post-card'
+                ? '[帖子卡片]'
+                : session.lastMessage.content || '[图片]'
+            : '互关成功，打个招呼吧'}
         </p>
       </div>
-      <Send className="w-3.5 h-3.5 text-slate-300 shrink-0" />
+      <MessageCircle className="w-4 h-4 text-slate-300 shrink-0" />
     </button>
   );
+
+  const totalUnread = unreadCount + msgUnread;
 
   if (!isAuthenticated || !user) return null;
 
@@ -297,7 +296,7 @@ export function NotificationCenter() {
         <DialogContent className="!w-[94vw] !max-w-3xl !h-[85vh] p-0 overflow-hidden flex flex-col rounded-2xl gap-0">
           <DialogHeader className="px-4 py-3 border-b shrink-0 flex-row items-center justify-between space-y-0">
             <DialogTitle className="text-base">消息中心</DialogTitle>
-            {section === 'notice' && unreadCount > 0 && (
+            {unreadCount > 0 && (
               <button
                 onClick={() => void handleMarkAllRead()}
                 className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
@@ -308,149 +307,69 @@ export function NotificationCenter() {
             )}
           </DialogHeader>
 
-          {/* 一级页签：通知 / 私信 */}
-          <div className="flex items-center gap-1 px-4 pt-3 shrink-0">
-            {(['notice', 'dm'] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => setSection(s)}
-                className={cn(
-                  'px-4 py-1.5 rounded-full text-sm font-medium transition-all',
-                  section === s
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+          {/* 互动消息横条 */}
+          <div className="px-4 pt-3 shrink-0">
+            <button
+              onClick={() => setShowNotices((v) => !v)}
+              className="w-full flex items-center justify-between rounded-xl bg-blue-50 border border-blue-100 px-4 py-2.5 transition-colors hover:bg-blue-100/70"
+            >
+              <span className="flex items-center gap-2 text-sm font-medium text-blue-700">
+                <Bell className="w-4 h-4" />
+                互动消息
+                {unreadCount > 0 && (
+                  <span className="min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
                 )}
-              >
-                {s === 'notice' ? '通知' : '私信'}
-                {s === 'notice'
-                  ? unreadCount > 0 && <span className="ml-1 text-xs text-red-500">{unreadCount}</span>
-                  : msgUnread > 0 && <span className="ml-1 text-xs text-red-500">{msgUnread}</span>}
-              </button>
-            ))}
-          </div>
+              </span>
+              <ChevronDown className={cn('w-4 h-4 text-blue-400 transition-transform', showNotices && 'rotate-180')} />
+            </button>
 
-          {section === 'notice' ? (
-            <div className="flex-1 min-h-0 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
-              {/* 左：关注 / 消息通知 */}
-              <div className="md:w-[58%] flex flex-col min-h-0 md:border-r border-slate-100">
-                <div className="flex items-center gap-1 px-3 pt-2 shrink-0">
-                  {(['follow', 'message'] as const).map((k) => (
-                    <button
-                      key={k}
-                      onClick={() => setTab(k)}
-                      className={cn(
-                        'px-4 py-1.5 rounded-full text-sm font-medium transition-all',
-                        tab === k
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-                      )}
-                    >
-                      {k === 'follow' ? '关注' : '消息'}
-                      {k === 'follow'
-                        ? followUnread > 0 && <span className="ml-1 text-xs text-red-500">{followUnread}</span>
-                        : messageUnread > 0 && <span className="ml-1 text-xs text-red-500">{messageUnread}</span>}
-                    </button>
-                  ))}
-                </div>
-                <ScrollArea className="flex-1 min-h-0">
+            {showNotices && (
+              <div className="mt-2 rounded-xl border border-blue-100 bg-white overflow-hidden">
+                <ScrollArea className="max-h-[260px]">
                   <div className="p-2">
                     {isLoading ? (
-                      <div className="flex items-center justify-center gap-2 py-10 text-gray-400">
+                      <div className="flex items-center justify-center gap-2 py-8 text-gray-400">
                         <Loader2 className="w-4 h-4 animate-spin" />
                         <span className="text-sm">加载中…</span>
                       </div>
-                    ) : activeList.length === 0 ? (
-                      <div className="text-center py-10 text-gray-400">
+                    ) : notifications.length === 0 ? (
+                      <div className="text-center py-8 text-gray-400">
                         <div className="text-3xl mb-2">🔔</div>
-                        <p className="text-sm">{tab === 'follow' ? '暂无关注通知' : '暂无消息通知'}</p>
-                        <p className="text-xs mt-1">有人关注、点赞或评论时会在这里提醒</p>
+                        <p className="text-sm">暂无互动消息</p>
+                        <p className="text-xs mt-1">有人点赞、评论或关注你时会在这里提醒</p>
                       </div>
                     ) : (
-                      activeList.map(renderNotification)
+                      notifications.map(renderNotification)
                     )}
                   </div>
                 </ScrollArea>
               </div>
+            )}
+          </div>
 
-              {/* 右：好友与私信 + 推荐用户 */}
-              <div className="md:w-[42%] flex flex-col min-h-0">
-                <div className="px-4 pt-3 pb-1 shrink-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    好友与私信
-                  </p>
-                </div>
-                <div className="px-2">
-                  {sessions.length === 0 ? (
-                    <p className="text-xs text-slate-400 px-2 py-2">暂无会话，与好友互相关注后即可私信</p>
-                  ) : (
-                    sessions.slice(0, 5).map((s) => renderSession(s, false))
-                  )}
-                </div>
-
-                <div className="px-4 pt-3 pb-1 shrink-0 border-t border-slate-100">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" />
-                    推荐用户
-                  </p>
-                </div>
-                <div className="px-2 pb-3">
-                  {recommended.length === 0 ? (
-                    <p className="text-xs text-slate-400 px-2 py-2">暂无推荐</p>
-                  ) : (
-                    recommended.map((u) => {
-                      const following = isFollowing(u.id);
-                      return (
-                        <div key={u.id} className="w-full flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-slate-50 transition-colors">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center overflow-hidden shrink-0">
-                            {u.avatar?.startsWith('data:') || u.avatar?.startsWith('http')
-                              ? <LazyImage src={u.avatar} alt="" className="w-full h-full object-cover" />
-                              : (u.avatar || '👤')}
-                          </div>
-                          <span className="flex-1 min-w-0 text-sm text-slate-700 truncate">{u.nickname}</span>
-                          <button
-                            onClick={() => {
-                              if (following) {
-                                void unfollowUser(u.id);
-                              } else {
-                                void followUser(u.id);
-                              }
-                            }}
-                            className={cn(
-                              'shrink-0 text-xs px-2.5 py-1 rounded-full transition-colors',
-                              following
-                                ? 'bg-slate-100 text-slate-500'
-                                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-                            )}
-                          >
-                            {following ? '已关注' : '关注'}
-                          </button>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
+          {/* 好友与私信列表 */}
+          <div className="px-4 pt-3 pb-1 shrink-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              好友与私信
+              <span className="ml-2 normal-case text-slate-300">互关即出现</span>
+            </p>
+          </div>
+          <ScrollArea className="flex-1 min-h-0 px-2 pb-3">
+            {rows.length === 0 ? (
+              <div className="text-center py-12 text-gray-400">
+                <div className="text-3xl mb-2">💬</div>
+                <p className="text-sm">还没有好友</p>
+                <p className="text-xs mt-1">在社区与好友互相关注后即可出现在这里</p>
               </div>
-            </div>
-          ) : (
-            /* 私信：会话列表 */
-            <ScrollArea className="flex-1 min-h-0">
-              <div className="p-3">
-                {sessions.length === 0 ? (
-                  <div className="text-center py-12 text-gray-400">
-                    <div className="text-3xl mb-2">💬</div>
-                    <p className="text-sm">暂无私信</p>
-                    <p className="text-xs mt-1">在社区与好友互相关注后即可聊天</p>
-                  </div>
-                ) : (
-                  sessions.map((s) => renderSession(s, true))
-                )}
-              </div>
-            </ScrollArea>
-          )}
+            ) : (
+              rows.map((r) => renderRow(r.friend, r.session))
+            )}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
 
-      {/* 聊天窗口 */}
       {chatFriend && (
         <ChatDialog
           isOpen={!!chatFriend}

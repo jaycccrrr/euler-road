@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User, ModuleCategory } from '@/types';
-import { getUserByNickname, getUserById, updateUser, createUser, initAdminUser, updateUserPostsAvatar, updateUserCommentsAvatar } from '@/lib/db';
+import { User, ModuleCategory, Message } from '@/types';
+import { getUserByNickname, getUserById, updateUser, createUser, initAdminUser, updateUserPostsAvatar, updateUserCommentsAvatar, createMessage, areFriends } from '@/lib/db';
 import { hashPassword, comparePassword, legacyComparePassword, isBcryptHash, generateId, formatLocalDate } from '@/lib/utils';
 import { initModuleData, addExperience, getPrimaryTitle, getPrimaryFrame, UserModuleData, Province, PROVINCES } from '@/lib/gamification';
 import { authAPI, usersAPI } from '@/lib/api-client';
 import { apiUserToLocalUser, hasApiToken, setApiToken, syncUserToApi, apiErrorMessage, mergeBackendAndLocal } from '@/lib/api-auth';
-import { mergeAnswersFromBackend } from '@/lib/api-sync';
+import { mergeAnswersFromBackend, syncMessageToBackend } from '@/lib/api-sync';
 
 interface AuthState {
   user: User | null;
@@ -467,12 +467,18 @@ export const useAuth = create<AuthState>()(
         const following = user.following || [];
         if (following.includes(userId)) return;
 
-        // 后端会话下优先走后端关注关系（先查询避免重复/反向切换）
+        // 后端会话下优先走后端关注关系，并检测是否因此达成互关（成为好友）
+        let becameFriends = false;
         if (hasApiToken()) {
           try {
-            const state = await usersAPI.isFollowing(userId);
-            if (!state.following) {
-              await usersAPI.follow(userId);
+            const before = await usersAPI.friendsStatus(user.id, userId);
+            if (!before.areFriends) {
+              const state = await usersAPI.isFollowing(userId);
+              if (!state.following) {
+                await usersAPI.follow(userId);
+              }
+              const after = await usersAPI.friendsStatus(user.id, userId);
+              becameFriends = !!after.areFriends;
             }
           } catch (error) {
             console.warn('后端关注失败，回退本地:', error);
@@ -482,6 +488,35 @@ export const useAuth = create<AuthState>()(
         const updatedUser = { ...user, following: [...following, userId] };
         await updateUser(updatedUser);
         set({ user: updatedUser });
+
+        // 本地回退：无后端会话时用本地互关判定
+        if (!becameFriends && !hasApiToken()) {
+          try {
+            becameFriends = await areFriends(user.id, userId);
+          } catch {
+            becameFriends = false;
+          }
+        }
+
+        // 互关达成：由后关注的一方自动发送欢迎消息
+        if (becameFriends) {
+          try {
+            const welcomeMsg: Message = {
+              id: generateId(),
+              senderId: user.id,
+              receiverId: userId,
+              content: '我们已经是好友啦，欢迎一起交流！',
+              images: [],
+              createdAt: new Date().toISOString(),
+              isRead: false,
+              messageType: 'text',
+            };
+            await createMessage(welcomeMsg);
+            void syncMessageToBackend(welcomeMsg);
+          } catch (error) {
+            console.warn('发送好友欢迎消息失败:', error);
+          }
+        }
       },
 
       // 取消关注用户

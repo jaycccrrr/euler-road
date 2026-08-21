@@ -157,7 +157,17 @@ export const usersAPI = {
     }),
   isFollowing: (id: string) =>
     fetchAPI<{ following: boolean }>(`/api/users/${id}/follow`),
+  friendsStatus: (a: string, b: string) =>
+    fetchAPI<{ following: boolean; followedBy: boolean; areFriends: boolean }>(
+      `/api/friends/status?userIdA=${encodeURIComponent(a)}&userIdB=${encodeURIComponent(b)}`
+    ),
+  followingList: (id: string) =>
+    fetchAPI<any[]>(`/api/users/${id}/following`),
+  followersList: (id: string) =>
+    fetchAPI<any[]>(`/api/users/${id}/followers`),
 };
+
+
 
 // 评论相关
 export const commentsAPI = {

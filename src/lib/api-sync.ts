@@ -16,6 +16,31 @@ export async function getPostWithBackendFallback(id: string): Promise<Post | nul
   return null;
 }
 
+export async function getFriends(userId: string): Promise<User[]> {
+  // 后端优先：互相关注的好友（跨设备一致）；失败回退本地
+  if (hasApiToken()) {
+    try {
+      const [following, followers] = await Promise.all([
+        usersAPI.followingList(userId),
+        usersAPI.followersList(userId),
+      ]);
+      const followerIds = new Set((followers || []).map((u: any) => u.id));
+      const ids = (following || []).filter((u: any) => followerIds.has(u.id)).map((u: any) => u.id);
+      const result: User[] = [];
+      for (const id of ids) {
+        const cached = await fetchAndCacheUser(id);
+        if (cached) result.push(cached);
+      }
+      return result;
+    } catch (error) {
+      console.warn('获取好友列表失败，回退本地:', error);
+    }
+  }
+  const [following, followers] = await Promise.all([getFollowing(userId), getFollowers(userId)]);
+  const followerIds = new Set(followers.map((u) => u.id));
+  return following.filter((u) => followerIds.has(u.id));
+}
+
 // 答题记录与社区帖子的后端同步（Supabase，最佳努力：失败不影响本地）
 import { answersAPI, postsAPI } from '@/lib/api-client';
 import {
@@ -40,8 +65,10 @@ import {
   createMessage,
   createDiscussionMessage,
   getDiscussionMessagesByQuestion,
+  getFollowing,
+  getFollowers,
 } from '@/lib/db';
-import type { AnswerRecord, AnswerComment, Comment, DiscussionMessage, DiscussionReply, Message, Post } from '@/types';
+import type { AnswerRecord, AnswerComment, Comment, DiscussionMessage, DiscussionReply, Message, Post, User } from '@/types';
 
 let lastPostsMergeAt = 0;
 let lastAnswersMergeAt = 0;
