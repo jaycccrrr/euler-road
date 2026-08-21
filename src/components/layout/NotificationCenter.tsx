@@ -145,6 +145,7 @@ export function NotificationCenter() {
 
   const loadLists = useCallback(async (uid: string) => {
     setListLoading(true);
+    const listStartedAt = Date.now();
     try {
       const list = await getChatSessions(uid);
       setSessions(list.sort((a, b) => b.lastMessage.createdAt.localeCompare(a.lastMessage.createdAt)));
@@ -156,7 +157,9 @@ export function NotificationCenter() {
     } catch {
       setFriends([]);
     } finally {
-      setListLoading(false);
+      // 加载动画至少展示 350ms，避免“暂无好友”闪烁
+      const wait = Math.max(0, 350 - (Date.now() - listStartedAt));
+      setTimeout(() => setListLoading(false), wait);
     }
   }, []);
 
@@ -189,6 +192,7 @@ export function NotificationCenter() {
     if (!user || !chatFriend) return;
     let cancelled = false;
     setChatLoading(true);
+    const chatStartedAt = Date.now();
     void (async () => {
       try {
         const msgs = await getMessagesBetweenUsers(user.id, chatFriend.id);
@@ -199,7 +203,10 @@ export function NotificationCenter() {
       } catch {
         // 忽略
       } finally {
-        if (!cancelled) setChatLoading(false);
+        if (!cancelled) {
+          const wait = Math.max(0, 350 - (Date.now() - chatStartedAt));
+          setTimeout(() => setChatLoading(false), wait);
+        }
       }
     })();
     return () => {
