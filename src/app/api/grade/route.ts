@@ -40,8 +40,12 @@ export async function POST(request: NextRequest) {
       });
     }
     return NextResponse.json({ aiAvailable: true, imageCount: cleanImages.length, visionUsed: true, ...result });
-  } catch (error) {
+    } catch (error) {
     console.error('判卷接口失败:', error);
+    const msg = error instanceof Error ? error.message : '';
+    if (msg) {
+      return NextResponse.json({ aiAvailable: false, reason: msg });
+    }
     return NextResponse.json({ aiAvailable: false }, { status: 500 });
   }
 }

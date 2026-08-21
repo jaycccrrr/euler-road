@@ -52,7 +52,7 @@ export async function gradeWithVision(
   question: { title: string; content: string; answer?: string | null },
   content: string,
   images: string[]
-): Promise<GradingResult | null> {
+): Promise<GradingResult | { error: string } | null> {
   const apiKey = process.env.VISION_API_KEY;
   if (!apiKey || !images?.length) return null;
 
@@ -95,8 +95,12 @@ export async function gradeWithVision(
     clearTimeout(timer);
 
     if (!res.ok) {
-      console.warn('识图判卷接口返回异常:', res.status, (await res.text()).slice(0, 200));
-      return null;
+      const statusText = await res.text();
+      console.warn('识图判卷接口返回异常:', res.status, statusText.slice(0, 200));
+      if (/arrear|overdue|balance|quota|欠费|余额/i.test(statusText)) {
+        return { error: '识图服务欠费或额度不足，请联系管理员充值后重试' };
+      }
+      return { error: '识图接口返回 ' + res.status };
     }
     const data = await res.json();
     const text = data?.choices?.[0]?.message?.content || '';
@@ -108,8 +112,9 @@ export async function gradeWithVision(
       isCorrect: typeof parsed.isCorrect === 'boolean' ? parsed.isCorrect : score >= 80,
     };
   } catch (error) {
-    console.warn('识图判卷失败，降级到文本判卷:', error);
-    return null;
+    console.warn('识图判卷调用失败:', error);
+    const aborted = error instanceof Error && error.name === 'AbortError';
+    return { error: aborted ? '识图请求超时' : '识图请求失败' };
   }
 }
 
@@ -151,7 +156,7 @@ export async function gradeWithAI(
     clearTimeout(timer);
 
     if (!res.ok) {
-      console.warn('识图判卷接口返回异常:', res.status, (await res.text()).slice(0, 200));
+      console.warn('文本 AI 判卷接口返回异常:', res.status);
       return null;
     }
     const data = await res.json();
@@ -169,16 +174,17 @@ export async function gradeWithAI(
   }
 }
 
-// 完整判卷链路：识图 → 文本 AI → null（调用方自行降级）
+// 完整判卷链路：有图必走识图；识图不可用/失败时抛错由接口返回原因，避免纯文本 AI 无视图片硬批改
 export async function gradeAnswerServer(
   question: { title: string; content: string; answer?: string | null },
   content: string,
   images: string[]
 ): Promise<GradingResult | null> {
-  // 有图片时只走识图判卷；识图不可用/失败时返回 null，
-  // 避免纯文本 AI 无视图片硬批改，产生误导性反馈
   if (images && images.length > 0) {
-    return gradeWithVision(question, content, images);
+    const vision = await gradeWithVision(question, content, images);
+    if (!vision) return null;
+    if ('error' in vision) throw new Error(vision.error);
+    return vision;
   }
   return gradeWithAI(question, content);
 }
