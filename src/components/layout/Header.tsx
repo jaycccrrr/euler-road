@@ -151,7 +151,6 @@ export default function Header() {
             </>
           ) : (
             <div className="flex items-center gap-2">
-          <FeedbackButton />
               <Link href="/login/">
                 <Button variant="ghost" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
                   登录

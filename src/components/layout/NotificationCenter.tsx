@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Bell, Heart, MessageSquare, UserPlus, MessagesSquare, CheckCheck } from 'lucide-react';
+import { Bell, Heart, MessageSquare, UserPlus, MessagesSquare, CheckCheck, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -53,6 +53,7 @@ export function NotificationCenter() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const refreshUnread = useCallback(async () => {
     if (!user || !hasApiToken()) return;
@@ -79,12 +80,15 @@ export function NotificationCenter() {
     if (!user) return;
     setIsOpen(true);
     if (!hasApiToken()) return;
+    setIsLoading(true);
     try {
       const data = await notificationsAPI.list(30);
       setNotifications(data.notifications);
       setUnreadCount(data.unreadCount);
     } catch (error) {
       console.error('Failed to load notifications:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -133,7 +137,7 @@ export function NotificationCenter() {
       </button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="!w-[400px] !max-h-[480px] p-0 overflow-hidden flex flex-col">
+        <DialogContent className="!w-[min(400px,calc(100vw-2rem))] !max-h-[480px] p-0 overflow-hidden flex flex-col">
           <DialogHeader className="px-4 py-3 border-b shrink-0 flex-row items-center justify-between space-y-0">
             <DialogTitle className="text-base">通知</DialogTitle>
             {unreadCount > 0 && (
@@ -148,7 +152,12 @@ export function NotificationCenter() {
           </DialogHeader>
           <ScrollArea className="flex-1">
             <div className="p-2">
-              {notifications.length === 0 ? (
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2 py-10 text-gray-400">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-sm">加载中…</span>
+                </div>
+              ) : notifications.length === 0 ? (
                 <div className="text-center py-10 text-gray-400">
                   <div className="text-3xl mb-2">🔔</div>
                   <p className="text-sm">暂无通知</p>

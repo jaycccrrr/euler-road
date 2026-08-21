@@ -1,6 +1,7 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { User, DailyQuestion, AnswerRecord, Post, Comment, Message, Note, CustomLesson, DiscussionMessage } from '@/types';
 import { initModuleData } from '@/lib/gamification';
+import { hasApiToken } from './api-auth';
 import { hashPassword } from '@/lib/utils';
 
 interface EulerDBSchema extends DBSchema {
@@ -744,6 +745,20 @@ export async function getFollowing(userId: string): Promise<User[]> {
 
 // 检查两个用户是否为好友（互相关注）
 export async function areFriends(userId1: string, userId2: string): Promise<boolean> {
+  // 后端优先：跨设备互相关注也能正确判定；失败回退本地
+  if (hasApiToken()) {
+    try {
+      const res = await fetch(
+        '/api/friends/status?userIdA=' + encodeURIComponent(userId1) + '&userIdB=' + encodeURIComponent(userId2)
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof data.areFriends === 'boolean') return data.areFriends;
+      }
+    } catch {
+      // 网络异常回退本地
+    }
+  }
   const database = await initDB();
   const [user1, user2] = await Promise.all([
     database.get('users', userId1),
