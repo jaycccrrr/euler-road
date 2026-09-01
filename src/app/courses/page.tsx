@@ -1,6 +1,6 @@
 import Header from '@/components/layout/Header';
 import CourseSearch from '@/components/search/CourseSearch';
-import { KNOWLEDGE_MODULES } from '@/data/modules';
+import { KNOWLEDGE_MODULES, getModuleSoftStyle } from '@/data/modules';
 import { staticAdvancedTopics } from '@/data/highschoolStatic';
 import Link from 'next/link';
 import { ArrowRight, BookOpen, Library } from 'lucide-react';
@@ -94,14 +94,7 @@ interface ModuleCardProps {
 }
 
 function ModuleCard({ module }: ModuleCardProps) {
-  const softColors: Record<string, { bg: string; text: string; ring: string }> = {
-    'from-blue-400 to-blue-600': { bg: 'bg-blue-50', text: 'text-blue-600', ring: 'hover:border-blue-200' },
-    'from-indigo-400 to-indigo-600': { bg: 'bg-indigo-50', text: 'text-indigo-600', ring: 'hover:border-indigo-200' },
-    'from-violet-400 to-violet-600': { bg: 'bg-violet-50', text: 'text-violet-600', ring: 'hover:border-violet-200' },
-    'from-pink-400 to-rose-500': { bg: 'bg-rose-50', text: 'text-rose-600', ring: 'hover:border-rose-200' },
-    'from-emerald-400 to-emerald-600': { bg: 'bg-emerald-50', text: 'text-emerald-600', ring: 'hover:border-emerald-200' },
-  };
-  const s = softColors[module.color] || { bg: 'bg-slate-50', text: 'text-slate-600', ring: 'hover:border-slate-200' };
+  const s = getModuleSoftStyle(module.color);
 
   return (
     <Link href={`/module/${module.id}/`} className="group block h-full">

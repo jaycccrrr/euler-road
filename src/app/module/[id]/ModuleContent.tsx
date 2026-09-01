@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import Header from '@/components/layout/Header';
 import { KnowledgeModule, Topic } from '@/types';
-import { KNOWLEDGE_MODULES } from '@/data/modules';
+import { KNOWLEDGE_MODULES, getModuleSoftStyle } from '@/data/modules';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,6 +53,8 @@ export default function ModuleContent({ module: initialModule, moduleId }: Modul
     );
   }
 
+  const soft = getModuleSoftStyle(mod.color);
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -67,18 +69,18 @@ export default function ModuleContent({ module: initialModule, moduleId }: Modul
         </Link>
 
         {/* Module Header */}
-        <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${mod.color} p-8 md:p-12 mb-8`}>
-          <div className="absolute inset-0 bg-pattern-dots opacity-20" />
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-b from-slate-50 via-white to-white p-8 md:p-12 mb-8 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <div className="pointer-events-none absolute inset-0 bg-pattern-dots opacity-30" />
+          <div className={`pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-gradient-to-br ${mod.color} opacity-15 blur-3xl`} />
+          <div className="pointer-events-none absolute -bottom-28 -left-20 h-56 w-56 rounded-full bg-gradient-to-tr from-blue-200/30 via-indigo-200/20 to-transparent blur-3xl" />
           <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
-            <div className="w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center text-5xl backdrop-blur-sm">
+            <div className={`w-24 h-24 ${soft.bg} rounded-2xl flex items-center justify-center text-5xl shadow-sm`}>
               {mod.icon}
             </div>
-            <div className="text-center md:text-left text-white">
-              <Badge className="bg-white/20 text-white mb-2">
-                数学
-              </Badge>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">{mod.name}</h1>
-              <p className="text-white/90 max-w-xl">{mod.description}</p>
+            <div className="text-center md:text-left">
+              <Badge className="border border-slate-200 bg-white/80 text-slate-500 shadow-sm mb-2">数学</Badge>
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-2">{mod.name}</h1>
+              <p className="text-slate-500 max-w-xl leading-relaxed">{mod.description}</p>
             </div>
           </div>
         </div>

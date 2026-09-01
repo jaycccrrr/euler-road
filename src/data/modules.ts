@@ -1208,3 +1208,17 @@ export function getModulesByCategory(category: string): KnowledgeModule[] {
 export const MODULE_CATEGORIES = {
   math: { name: '数学', color: 'bg-blue-100 text-blue-700' },
 };
+
+/** 模块柔和配色（与知识库首页课程卡片一致） */
+export const MODULE_SOFT_COLORS: Record<string, { bg: string; text: string; ring: string }> = {
+  'from-blue-400 to-blue-600': { bg: 'bg-blue-50', text: 'text-blue-600', ring: 'hover:border-blue-200' },
+  'from-indigo-400 to-indigo-600': { bg: 'bg-indigo-50', text: 'text-indigo-600', ring: 'hover:border-indigo-200' },
+  'from-violet-400 to-violet-600': { bg: 'bg-violet-50', text: 'text-violet-600', ring: 'hover:border-violet-200' },
+  'from-pink-400 to-rose-500': { bg: 'bg-rose-50', text: 'text-rose-600', ring: 'hover:border-rose-200' },
+  'from-emerald-400 to-emerald-600': { bg: 'bg-emerald-50', text: 'text-emerald-600', ring: 'hover:border-emerald-200' },
+};
+
+/** 根据模块主色返回对应的柔和样式（未知配色回退灰色） */
+export function getModuleSoftStyle(color?: string) {
+  return MODULE_SOFT_COLORS[color || ''] || { bg: 'bg-slate-50', text: 'text-slate-600', ring: 'hover:border-slate-200' };
+}
