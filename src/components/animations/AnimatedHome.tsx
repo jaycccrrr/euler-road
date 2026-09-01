@@ -15,6 +15,10 @@ import { EulerWordmark } from '@/components/home/EulerWordmark';
 import { ScrollWorld } from '@/components/home/ScrollWorld';
 import { LandingSections } from '@/components/home/LandingSections';
 import { TiltCard } from '@/components/home/TiltCard';
+import { MathRenderer } from '@/components/math/MathRenderer';
+import { getDailyQuestionByDate } from '@/lib/db';
+import { getQuestionDateString } from '@/lib/ai-question-generator';
+import { getDailyQuestionsByDate } from '@/lib/daily-question-bank';
 import Link from 'next/link';
 import { ArrowRight, Play, ChevronDown } from 'lucide-react';
 
@@ -22,50 +26,41 @@ import { ArrowRight, Play, ChevronDown } from 'lucide-react';
 const SPRING_GENTLE = { type: 'spring', stiffness: 100, damping: 22 } as const;
 const SPRING_SNAPPY = { type: 'spring', stiffness: 220, damping: 24 } as const;
 
-const MODULES = [
-  {
-    name: '高中数学',
-    en: 'High School',
-    href: '/module/highschool-math/',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-        <path d="M12 3L3 20h18L12 3z" />
-        <circle cx="12" cy="14" r="2" />
-      </svg>
-    ),
-  },
-  {
-    name: '高等数学',
-    en: 'Calculus',
-    href: '/module/advanced-math/',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-        <path d="M6 4v16M6 8c2-3 6-3 6 0s-4 5-6 8" />
-        <path d="M14 4h6M17 4v16" />
-      </svg>
-    ),
-  },
-  {
-    name: '线性代数',
-    en: 'Linear Algebra',
-    href: '/module/linear-algebra/',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-        <rect x="4" y="4" width="16" height="16" rx="1" />
-        <line x1="4" y1="10" x2="20" y2="10" />
-        <line x1="4" y1="16" x2="20" y2="16" />
-        <line x1="10" y1="4" x2="10" y2="20" />
-        <line x1="16" y1="4" x2="16" y2="20" />
-      </svg>
-    ),
-  },
-];
-
 export function AnimatedHome() {
   const { phase, isRecentLogin } = useAnimation();
   const heroRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const [todayPreview, setTodayPreview] = useState<string | null>(null);
   const reduce = useReducedMotion();
+
+  // 今日挑战预览：与 /daily 同源（高中数学今日题），题目文字保持同步。
+  // 本地已有今日题则直接显示；否则用按日期稳定的题库题目做预览，不触发 AI 生成，保证首页秒开。
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const today = getQuestionDateString();
+        const q = await getDailyQuestionByDate(today, 'highschool-math');
+        if (q) {
+          if (!cancelled) {
+            const firstLine = q.content.split('\n').map((s) => s.trim()).find(Boolean) || q.title;
+            setTodayPreview(firstLine);
+          }
+          return;
+        }
+        const bank = getDailyQuestionsByDate(today).find((x) => x.moduleId === 'highschool-math');
+        if (bank && !cancelled) {
+          const firstLine = bank.content.split('\n').map((s) => s.trim()).find(Boolean) || bank.title;
+          setTodayPreview(firstLine);
+        }
+      } catch {
+        // 加载失败时保持占位文案
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // 由 phase 派生入场延迟，替代 effect + setState
   // 'home'（首次进入，紧随过渡动画）延迟揭示；'complete'（已完成引导）立即呈现
@@ -241,32 +236,6 @@ export function AnimatedHome() {
               </Link>
             </motion.div>
 
-            {/* 模块导航 —— 3D 倾斜玻璃卡 */}
-            <motion.div
-              className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ ...SPRING_GENTLE, delay: base + 1.35 }}
-            >
-              {MODULES.map((mod) => (
-                <Link key={mod.name} href={mod.href} className="group w-full sm:w-auto">
-                  <TiltCard
-                    className="flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-white/50 border border-[#bfdbfe]/50 backdrop-blur-md shadow-[0_8px_24px_-10px_rgba(59,130,246,0.25)] hover:border-[#3b82f6]/60 transition-colors"
-                    intensity={10}
-                  >
-                    <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#60a5fa]/15 to-[#3b82f6]/15 border border-[#bfdbfe]/60 flex items-center justify-center text-[#3b82f6] group-hover:text-[#2563eb] transition-colors">
-                      {mod.icon}
-                    </span>
-                    <span className="text-left">
-                      <span className="block text-sm font-semibold text-[#1e293b]">{mod.name}</span>
-                      <span className="block text-[11px] text-slate-400 tracking-wide">{mod.en}</span>
-                    </span>
-                    <ArrowRight className="w-4 h-4 ml-2 text-slate-300 group-hover:text-[#3b82f6] group-hover:translate-x-0.5 transition-all" />
-                  </TiltCard>
-                </Link>
-              ))}
-            </motion.div>
-
             {/* 今日挑战预览卡片 */}
             <motion.div
               className="mt-6"
@@ -303,9 +272,15 @@ export function AnimatedHome() {
                           ))}
                         </span>
                       </div>
-                      <p className="text-sm font-medium text-[#1e293b] truncate mt-0.5">
-                        求函数 f(x) = x³ - 3x² + 2 的极值点
-                      </p>
+                      {todayPreview ? (
+                        <MathRenderer className="!text-sm !leading-snug !text-[#1e293b] font-medium line-clamp-2 mt-0.5">
+                          {todayPreview}
+                        </MathRenderer>
+                      ) : (
+                        <p className="text-sm font-medium text-slate-400 mt-0.5">
+                          正在获取今日题目…
+                        </p>
+                      )}
                     </div>
                     <ArrowRight className="w-4 h-4 text-[#3b82f6] group-hover:translate-x-1 transition-transform flex-shrink-0" />
                   </div>
