@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import Header from '@/components/layout/Header';
 import { KnowledgeModule, Topic } from '@/types';
-import { KNOWLEDGE_MODULES, getModuleSoftStyle } from '@/data/modules';
+import { KNOWLEDGE_MODULES } from '@/data/modules';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,8 +53,6 @@ export default function ModuleContent({ module: initialModule, moduleId }: Modul
     );
   }
 
-  const soft = getModuleSoftStyle(mod.color);
-
   return (
     <div className="min-h-screen">
       <Header />
@@ -70,13 +68,11 @@ export default function ModuleContent({ module: initialModule, moduleId }: Modul
 
         {/* Module Header */}
         <div className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-b from-slate-50 via-white to-white p-8 md:p-12 mb-8 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <div className="pointer-events-none absolute inset-0 bg-pattern-dots opacity-30" />
-          <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${mod.color} opacity-[0.08]`} />
-          <div className={`pointer-events-none absolute -top-28 -right-28 h-80 w-80 rounded-full bg-gradient-to-br ${mod.color} opacity-30 blur-3xl`} />
-          <div className={`pointer-events-none absolute -bottom-32 -left-24 h-72 w-72 rounded-full bg-gradient-to-tr ${mod.color} opacity-25 blur-3xl`} />
-          <div className="pointer-events-none absolute -bottom-28 -left-20 h-56 w-56 rounded-full bg-gradient-to-tr from-blue-200/30 via-indigo-200/20 to-transparent blur-3xl" />
+          <div className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${mod.color}`} />
+          <div className="pointer-events-none absolute inset-0 bg-pattern-dots opacity-20" />
+          <div className={`pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-gradient-to-br ${mod.color} opacity-20 blur-3xl`} />
           <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
-            <div className={`w-24 h-24 ${soft.bg} rounded-2xl flex items-center justify-center text-5xl shadow-sm ring-1 ring-inset ring-slate-200/60`}>
+            <div className={`w-24 h-24 bg-gradient-to-br ${mod.color} rounded-2xl flex items-center justify-center text-5xl shadow-lg ring-4 ring-white/70`}>
               {mod.icon}
             </div>
             <div className="text-center md:text-left">
